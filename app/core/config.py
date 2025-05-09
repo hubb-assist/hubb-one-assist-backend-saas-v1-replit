@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "HUBB ONE - Assist SaaS"
     PROJECT_VERSION: str = "1.0.0"
     
-    # CORS
-    CORS_ORIGINS: List[AnyHttpUrl] = []
+    # CORS - Permitir acesso de qualquer origem para facilitar desenvolvimento
+    CORS_ORIGINS: List[str] = ["*"]
     
     @field_validator("CORS_ORIGINS", mode="before")
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
