@@ -66,13 +66,12 @@ def app(environ, start_response):
                 
                 <ol>
                     <li>Abrir um novo terminal no Replit</li>
-                    <li>Executar o comando: <code>uvicorn app.main:app --host 0.0.0.0 --port 8000</code></li>
+                    <li>Executar o comando: <code>./run-uvicorn.sh</code></li>
                     <li>Manter esse terminal aberto (ele executará o servidor Uvicorn)</li>
-                    <li>Acessar a documentação Swagger em: <a href="https://{base_domain}:8000/api/v1/docs" target="_blank">https://{base_domain}:8000/api/v1/docs</a></li>
+                    <li>Acessar a documentação Swagger em: <a href="//{base_domain}:8000/api/v1/docs" target="_blank">https://{base_domain}:8000/api/v1/docs</a></li>
                 </ol>
                 
-                <p>Ou, para maior comodidade, execute o script:</p>
-                <pre><code>./start-fastapi.sh</code></pre>
+                <p>Para mais detalhes, consulte o arquivo <a href="./README.md">README.md</a> no repositório.</p>
                 
                 <div class="note">
                     <p><strong>Importante:</strong> O Swagger UI e outros recursos da API FastAPI só estarão disponíveis enquanto o servidor Uvicorn estiver em execução no terminal.</p>

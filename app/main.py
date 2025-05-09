@@ -41,6 +41,7 @@ async def custom_swagger_ui_html():
         title=f"{settings.PROJECT_NAME} - Swagger UI",
         swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js",
         swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css",
+        swagger_favicon_url="",
     )
 
 @app.get(f"{settings.API_V1_STR}/redoc", include_in_schema=False)
