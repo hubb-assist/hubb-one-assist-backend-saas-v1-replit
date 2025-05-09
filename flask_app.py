@@ -45,10 +45,13 @@ def index():
             
             <p>Após iniciar o servidor, você pode acessar:
             <ul>
-                <li><a href="http://0.0.0.0:8000/docs">http://0.0.0.0:8000/docs</a> - Documentação Swagger UI (interativa)</li>
-                <li><a href="http://0.0.0.0:8000/redoc">http://0.0.0.0:8000/redoc</a> - Documentação ReDoc</li>
-                <li><a href="http://0.0.0.0:8000/">http://0.0.0.0:8000/</a> - Endpoint raiz da API</li>
+                <li><a href="/docs" target="_blank">/docs</a> - Documentação Swagger UI (interativa)</li>
+                <li><a href="/redoc" target="_blank">/redoc</a> - Documentação ReDoc</li>
+                <li><a href="/" target="_blank">/</a> - Endpoint raiz da API</li>
             </ul>
+            </p>
+            <p class="note">
+                <strong>Importante:</strong> É necessário iniciar o servidor da API no mesmo domínio para que esses links funcionem. Após iniciar o servidor com o comando acima, os endpoints estarão disponíveis neste mesmo domínio.
             </p>
         </div>
         

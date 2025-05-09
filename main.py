@@ -1,2 +1,2 @@
-# Importar a aplicação Flask para o Gunicorn
-from flask_app import app
+# Importar a aplicação combinada Flask+FastAPI para o Gunicorn
+from app import app
