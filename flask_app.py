@@ -1,24 +1,15 @@
 """
-WSGI aplicação para Gunicorn que converte requisições WSGI para ASGI
-e permite que o FastAPI seja executado com o Gunicorn.
+Aplicação Flask simples para servir a página inicial e redirecionar para o FastAPI.
 """
 
-from asgiref.wsgi import WsgiToAsgi
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, RedirectResponse
-from starlette.routing import Mount
+from flask import Flask, render_template_string, redirect, url_for
 
-# Importe o app FastAPI do arquivo single_main
-from single_main import app as fastapi_app
+app = Flask(__name__)
 
-# Inicialização do FastAPI wrapper
-app = FastAPI()
-
-# Rota raiz que renderiza uma página inicial simples
-@app.get("/", response_class=HTMLResponse)
-async def index():
+@app.route('/')
+def index():
     """Página inicial com links para a documentação da API"""
-    return """
+    html = """
     <!DOCTYPE html>
     <html>
     <head>
@@ -48,11 +39,15 @@ async def index():
         <div class="container">
             <p>Bem-vindo à API do HUBB ONE Assist! Esta API está rodando com FastAPI.</p>
             
-            <p>Você pode acessar:
+            <p>Para acessar a documentação e os endpoints da API, você precisa iniciar o servidor FastAPI/Uvicorn em um terminal separado:</p>
+            
+            <pre><code>python -m uvicorn single_main:app --host 0.0.0.0 --port 8000</code></pre>
+            
+            <p>Após iniciar o servidor, você pode acessar:
             <ul>
-                <li><a href="/api/v1/docs">/api/v1/docs</a> - Documentação Swagger UI (interativa)</li>
-                <li><a href="/api/v1/redoc">/api/v1/redoc</a> - Documentação ReDoc</li>
-                <li><a href="/api/v1/status">/api/v1/status</a> - Status da API</li>
+                <li><a href="http://0.0.0.0:8000/api/v1/docs">http://0.0.0.0:8000/api/v1/docs</a> - Documentação Swagger UI (interativa)</li>
+                <li><a href="http://0.0.0.0:8000/api/v1/redoc">http://0.0.0.0:8000/api/v1/redoc</a> - Documentação ReDoc</li>
+                <li><a href="http://0.0.0.0:8000/api/v1/status">http://0.0.0.0:8000/api/v1/status</a> - Status da API</li>
             </ul>
             </p>
         </div>
@@ -81,27 +76,7 @@ async def index():
     </body>
     </html>
     """
+    return render_template_string(html)
 
-# Redirecionar /api/ para o app FastAPI
-@app.get("/api")
-@app.get("/api/")
-async def redirect_to_api():
-    return RedirectResponse(url="/api/v1/docs")
-
-# Crie a aplicação WSGI que o Gunicorn irá utilizar
-# Primeiro, inclua a submontagem para o app original do FastAPI
-routes = [
-    Mount("/api/v1", app=fastapi_app)
-]
-app.router.routes.extend(routes)
-
-# Converta a aplicação ASGI para WSGI
-wsgi_app = WsgiToAsgi(app)
-
-# Esta é a aplicação que o Gunicorn irá chamar
-application = wsgi_app
-
-# Quando executado diretamente, inicie o servidor Uvicorn
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000, reload=True)
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
