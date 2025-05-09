@@ -1,6 +1,6 @@
 import os
 import sys
-from main import application
+from main import app as application
 
 # Add current directory to Python path
 sys.path.insert(0, os.path.dirname(__file__))
