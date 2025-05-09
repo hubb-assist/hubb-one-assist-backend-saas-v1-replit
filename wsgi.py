@@ -1,10 +1,12 @@
 import os
 import sys
-from main import app as application
 
-# Add current directory to Python path
+# Adicione o caminho atual ao PYTHONPATH
 sys.path.insert(0, os.path.dirname(__file__))
 
-# This is the WSGI application object for Gunicorn
-# 'application' is the default variable name that Gunicorn looks for
+# Importe o aplicativo WSGI do novo arquivo wsgi_app.py
+from wsgi_app import application
+
+# Este é o objeto de aplicação WSGI para o Gunicorn
+# 'application' é o nome da variável padrão que o Gunicorn procura
 app = application
