@@ -1,73 +1,68 @@
-# API REST Simples com FastAPI
+# API REST Simples - FastAPI
 
-Uma API REST básica construída com FastAPI em Python para demonstrar funcionalidades CRUD, tratamento de erros e documentação automática.
+API REST simples construída com FastAPI, focando na implementação de operações CRUD básicas para um modelo simples de itens.
+
+## Sobre o Projeto
+
+Este projeto é uma API REST desenvolvida com FastAPI, que fornece operações CRUD simples com armazenamento em memória. A API inclui documentação interativa automática usando Swagger UI.
 
 ## Funcionalidades
 
-- ✅ API REST construída com FastAPI
-- ✅ Operações CRUD básicas
-- ✅ Respostas em formato JSON
-- ✅ Tratamento adequado de erros
-- ✅ Documentação com Swagger UI e ReDoc
-- ✅ Implementação de modelo de dados básico
-- ✅ Validação de entrada de dados
-- ✅ Banco de dados em memória
+- Operações CRUD completas para o modelo `Item`
+- Paginação e filtragem de dados
+- Validação de dados usando Pydantic
+- Documentação interativa com Swagger UI
+- Resposta HTML na rota raiz com informações sobre a API
 
 ## Estrutura do Projeto
 
 ```
 .
-├── fastapi_app.py           # Aplicação principal FastAPI
-├── run.py                   # Script para executar o servidor
-├── start-server.sh          # Shell script para iniciar o servidor
-└── README.md                # Este arquivo README
+├── app/
+│   ├── __init__.py
+│   └── main.py         # Aplicação FastAPI principal
+├── main.py             # Importa e exporta a aplicação
+├── wsgi.py             # Adaptador ASGI para WSGI
+└── start-fastapi.sh    # Script para iniciar o servidor
 ```
+
+## Endpoints
+
+A API oferece os seguintes endpoints:
+
+- `GET /`: Página inicial com informações sobre a API
+- `GET /api-info`: Informações básicas sobre a API
+- `GET /items`: Listar todos os itens com opções de paginação e filtro
+- `GET /items/{item_id}`: Obter um item específico por ID
+- `POST /items`: Criar um novo item
+- `PUT /items/{item_id}`: Atualizar um item existente
+- `DELETE /items/{item_id}`: Remover um item
+
+## Documentação
+
+A documentação interativa está disponível em:
+
+- Swagger UI: `/docs`
+- ReDoc: `/redoc`
 
 ## Como Executar
 
-### Opção 1: Usando Python diretamente
+Para iniciar o servidor usando uvicorn:
 
 ```bash
-python -m uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 5000 --reload
 ```
 
-### Opção 2: Usando o script Python
+Ou use o script shell fornecido:
 
 ```bash
-python run.py
+./start-fastapi.sh
 ```
-
-### Opção 3: Usando o shell script
-
-```bash
-./start-server.sh
-```
-
-## Acessando a API
-
-- **Documentação Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Documentação ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
-- **Endpoint Raiz**: [http://localhost:8000/](http://localhost:8000/)
-
-## Endpoints Disponíveis
-
-- `GET /` - Informações sobre a API
-- `GET /items` - Listar todos os itens (com paginação e filtros)
-- `GET /items/{item_id}` - Obter um item específico
-- `POST /items` - Criar um novo item
-- `PUT /items/{item_id}` - Atualizar um item existente
-- `DELETE /items/{item_id}` - Remover um item
 
 ## Tecnologias Utilizadas
 
-- Python 3.x
+- Python 3.11
 - FastAPI
-- Uvicorn (servidor ASGI)
 - Pydantic para validação de dados
-
-## Próximos Passos
-
-- [ ] Integração com banco de dados
-- [ ] Sistema de autenticação
-- [ ] Limitação de taxa de requisições
-- [ ] Tratamento de requisições assíncronas
+- Uvicorn como servidor ASGI
+- Gunicorn como servidor WSGI com adaptador ASGI
