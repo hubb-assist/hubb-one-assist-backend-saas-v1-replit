@@ -2,7 +2,7 @@
 Aplicação Flask simples para servir a página inicial e redirecionar para o FastAPI.
 """
 
-from flask import Flask, render_template_string, redirect, url_for
+from flask import Flask, render_template_string, redirect
 
 app = Flask(__name__)
 
@@ -13,7 +13,7 @@ def index():
     <!DOCTYPE html>
     <html>
     <head>
-        <title>HUBB ONE Assist API</title>
+        <title>API REST Simples</title>
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; padding: 20px; max-width: 800px; margin: 0 auto; }
             h1 { color: #333; }
@@ -34,44 +34,49 @@ def index():
         </style>
     </head>
     <body>
-        <h1>HUBB ONE Assist API</h1>
+        <h1>API REST Simples com FastAPI</h1>
         
         <div class="container">
-            <p>Bem-vindo à API do HUBB ONE Assist! Esta API está rodando com FastAPI.</p>
+            <p>Bem-vindo à API REST Simples construída com FastAPI!</p>
             
             <p>Para acessar a documentação e os endpoints da API, você precisa iniciar o servidor FastAPI/Uvicorn em um terminal separado:</p>
             
-            <pre><code>python -m uvicorn single_main:app --host 0.0.0.0 --port 8000</code></pre>
+            <pre><code>python -m uvicorn fastapi_app:app --host 0.0.0.0 --port 8000</code></pre>
             
             <p>Após iniciar o servidor, você pode acessar:
             <ul>
-                <li><a href="http://0.0.0.0:8000/api/v1/docs">http://0.0.0.0:8000/api/v1/docs</a> - Documentação Swagger UI (interativa)</li>
-                <li><a href="http://0.0.0.0:8000/api/v1/redoc">http://0.0.0.0:8000/api/v1/redoc</a> - Documentação ReDoc</li>
-                <li><a href="http://0.0.0.0:8000/api/v1/status">http://0.0.0.0:8000/api/v1/status</a> - Status da API</li>
+                <li><a href="http://0.0.0.0:8000/docs">http://0.0.0.0:8000/docs</a> - Documentação Swagger UI (interativa)</li>
+                <li><a href="http://0.0.0.0:8000/redoc">http://0.0.0.0:8000/redoc</a> - Documentação ReDoc</li>
+                <li><a href="http://0.0.0.0:8000/">http://0.0.0.0:8000/</a> - Endpoint raiz da API</li>
             </ul>
             </p>
         </div>
         
-        <h2>Endpoints Principais</h2>
+        <h2>Endpoints Disponíveis</h2>
         
         <div class="endpoints">
             <div class="endpoint">
-                <span class="method post">POST</span> <code>/api/v1/auth/login</code> - Login (obter token JWT)
+                <span class="method get">GET</span> <code>/</code> - Informações sobre a API
             </div>
             <div class="endpoint">
-                <span class="method post">POST</span> <code>/api/v1/auth/refresh</code> - Renovar token
+                <span class="method get">GET</span> <code>/items</code> - Listar todos os itens
             </div>
             <div class="endpoint">
-                <span class="method get">GET</span> <code>/api/v1/users</code> - Listar usuários
+                <span class="method get">GET</span> <code>/items/{item_id}</code> - Obter um item específico
             </div>
             <div class="endpoint">
-                <span class="method get">GET</span> <code>/api/v1/users/me</code> - Informações do usuário atual
+                <span class="method post">POST</span> <code>/items</code> - Criar um novo item
+            </div>
+            <div class="endpoint">
+                <span class="method put">PUT</span> <code>/items/{item_id}</code> - Atualizar um item existente
+            </div>
+            <div class="endpoint">
+                <span class="method delete">DELETE</span> <code>/items/{item_id}</code> - Remover um item
             </div>
         </div>
         
         <div class="note">
-            <p><strong>Nota:</strong> Esta API usa autenticação JWT. Use o endpoint <code>/api/v1/auth/login</code> 
-            para obter um token e inclua-o no cabeçalho <code>Authorization: Bearer &lt;token&gt;</code> para as requisições protegidas.</p>
+            <p><strong>Nota:</strong> Esta API implementa operações CRUD básicas e demonstra a validação de dados com o Pydantic.</p>
         </div>
     </body>
     </html>

@@ -1,77 +1,73 @@
-# HUBB ONE Assist SaaS API
+# API REST Simples com FastAPI
 
-Esta é uma API backend para o HUBB ONE Assist SaaS construída usando FastAPI. A API inclui autenticação JWT, integração com PostgreSQL, e segue os princípios de arquitetura limpa.
+Uma API REST básica construída com FastAPI em Python para demonstrar funcionalidades CRUD, tratamento de erros e documentação automática.
+
+## Funcionalidades
+
+- ✅ API REST construída com FastAPI
+- ✅ Operações CRUD básicas
+- ✅ Respostas em formato JSON
+- ✅ Tratamento adequado de erros
+- ✅ Documentação com Swagger UI e ReDoc
+- ✅ Implementação de modelo de dados básico
+- ✅ Validação de entrada de dados
+- ✅ Banco de dados em memória
 
 ## Estrutura do Projeto
 
 ```
-├── app                 # Diretório principal da aplicação
-│   ├── api             # Rotas da API
-│   ├── core            # Configurações e funcionalidades centrais
-│   ├── db              # Modelos de banco de dados e repositórios
-│   ├── schemas         # Esquemas Pydantic para validação de dados
-│   ├── services        # Lógica de negócios
-│   └── utils           # Utilitários
-├── alembic             # Migrações de banco de dados
-└── scripts             # Scripts auxiliares
+.
+├── fastapi_app.py           # Aplicação principal FastAPI
+├── run.py                   # Script para executar o servidor
+├── start-server.sh          # Shell script para iniciar o servidor
+└── README.md                # Este arquivo README
 ```
 
 ## Como Executar
 
-Este projeto precisa ser executado em duas partes para funcionar corretamente:
-
-### 1. Servidor de Frontend (Gunicorn)
-
-Este servidor é iniciado automaticamente pelo Replit e serve a página inicial com instruções.
+### Opção 1: Usando Python diretamente
 
 ```bash
-gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app
+python -m uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
 ```
 
-### 2. Servidor de API (Uvicorn)
-
-**IMPORTANTE**: Para acessar a documentação Swagger e usar a API, é necessário iniciar o servidor Uvicorn separadamente.
-
-Em um novo terminal, execute:
+### Opção 2: Usando o script Python
 
 ```bash
-./run-uvicorn.sh
+python run.py
 ```
 
-ou
+### Opção 3: Usando o shell script
 
 ```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips='*'
+./start-server.sh
 ```
 
 ## Acessando a API
 
-- **API Root**: `/`
-- **Documentação Swagger UI**: `/api/v1/docs`
-- **Documentação ReDoc**: `/api/v1/redoc`
+- **Documentação Swagger UI**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Documentação ReDoc**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+- **Endpoint Raiz**: [http://localhost:8000/](http://localhost:8000/)
 
 ## Endpoints Disponíveis
 
-- **Autenticação**:
-  - `/api/v1/auth/login`: Autenticação de usuários
-  - `/api/v1/auth/refresh`: Renovação de token JWT
-
-- **Usuários**:
-  - `/api/v1/users`: CRUD de usuários
+- `GET /` - Informações sobre a API
+- `GET /items` - Listar todos os itens (com paginação e filtros)
+- `GET /items/{item_id}` - Obter um item específico
+- `POST /items` - Criar um novo item
+- `PUT /items/{item_id}` - Atualizar um item existente
+- `DELETE /items/{item_id}` - Remover um item
 
 ## Tecnologias Utilizadas
 
+- Python 3.x
 - FastAPI
-- PostgreSQL
-- SQLAlchemy
-- Pydantic
-- JWT para autenticação
-- Uvicorn/Gunicorn como servidores ASGI/WSGI
+- Uvicorn (servidor ASGI)
+- Pydantic para validação de dados
 
-## Desenvolvimento
+## Próximos Passos
 
-Para desenvolvimento local, é recomendado iniciar o servidor Uvicorn com a flag `--reload` para atualização automática ao editar os arquivos:
-
-```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
+- [ ] Integração com banco de dados
+- [ ] Sistema de autenticação
+- [ ] Limitação de taxa de requisições
+- [ ] Tratamento de requisições assíncronas
