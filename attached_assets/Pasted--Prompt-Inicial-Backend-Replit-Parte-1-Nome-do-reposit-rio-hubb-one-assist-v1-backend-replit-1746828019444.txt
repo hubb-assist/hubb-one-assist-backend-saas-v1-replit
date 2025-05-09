@@ -1,0 +1,690 @@
+🟢 Prompt Inicial — Backend Replit (Parte 1)
+Nome do repositório: hubb-one-assist-v1-backend-replit
+Este repositório conterá o backend do projeto HUBB ONE – Assist SaaS, escrito em Python utilizando o framework FastAPI, com suporte a JWT, PostgreSQL, arquitetura escalável, modular e pronta para autoscaling no Replit.
+🟢 Prompt Inicial — Backend Replit (Parte 2)
+Stack Tecnológica do Backend:
+Linguagem: Python 3.11+
+
+
+Framework: FastAPI com Uvicorn (ASGI)
+
+
+Banco de Dados: PostgreSQL (gerenciado via Neon ou Supabase)
+
+
+Autenticação: JWT com cookies HttpOnly (Access e Refresh Token)
+
+
+ORM: SQLAlchemy 2.0 + Alembic para migrations
+
+
+Validações: Pydantic v2
+
+
+Middlewares: CORS, Autenticação, Logging
+
+
+Gerenciador de Tarefas: Agendador opcional com background tasks
+
+
+Gerenciamento de segredos: Replit Secrets
+
+
+Deploy: Replit Autoscale Deployment com uvicorn app.main:app --host 0.0.0.0
+
+
+Estrutura de Pastas:
+bash
+CopiarEditar
+/
+├── app/
+│   ├── main.py                 # Inicialização da aplicação FastAPI
+│   ├── api/                    # Rotas (endpoints)
+│   ├── core/                   # Configurações, segurança, middlewares
+│   ├── db/                     # Conexão com banco, models e migrations
+│   ├── services/               # Lógica de negócio
+│   ├── schemas/                # Schemas do Pydantic
+│   └── utils/                  # Helpers e utilitários
+│
+├── tests/                      # Testes automatizados
+├── alembic.ini                 # Configuração de migrations
+├── requirements.txt            # Dependências do projeto
+├── README.md
+└── replit.nix (opcional)       # Configuração do ambiente Replit
+
+
+🟢 Prompt Inicial — Backend Replit (Parte 3)
+Módulos já implementados no backend e incluídos neste repositório:
+Autenticação (Auth):
+
+
+Registro e login com e-mail e senha
+
+
+Sistema de JWT (Access + Refresh Token via cookies HttpOnly)
+
+
+Endpoint de refresh, logout e proteção por roles
+
+
+Suporte a múltiplos níveis de permissão por rota
+
+
+Usuários (Users):
+
+
+CRUD completo de usuários
+
+
+Sistema de papéis: SUPER_ADMIN, DIRETOR, COLABORADOR_NIVEL_2
+
+
+Permissões customizadas por usuário
+
+
+Assinantes (Antigo "Tenants"):
+
+
+Registro de empresas que assinam o HUBB Assist
+
+
+Cada assinante possui: nome da empresa, responsável, plano contratado, segmento, status
+
+
+Vinculação automática do usuário proprietário (owner)
+
+
+Slug único para cada instância
+
+
+Controle de ativação/desativação
+
+
+Segmentos:
+
+
+CRUD de segmentos de mercado (ex: odontologia, veterinária, estética)
+
+
+Utilizado no cadastro de assinantes para classificar o negócio
+
+
+Planos:
+
+
+CRUD de planos do HUBB Assist
+
+
+Cada plano inclui módulos vinculados, valor mensal, período de teste e descrição comercial
+
+
+Módulos:
+
+
+Representam funcionalidades do sistema (ex: HOF, Vision, Talk, RH, IA)
+
+
+Cada módulo pode ser ativado ou não conforme o plano
+
+
+✅ Aplicação dos Princípios SOLID no Projeto hubb-one-assist-v1-backend-replit
+1. S — Single Responsibility Principle (Princípio da Responsabilidade Única)
+"Cada módulo ou classe deve ter uma única responsabilidade, e essa responsabilidade deve estar completamente encapsulada."
+Aplicação no projeto:
+Cada camada tem responsabilidade clara:
+
+
+app/api/: somente define rotas e recebe requisições.
+
+
+app/services/: concentra as regras de negócio (casos de uso).
+
+
+app/db/models/: define a estrutura do banco.
+
+
+app/schemas/: define as validações de entrada e saída.
+
+
+app/core/: configurações gerais, autenticação, segurança.
+
+
+Nenhum módulo deve misturar responsabilidades de domínio com lógica de requisição, nem lógica de banco com validações.
+
+
+
+2. O — Open/Closed Principle (Aberto para Extensão, Fechado para Modificação)
+"Entidades devem estar abertas para extensão, mas fechadas para modificação."
+Aplicação no projeto:
+O backend será modular: novos módulos (como financeiro, agenda, custos) podem ser adicionados sem alterar os existentes, apenas integrando novos arquivos no padrão já definido.
+
+
+Utilização de interfaces e serviços desacoplados: por exemplo, um serviço de envio de e-mail pode ser substituído por outro sem alterar as chamadas do código que o consome.
+
+
+
+3. L — Liskov Substitution Principle (Princípio da Substituição de Liskov)
+"Objetos devem poder ser substituídos por instâncias de suas subclasses sem afetar o funcionamento do sistema."
+Aplicação no projeto:
+Serviços e controladores usarão tipagem explícita e Pydantic com herança segura, permitindo que UserBase, UserCreate, UserUpdate compartilhem atributos, mas sejam usados conforme o contexto, sem quebrar validações.
+
+
+Em testes, será possível substituir classes de serviços reais por mocks, sem comprometer o comportamento da aplicação.
+
+
+
+4. I — Interface Segregation Principle (Princípio da Segregação de Interface)
+"Muitos contratos específicos são melhores do que um contrato único e geral."
+Aplicação no projeto:
+Os endpoints e serviços seguirão contratos pequenos e separados:
+
+
+Em vez de um controller gigantesco, haverá divisão clara de rotas por domínio (auth_routes.py, user_routes.py, etc.).
+
+
+Serviços também seguem esse padrão: AuthService, UserService, PlanoService, etc.
+
+
+
+5. D — Dependency Inversion Principle (Princípio da Inversão de Dependência)
+"Módulos de alto nível não devem depender de módulos de baixo nível, ambos devem depender de abstrações."
+Aplicação no projeto:
+Utilização de injeção de dependência do FastAPI para entregar serviços (Depends(AuthService)).
+
+
+Serviços de repositório e lógica de negócio serão injetados, nunca instanciados diretamente.
+
+
+Isso permite trocar implementações facilmente (ex: trocar o serviço de envio de notificação por outro, apenas mudando a dependência).
+
+
+
+✳️ Resultado esperado:
+Seguindo esses princípios, o backend do HUBB Assist será:
+Robusto
+
+
+Testável
+
+
+Modular
+
+
+Fácil de manter e expandir
+
+
+Pronto para escalar com segurança
+
+
+A seguir está uma explicação clara, prática e totalmente contextualizada de como o DDD (Domain-Driven Design) será aplicado no backend do projeto hubb-one-assist-v1-backend-replit:
+
+✅ Aplicação de DDD — Domain-Driven Design no Backend do HUBB Assist
+Objetivo do DDD:
+ Manter a complexidade do sistema sob controle ao modelar o código diretamente com base na lógica de negócio real, separando as responsabilidades técnicas da regra de negócio central.
+
+🧱 Camadas do Projeto com DDD
+1. Camada de Domínio (app/services/ e app/schemas/)
+Representa a lógica de negócio do HUBB Assist: cadastro de assinantes, planos, usuários, permissões, etc.
+
+
+Cada serviço de domínio encapsula um "caso de uso", por exemplo:
+
+
+CreateAssinanteService
+
+
+ChangeUserPasswordService
+
+
+CalculatePlanCostService
+
+
+Essa camada não depende de FastAPI, banco ou rotas.
+
+
+2. Camada de Aplicação (app/api/)
+Responsável por expor a aplicação ao mundo exterior (HTTP).
+
+
+Define as rotas (@router.get, @router.post) e orquestra chamadas aos serviços de domínio.
+
+
+Essa camada não implementa regra de negócio, apenas chama os casos de uso da camada de domínio e responde com JSONResponse.
+
+
+3. Camada de Infraestrutura (app/db/ e app/core/)
+Contém os detalhes técnicos: acesso ao banco (SQLAlchemy), migrações (Alembic), autenticação, middlewares, configurações de ambiente.
+
+
+Também pode conter serviços de integração externa, como: envio de e-mail, storage, webhooks, etc.
+
+
+Essas implementações são injetadas como dependências nos serviços de domínio, nunca chamadas diretamente da camada de aplicação.
+
+
+
+📦 Organização Modular por Domínio
+O código será dividido por módulos de negócio, com subpastas contendo os arquivos de cada camada:
+css
+CopiarEditar
+app/
+├── domains/
+│   ├── assinantes/
+│   │   ├── service.py
+│   │   ├── schemas.py
+│   │   └── repository.py
+│   ├── auth/
+│   ├── usuarios/
+│   └── planos/
+├── api/
+│   ├── routes_assinantes.py
+│   ├── routes_auth.py
+│   └── ...
+├── core/
+├── db/
+├── main.py
+
+
+💡 Exemplo real no projeto HUBB Assist:
+A criação de um novo assinante:
+
+
+routes_assinantes.py → recebe os dados e chama:
+
+
+CriarAssinanteService.handle() → executa as regras, validações e chama:
+
+
+AssinanteRepository.create() → persiste no banco via SQLAlchemy.
+
+
+A rota não conhece os detalhes do banco, nem o banco conhece a regra de negócio.
+
+📌 Benefícios esperados com DDD:
+Clareza sobre as regras de negócio
+
+
+Isolamento de complexidade técnica
+
+
+Facilidade de testes unitários
+
+
+Escalabilidade horizontal da aplicação
+
+
+Flexibilidade para troca de tecnologias (ex: outro banco ou API externa)
+
+
+✅ Aplicação de Clean Code no Backend do HUBB Assist
+Objetivo do Clean Code:
+ Escrever código legível, simples, sem duplicação e fácil de entender, mesmo por outros desenvolvedores que não participaram da implementação original. Código limpo não apenas funciona — ele comunica.
+
+🧼 Práticas de Clean Code no projeto
+1. Nomeação clara e sem ambiguidade
+Funções, variáveis, rotas e arquivos terão nomes descritivos com intenção explícita.
+
+
+Ruim: def proc(data):
+
+
+Bom: def create_assinante(assinante_data: AssinanteCreateSchema):
+
+
+Pastas organizadas por contexto, não por tipo genérico (ex: usuarios/service.py ao invés de services/users.py).
+
+
+2. Funções pequenas com responsabilidade única
+Nenhuma função deve fazer mais de uma coisa.
+
+
+Regras complexas serão quebradas em pequenos métodos reutilizáveis dentro do service.
+
+
+3. Sem código duplicado
+Qualquer lógica repetida será extraída para:
+
+
+utils/
+
+
+core/validators.py
+
+
+ou funções reutilizáveis nos próprios serviços.
+
+
+4. Tratamento explícito de erros
+Toda exceção será tratada com mensagens claras, usando o sistema de HTTPException e handlers globais.
+
+
+Logs serão estruturados com contexto: quem, onde e por quê algo falhou.
+
+
+5. Separação entre lógica e efeitos colaterais
+Nenhum código de banco, envio de email ou integração externa dentro dos services diretamente.
+
+
+Toda interação com o mundo externo será mediada por repositories ou adapters.
+
+
+6. Arquivos curtos e objetivos
+Cada arquivo terá um foco. Exemplo:
+
+
+auth_service.py trata apenas de login e tokens.
+
+
+user_service.py trata criação, edição e deleção de usuários.
+
+
+Quando um arquivo crescer demais, ele será dividido em múltiplos por função ou contexto.
+
+
+
+✳️ Convenções e boas práticas adotadas
+PEP8: Estilo Python padronizado.
+
+
+Tipagem estática com mypy e pyright para validação de tipos.
+
+
+Black e isort: formatação e ordenação automática dos arquivos.
+
+
+Comentários e docstrings serão usados apenas quando o nome da função não for autoexplicativo.
+
+
+
+✅ Resultado esperado
+Com Clean Code aplicado junto a SOLID e DDD:
+O backend será autoexplicativo, testável e sustentável.
+
+
+Novos desenvolvedores entenderão o projeto rapidamente.
+
+
+Bugs serão minimizados e mudanças se tornarão seguras e previsíveis.
+
+
+
+Tudo pronto com SOLID + DDD + Clean Code.
+🛠️ TAREFA BACKEND 001 — CRUD completo de usuários
+Objetivo:
+ Implementar o módulo de usuários com as funcionalidades de listagem, criação, edição, exclusão e visualização individual, incluindo papéis e permissões.
+
+✅ Funcionalidades esperadas:
+GET /users/ — Listar todos os usuários (com paginação e filtro opcional por nome, e-mail ou role)
+
+
+GET /users/{id} — Obter detalhes de um usuário por ID
+
+
+POST /users/ — Criar um novo usuário com:
+
+
+nome, e-mail, senha (criptografada), role (com validação)
+
+
+PUT /users/{id} — Atualizar dados do usuário
+
+
+DELETE /users/{id} — Deletar um usuário (soft delete opcional)
+
+
+
+🗂️ Estrutura recomendada:
+app/api/routes_users.py → define as rotas
+
+
+app/services/user_service.py → lógica de negócio
+
+
+app/schemas/user.py → schemas Pydantic (UserCreate, UserUpdate, UserOut)
+
+
+app/db/models/user.py → modelo SQLAlchemy
+
+
+app/db/repositories/user_repository.py → acesso ao banco
+
+
+
+🔐 Regras e Restrições
+Apenas usuários com role >= DIRETOR podem:
+
+
+Criar, listar e visualizar usuários
+
+
+Apenas SUPER_ADMIN pode:
+
+
+Editar ou deletar usuários
+
+
+COLABORADOR_NIVEL_2 pode apenas visualizar seu próprio perfil
+
+
+
+🔒 Segurança
+Todas as rotas protegidas com autenticação JWT (HttpOnly cookies)
+
+
+Validação de permissões por Depends(get_current_user_with_permissions)
+
+
+
+
+📁 1. Sidebar (menu lateral)
+Cor de fundo: #2D113F (Primária)
+
+
+Comportamento: colapsável, ocupando a altura total da tela (inclusive por trás do header).
+
+
+Logo:
+
+
+Quando expandido, usar:
+ https://sq360.com.br/logo-hubb-novo/logo_hubb_assisit.png
+
+
+Quando colapsado, usar:
+ https://sq360.com.br/logo-hubb-novo/hubb_pet_icon.png
+
+
+Largura:
+
+
+Expandido: 240px
+
+
+Colapsado: 80px
+
+
+Transição suave no colapso (usando Tailwind ou CSS transition width com ease-in-out).
+
+
+Itens do menu: ícones + texto no modo expandido, somente ícones no modo colapsado.
+
+
+Logo sempre fixo no topo da sidebar.
+
+
+
+📁 2. Header (barra superior)
+Cor de fundo: #C52339 (Secundária)
+
+
+Altura: 64px
+
+
+Posição: fixa no topo, ocupando toda a largura da tela, inclusive sobre o espaço da sidebar.
+
+
+Conteúdo esperado:
+
+
+Breadcrumbs ou nome da página
+
+
+Avatar do usuário logado
+
+
+Ações rápidas (notificações, menu, etc.)
+
+
+
+📁 3. Conteúdo Principal
+Área central do dashboard
+
+
+Deve respeitar o padding-left da sidebar (pl-60 quando expandido ou pl-20 quando colapsado).
+
+
+Exemplo de cards (como na imagem):
+
+
+Cards com título, valor destacado (R$ 87.500) e texto auxiliar.
+
+
+Estilo visual com sombra leve, bordas arredondadas (rounded-xl), ícones de contexto e textos responsivos.
+
+
+
+🛠️ Tecnologias Recomendadas
+Frontend framework: Next.js (App Router)
+
+
+Styling: Tailwind CSS
+
+
+Componentes UI: shadcn/ui
+
+
+Icones: Lucide-react
+
+
+Estado do colapso do menu: Zustand ou Context API (sidebarCollapsed: boolean)
+
+
+
+🧠 Comportamento esperado
+Ao clicar no botão de colapsar:
+
+
+Sidebar diminui de largura com transição
+
+
+Logo muda automaticamente (imagem)
+
+
+Tooltips podem aparecer ao passar o mouse sobre os ícones do menu
+
+
+Layout deve ser 100% responsivo:
+
+
+Em telas menores: sidebar pode se ocultar totalmente com botão de hambúrguer
++-------------+-----------------------------------------------+
+|             |              Header (C52339)                 |
+| Sidebar     +-----------------------------------------------+
+| (2D113F)    |              Main Content Area               |
+|             |                                               |
+|             |                                               |
++-------------+-----------------------------------------------+
+✅ Correção técnica do layout HUBB Assist
+📁 Sidebar
+Cor: #2D113F (Primária)
+
+Altura: 100vh (vai até o topo da tela)
+
+Posição: fixed left-0 top-0
+
+Largura:
+
+Expandido: w-60 (240px)
+
+Colapsado: w-20 (80px)
+
+Perfeito. Para garantir que o layout não seja alterado arbitrariamente por outros desenvolvedores, e que o padrão visual do HUBB Assist seja imutável sem aprovação, você deve criar um arquivo chamado:
+bash
+CopiarEditar
+📁 /docs/design_system.md
+
+Abaixo está o conteúdo inicial desse arquivo, que define o padrão visual oficial e imutável do layout:
+
+markdown
+CopiarEditar
+# 🎨 HUBB Assist — Design System (V1)
+
+> Este documento define as **regras imutáveis** de layout e identidade visual do projeto HUBB Assist.  
+**Nenhuma modificação no layout, cores ou comportamento estrutural pode ser realizada sem aprovação formal do responsável técnico.**
+
+---
+
+## 🧱 Estrutura do Layout Padrão
+
+
++-------------+-----------------------------------------------+
+ | | Header (C52339) |
+ | Sidebar +-----------------------------------------------+
+ | (2D113F) | Main Content Area |
+ | | |
+ | | |
+ +-------------+-----------------------------------------------+
+markdown
+CopiarEditar
+
+### 🧩 Sidebar
+- Cor: `#2D113F` (cor primária)
+- Altura: `100vh` (vai até o topo)
+- Largura expandida: `240px` (`w-60`)
+- Largura colapsada: `80px` (`w-20`)
+- Comportamento: colapsável, com transição suave
+- Logo (modo aberto): `https://sq360.com.br/logo-hubb-novo/logo_hubb_assisit.png`
+- Logo (modo colapsado): `https://sq360.com.br/logo-hubb-novo/hubb_pet_icon.png`
+- Menu: ícones com texto (expandido) / ícones com tooltip (colapsado)
+
+### 🧩 Header
+- Cor: `#C52339` (cor secundária)
+- Altura: `64px` (`h-16`)
+- Posição: `fixed top-0 left-[largura da sidebar] right-0`
+- Conteúdo: título da página, notificações, avatar, botão colapsar
+
+### 🧩 Área Principal
+- Padding horizontal: `p-6`
+- Margem esquerda: `ml-60` (ou `ml-20` no modo colapsado)
+- Margem superior: `mt-16`
+
+---
+
+## 🎨 Paleta de Cores Oficial
+
+| Nome         | Código HEX | Uso padrão                       |
+|--------------|------------|----------------------------------|
+| Primária     | `#2D113F`  | Sidebar, botões principais       |
+| Secundária   | `#C52339`  | Header, destaques, botões        |
+| Texto Claro  | `#FFFFFF`  | Textos sobre fundo escuro        |
+| Texto Escuro | `#1B0B25`  | Textos sobre fundo claro         |
+| Fundo Geral  | `#F5F5F5`  | Background da área principal     |
+| Verde OK     | `#00B050`  | Indicadores de crescimento       |
+
+---
+
+## 🔐 Política de Alterações
+
+> Qualquer alteração visual **deve ser submetida à revisão do responsável técnico.**  
+> Este arquivo `design_system.md` serve como referência única e oficial.
+
+---
+
+## 📌 Versão
+
+**Versão do Design:** v1.0  
+**Última atualização:** `2025-05-09`  
+**Responsável técnico:** *Luis Paim*
+
+
+
