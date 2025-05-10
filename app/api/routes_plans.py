@@ -2,13 +2,14 @@
 Rotas da API para gerenciamento de planos
 """
 
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.db.models import PlanModule
 from app.services.plan_service import PlanService
 from app.schemas.plan import PlanCreate, PlanUpdate, PlanResponse, PaginatedPlanResponse
 
@@ -57,7 +58,32 @@ async def get_plan(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Plano não encontrado"
         )
-    return db_plan
+    
+    # Carregar os módulos vinculados ao plano
+    plan_modules = db.query(PlanModule).filter(PlanModule.plan_id == plan_id).all()
+    
+    # Converter para schema de resposta
+    plan_data = {
+        "id": db_plan.id,
+        "name": db_plan.name,
+        "description": db_plan.description,
+        "segment_id": db_plan.segment_id,
+        "base_price": db_plan.base_price,
+        "is_active": db_plan.is_active,
+        "created_at": db_plan.created_at,
+        "updated_at": db_plan.updated_at,
+        "modules": [
+            {
+                "plan_id": pm.plan_id,
+                "module_id": pm.module_id,
+                "price": pm.price,
+                "is_free": pm.is_free,
+                "trial_days": pm.trial_days
+            } for pm in plan_modules
+        ]
+    }
+    
+    return plan_data
 
 
 @router.post("/", response_model=PlanResponse, status_code=status.HTTP_201_CREATED)
@@ -68,7 +94,33 @@ async def create_plan(
     """
     Criar um novo plano.
     """
-    return PlanService.create_plan(db, plan_data)
+    db_plan = PlanService.create_plan(db, plan_data)
+    
+    # Carregar os módulos vinculados ao plano
+    plan_modules = db.query(PlanModule).filter(PlanModule.plan_id == db_plan.id).all()
+    
+    # Converter para schema de resposta
+    plan_response = {
+        "id": db_plan.id,
+        "name": db_plan.name,
+        "description": db_plan.description,
+        "segment_id": db_plan.segment_id,
+        "base_price": db_plan.base_price,
+        "is_active": db_plan.is_active,
+        "created_at": db_plan.created_at,
+        "updated_at": db_plan.updated_at,
+        "modules": [
+            {
+                "plan_id": pm.plan_id,
+                "module_id": pm.module_id,
+                "price": pm.price,
+                "is_free": pm.is_free,
+                "trial_days": pm.trial_days
+            } for pm in plan_modules
+        ]
+    }
+    
+    return plan_response
 
 
 @router.put("/{plan_id}", response_model=PlanResponse)
@@ -86,7 +138,32 @@ async def update_plan(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Plano não encontrado"
         )
-    return updated_plan
+    
+    # Carregar os módulos vinculados ao plano
+    plan_modules = db.query(PlanModule).filter(PlanModule.plan_id == plan_id).all()
+    
+    # Converter para schema de resposta
+    plan_response = {
+        "id": updated_plan.id,
+        "name": updated_plan.name,
+        "description": updated_plan.description,
+        "segment_id": updated_plan.segment_id,
+        "base_price": updated_plan.base_price,
+        "is_active": updated_plan.is_active,
+        "created_at": updated_plan.created_at,
+        "updated_at": updated_plan.updated_at,
+        "modules": [
+            {
+                "plan_id": pm.plan_id,
+                "module_id": pm.module_id,
+                "price": pm.price,
+                "is_free": pm.is_free,
+                "trial_days": pm.trial_days
+            } for pm in plan_modules
+        ]
+    }
+    
+    return plan_response
 
 
 @router.delete("/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -120,7 +197,32 @@ async def activate_plan(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Plano não encontrado"
         )
-    return updated_plan
+        
+    # Carregar os módulos vinculados ao plano
+    plan_modules = db.query(PlanModule).filter(PlanModule.plan_id == plan_id).all()
+    
+    # Converter para schema de resposta
+    plan_response = {
+        "id": updated_plan.id,
+        "name": updated_plan.name,
+        "description": updated_plan.description,
+        "segment_id": updated_plan.segment_id,
+        "base_price": updated_plan.base_price,
+        "is_active": updated_plan.is_active,
+        "created_at": updated_plan.created_at,
+        "updated_at": updated_plan.updated_at,
+        "modules": [
+            {
+                "plan_id": pm.plan_id,
+                "module_id": pm.module_id,
+                "price": pm.price,
+                "is_free": pm.is_free,
+                "trial_days": pm.trial_days
+            } for pm in plan_modules
+        ]
+    }
+    
+    return plan_response
 
 
 @router.patch("/{plan_id}/deactivate", response_model=PlanResponse)
@@ -137,4 +239,29 @@ async def deactivate_plan(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Plano não encontrado"
         )
-    return updated_plan
+        
+    # Carregar os módulos vinculados ao plano
+    plan_modules = db.query(PlanModule).filter(PlanModule.plan_id == plan_id).all()
+    
+    # Converter para schema de resposta
+    plan_response = {
+        "id": updated_plan.id,
+        "name": updated_plan.name,
+        "description": updated_plan.description,
+        "segment_id": updated_plan.segment_id,
+        "base_price": updated_plan.base_price,
+        "is_active": updated_plan.is_active,
+        "created_at": updated_plan.created_at,
+        "updated_at": updated_plan.updated_at,
+        "modules": [
+            {
+                "plan_id": pm.plan_id,
+                "module_id": pm.module_id,
+                "price": pm.price,
+                "is_free": pm.is_free,
+                "trial_days": pm.trial_days
+            } for pm in plan_modules
+        ]
+    }
+    
+    return plan_response

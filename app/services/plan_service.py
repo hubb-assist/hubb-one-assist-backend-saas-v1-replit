@@ -61,16 +61,39 @@ class PlanService:
         # Executar a consulta
         plans = query.all()
         
-        # Para cada plano, buscar os relacionamentos necessários para a resposta
+        # Converter resposta para o formato adequado
+        plan_responses = []
         for plan in plans:
             # Carregar os módulos vinculados ao plano
-            db.query(PlanModule).filter(PlanModule.plan_id == plan.id).all()
+            plan_modules = db.query(PlanModule).filter(PlanModule.plan_id == plan.id).all()
+            
+            # Converter para schema de resposta
+            plan_dict = {
+                "id": plan.id,
+                "name": plan.name,
+                "description": plan.description,
+                "segment_id": plan.segment_id,
+                "base_price": plan.base_price,
+                "is_active": plan.is_active,
+                "created_at": plan.created_at,
+                "updated_at": plan.updated_at,
+                "modules": [
+                    {
+                        "plan_id": pm.plan_id,
+                        "module_id": pm.module_id,
+                        "price": pm.price,
+                        "is_free": pm.is_free,
+                        "trial_days": pm.trial_days
+                    } for pm in plan_modules
+                ]
+            }
+            plan_responses.append(plan_dict)
         
         return PaginatedPlanResponse(
             total=total,
             page=skip // limit + 1 if limit > 0 else 1,
             size=limit,
-            items=plans
+            items=plan_responses
         )
     
     @staticmethod
