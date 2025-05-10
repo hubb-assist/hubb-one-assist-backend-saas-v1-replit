@@ -1,0 +1,88 @@
+Perfeito! Vamos avançar corretamente.
+
+✅ Primeiro: definição clara de segmentos
+No contexto do HUBB Assist, segmentos representam áreas de atuação de um assinante/cliente. Exemplos de segmentos:
+
+Odontologia
+
+Estética
+
+Fisioterapia
+
+Medicina Veterinária
+
+etc.
+
+Eles são utilizados para classificar o tipo de negócio que está contratando o sistema, e cada assinante (tenant) escolhe seu segmento no momento do cadastro.
+
+📦 Estrutura esperada do módulo de segmentos
+Vamos criar o CRUD completo de segmentos, com as seguintes rotas:
+
+Método	Rota	Descrição
+GET	/segments/	Listar todos os segmentos
+GET	/segments/{id}	Buscar segmento por ID
+POST	/segments/	Criar um novo segmento
+PUT	/segments/{id}	Atualizar um segmento
+DELETE	/segments/{id}	Deletar um segmento
+
+🧩 Estrutura dos arquivos a criar
+pgsql
+Copiar
+Editar
+app/
+├── api/
+│   └── routes_segments.py
+├── services/
+│   └── segment_service.py
+├── schemas/
+│   └── segment.py
+├── db/
+│   └── models.py (adicionar Segment)
+📄 Prompt para o Replit AI — Criar módulo de Segmentos
+Copie e cole este prompt para o Replit AI:
+
+💬 Prompt:
+Olá Replit! Vamos criar o módulo de segmentos agora no projeto HUBB ONE Assist.
+
+❗Antes de começar a tarefa, leia o arquivo rules.md. Todas as regras lá descritas devem ser respeitadas.
+
+📦 Tarefa: Implementar CRUD completo de Segmentos
+Crie o modelo Segment no banco, com os campos:
+
+id: UUID
+
+nome: string
+
+descricao: string opcional
+
+is_active: bool (padrão: True)
+
+created_at: datetime
+
+Crie o schema Pydantic em schemas/segment.py
+
+Crie o service em services/segment_service.py com funções CRUD
+
+Crie as rotas REST em api/routes_segments.py
+
+As rotas devem seguir o padrão:
+
+Método	Rota	Descrição
+GET	/segments/	Listar segmentos
+GET	/segments/{id}	Buscar por ID
+POST	/segments/	Criar novo segmento
+PUT	/segments/{id}	Atualizar segmento
+DELETE	/segments/{id}	Deletar segmento
+
+✅ Observações:
+Use SQLAlchemy para persistência no PostgreSQL
+
+Use Pydantic para validação de entrada e saída
+
+Respeite Clean Code, DDD, SOLID
+
+Não crie arquivos ou rotas extras além do solicitado
+
+Não usar Flask nem simplificações
+
+Quando terminar, irei testar a rota GET /segments/.

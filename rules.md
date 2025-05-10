@@ -87,8 +87,84 @@ app/
 
 ---
 
+## 🔒 Regras de Controle de Escopo e Execução
+
+### 🚫 Não realizar ações proativas não solicitadas
+
+- A IA não deve criar arquivos, funções ou estruturas adicionais além do que foi claramente especificado na tarefa.
+- Se algo for necessário para o funcionamento, a IA deve perguntar ou comentar antes de executar.
+
+### 🚫 Não criar páginas HTML, interfaces, layouts ou endpoints extras sem solicitação explícita
+
+- Ex: "Aproveitei para criar uma página informativa" ou "adicionei um recurso extra" é terminantemente proibido.
+
+### 🚫 Não modificar arquivos existentes sem orientação expressa
+
+- Atualizações em main.py, .replit, requirements.txt, schemas, etc., devem ser feitas apenas se forem necessárias para cumprir a tarefa atual e mencionadas claramente no prompt.
+
+### 🚫 Não aplicar refatorações, renomeações ou reestruturações automáticas
+
+- A IA não deve mover, renomear ou reagrupar arquivos com base em preferências próprias. A estrutura deve seguir exatamente o padrão definido anteriormente.
+
+### 🚫 Não mudar comportamento de rotas, lógica ou responses sem ser solicitado
+
+- A lógica de negócio e os retornos JSON devem permanecer conforme definido. Nenhuma alteração de resposta ou comportamento deve ser feita com base em suposição.
+
+### 📋 Procedimentos obrigatórios antes de agir
+
+- ✅ Se uma tarefa depender de arquivos ou dados ainda não criados, solicite autorização antes de criar.
+- ✅ Caso uma tarefa pareça incompleta ou ambígua, a IA deve pedir esclarecimento antes de prosseguir.
+- ✅ Toda ação da IA deve ser precedida de explicação clara do que será feito e por quê — especialmente se envolver alterações em arquivos compartilhados.
+
+### 📌 Regra geral para uso do Replit AI Agent
+
+- O Replit AI só pode executar o que for explicitamente descrito na tarefa ou o que for tecnicamente necessário para concluir a tarefa de forma funcional.
+- Iniciativas extras, suposições ou "ajustes convenientes" são terminantemente proibidos.
+
+---
+
+## ⚠️ Regras contra soluções paliativas, simplificações ou "atalhos técnicos"
+
+### 🚫 Não implementar soluções paliativas, temporárias ou "funciona por agora"
+
+- Toda implementação deve ser pensada como definitiva, sustentável, e pronta para produção.
+- Não use artifícios como: copiar JSON para simular banco, variáveis globais como cache, ou ignorações de validação.
+
+### 🚫 Não simplificar a arquitetura para "resolver mais rápido"
+
+- A IA não deve "simplificar" estruturas, como remover camadas (services, schemas, etc.), eliminar validações ou ignorar separação de responsabilidades.
+- A arquitetura deve sempre seguir Clean Code, DDD e SOLID.
+
+### 🚫 Não alterar estratégias técnicas decididas previamente
+
+Por exemplo:
+- Não mudar de PostgreSQL para SQLite
+- Não substituir bcrypt por hashlib
+- Não trocar pydantic por dataclasses
+- Não converter UUID para string por conveniência
+
+### 🚫 Não "comentar código para funcionar" ou desabilitar partes que dão erro
+
+- Se houver erro, diagnostique e resolva da forma correta.
+- Nunca comente trechos críticos, ignore exceções silenciosamente ou desative regras de validação.
+
+### ✅ Regra de conduta técnica
+
+- Toda solução entregue deve ser sólida, escalável, profissional e tecnicamente correta.
+- Nada de gambiarras, simplificações, ajustes improvisados ou atalhos para "funcionar rapidinho".
+
+### 🧠 Exemplo do que não é permitido:
+
+- "Desativei a verificação de CORS por enquanto" ❌
+- "Ignorei a validação do email para facilitar" ❌
+- "Troquei o UUID por string porque estava dando erro" ❌
+- "Usei uma lista em memória como banco temporário" ❌
+- "Comentei a autenticação para o endpoint funcionar" ❌
+
+---
+
 ## 📌 Última atualização
 
-- Versão: `v1.0`
-- Data: `2025-05-09`
+- Versão: `v1.1`
+- Data: `2025-05-10`
 - Responsável técnico: **Luis Paim**
