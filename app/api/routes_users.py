@@ -74,7 +74,7 @@ async def create_user(
 @router.put("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def update_user(
     user_id: int = Path(..., description="ID do usuário"),
-    user_data: UserUpdate = ...,
+    user_data: UserUpdate = None,
     db: Session = Depends(get_db)
 ):
     """
