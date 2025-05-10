@@ -1,7 +1,4 @@
 """
-Módulo WSGI para iniciar a aplicação a partir de main.py
+Módulo WSGI para iniciar a aplicação através do adaptador
 """
-from main import app
-
-# Exportar a aplicação WSGI para o Gunicorn
-application = app
+from wsgi_to_asgi import application
