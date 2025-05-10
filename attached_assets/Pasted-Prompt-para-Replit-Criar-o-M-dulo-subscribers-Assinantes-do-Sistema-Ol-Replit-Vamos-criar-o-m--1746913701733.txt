@@ -1,0 +1,88 @@
+Prompt para Replit — Criar o Módulo subscribers (Assinantes do Sistema)
+Olá Replit!
+Vamos criar o módulo de assinantes do sistema (no backend) — também chamados de subscribers.
+
+Esses são os usuários especiais que contratam a plataforma HUBB ONE e terão acesso ao seu próprio painel com pacientes, finanças, etc.
+
+🧩 Nome do modelo: Subscriber
+Em português: Assinante
+Em inglês (no código): Subscriber
+
+✅ Campos obrigatórios no modelo SQLAlchemy:
+python
+Copiar
+Editar
+class Subscriber(Base):
+    __tablename__ = "subscribers"
+
+    id = Column(UUID, primary_key=True, index=True, default=uuid4)
+    name = Column(String, nullable=False)  # Nome do responsável
+    clinic_name = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True)
+    phone = Column(String)
+    document = Column(String, unique=True)  # CPF ou CNPJ
+    zip_code = Column(String)
+    address = Column(String)
+    city = Column(String)
+    state = Column(String)
+    segment_id = Column(UUID, ForeignKey("segments.id"))  # ← Relacionamento com segmentos
+    plan_id = Column(UUID, ForeignKey("plans.id"))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+🔗 Relacionamento com segmentos:
+Um Subscriber deve estar vinculado a um segment_id
+
+Isso define se é uma clínica médica, veterinária, odontológica, etc.
+
+O campo deve ser validado no Pydantic
+
+🔗 Relacionamento com User:
+Ao criar um assinante, o sistema também criará um User
+
+Este User será o dono do assinante (role = DONO_ASSINANTE) e terá subscriber_id
+
+Todos os usuários de uma clínica terão esse subscriber_id no token
+
+✅ Endpoints esperados:
+Método	Endpoint	Descrição
+GET	/subscribers/	Listar assinantes
+GET	/subscribers/{id}	Detalhes de um assinante
+POST	/subscribers/	Criar novo assinante + usuário
+PUT	/subscribers/{id}	Atualizar dados
+DELETE	/subscribers/{id}	Desativar ou remover assinante
+
+🧾 Schemas esperados (Pydantic):
+SubscriberCreate
+
+SubscriberUpdate
+
+SubscriberResponse
+
+PaginatedSubscriberResponse (opcional)
+
+Inclua segment_id, plan_id, e os campos básicos descritos acima.
+
+🔐 Regras de acesso:
+Os endpoints devem ser protegidos para SUPER_ADMIN (no painel admin)
+
+O endpoint /subscribers/ também será usado pelo formulário público de onboarding (sem token) — mas com validações internas
+
+🧠 Importante:
+O campo segment_id deve vir do frontend no onboarding
+
+O User criado com o assinante deve ter:
+
+subscriber_id
+
+role = DONO_ASSINANTE
+
+senha gerada na hora (recebida do formulário)
+
+Após esse módulo estar pronto, poderemos:
+
+Criar o formulário público de onboarding (multi-etapas)
+
+Criar o login isolado para assinantes
+
+Gerar instâncias reais no banco com isolamento de dados por subscriber_id
+
