@@ -6,9 +6,9 @@ import os
 from pathlib import Path
 import markdown
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, get_db
@@ -29,6 +29,35 @@ app = FastAPI(
     description="Backend para o sistema HUBB ONE Assist",
     version="0.1.0",
 )
+
+# Middleware para redirecionar HTTP para HTTPS
+@app.middleware("http")
+async def force_https(request: Request, call_next):
+    """
+    Middleware para garantir que todas as requisições sejam via HTTPS.
+    Se uma requisição for detectada como HTTP, redireciona para HTTPS.
+    
+    Args:
+        request: Requisição HTTP
+        call_next: Próxima função na cadeia de middlewares
+        
+    Returns:
+        Response: Redirecionamento ou resposta da próxima função
+    """
+    # Verificar o protocolo via cabeçalho X-Forwarded-Proto (comum em proxies como Replit/Vercel)
+    forwarded_proto = request.headers.get("X-Forwarded-Proto", "")
+    host = request.headers.get("Host", "")
+    
+    # Se o protocolo for HTTP e não for localhost, redirecionar para HTTPS
+    if forwarded_proto == "http" and not host.startswith("localhost"):
+        url = request.url
+        https_url = f"https://{host}{url.path}"
+        if url.query:
+            https_url = f"{https_url}?{url.query}"
+        
+        return RedirectResponse(https_url, status_code=301)
+    
+    return await call_next(request)
 
 # Adicionar middleware CORS
 app.add_middleware(
