@@ -12,13 +12,14 @@ from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, get_db
-from app.db.models import User, Segment, Module, Plan, PlanModule
+from app.db.models import User, Segment, Module, Plan, PlanModule, Subscriber
 from app.services.user_service import UserService
 from app.api.routes_users import router as users_router
 from app.api.routes_segments import router as segments_router
 from app.api.routes_modules import router as modules_router
 from app.api.routes_plans import router as plans_router
 from app.api.routes_auth import router as auth_router
+from app.api.routes_subscribers import router as subscribers_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -90,6 +91,7 @@ app.include_router(users_router)
 app.include_router(segments_router)
 app.include_router(modules_router)
 app.include_router(plans_router)
+app.include_router(subscribers_router)
 
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)
@@ -213,6 +215,7 @@ async def home():
             <h2>Endpoints Disponíveis</h2>
             
             <div class="endpoints">
+                <h3>Usuários do Sistema</h3>
                 <div class="endpoint">
                     <span class="method get">GET</span> <code>/users/</code> - Listar todos os usuários (com paginação e filtros)
                 </div>
@@ -228,18 +231,52 @@ async def home():
                 <div class="endpoint">
                     <span class="method delete">DELETE</span> <code>/users/{{user_id}}</code> - Remover um usuário
                 </div>
+                
+                <h3>Assinantes</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span> <code>/subscribers/</code> - Listar todos os assinantes (com paginação e filtros)
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span> <code>/subscribers/{{subscriber_id}}</code> - Obter um assinante específico
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span> <code>/subscribers/</code> - Criar um novo assinante (também cria um usuário DONO_ASSINANTE)
+                </div>
+                <div class="endpoint">
+                    <span class="method put">PUT</span> <code>/subscribers/{{subscriber_id}}</code> - Atualizar um assinante existente
+                </div>
+                <div class="endpoint">
+                    <span class="method delete">DELETE</span> <code>/subscribers/{{subscriber_id}}</code> - Desativar um assinante
+                </div>
+                <div class="endpoint">
+                    <span class="method patch">PATCH</span> <code>/subscribers/{{subscriber_id}}/activate</code> - Ativar um assinante
+                </div>
+                <div class="endpoint">
+                    <span class="method patch">PATCH</span> <code>/subscribers/{{subscriber_id}}/deactivate</code> - Desativar um assinante
+                </div>
             </div>
             
             <div class="note">
-                <p><strong>Filtros disponíveis para listagem:</strong></p>
+                <p><strong>Filtros disponíveis para usuários:</strong></p>
                 <ul>
                     <li><code>name</code> - Filtrar por nome (busca parcial)</li>
                     <li><code>email</code> - Filtrar por email (busca parcial)</li>
-                    <li><code>role</code> - Filtrar por papel/role (SUPER_ADMIN, DIRETOR, COLABORADOR_NIVEL_2)</li>
+                    <li><code>role</code> - Filtrar por papel/role (SUPER_ADMIN, DIRETOR, COLABORADOR_NIVEL_2, DONO_ASSINANTE)</li>
                     <li><code>is_active</code> - Filtrar por status de ativação (true/false)</li>
                 </ul>
                 
-                <p><strong>Parâmetros de paginação:</strong></p>
+                <p><strong>Filtros disponíveis para assinantes:</strong></p>
+                <ul>
+                    <li><code>name</code> - Filtrar por nome do responsável (busca parcial)</li>
+                    <li><code>clinic_name</code> - Filtrar por nome da clínica (busca parcial)</li>
+                    <li><code>email</code> - Filtrar por email (busca parcial)</li>
+                    <li><code>document</code> - Filtrar por documento (CPF/CNPJ)</li>
+                    <li><code>segment_id</code> - Filtrar por segmento (UUID)</li>
+                    <li><code>plan_id</code> - Filtrar por plano (UUID)</li>
+                    <li><code>is_active</code> - Filtrar por status de ativação (true/false)</li>
+                </ul>
+                
+                <p><strong>Parâmetros de paginação (para todas as listagens):</strong></p>
                 <ul>
                     <li><code>skip</code> - Quantos registros pular (default: 0)</li>
                     <li><code>limit</code> - Limite de registros por página (default: 10, max: 100)</li>
