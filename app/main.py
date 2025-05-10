@@ -18,6 +18,7 @@ from app.api.routes_users import router as users_router
 from app.api.routes_segments import router as segments_router
 from app.api.routes_modules import router as modules_router
 from app.api.routes_plans import router as plans_router
+from app.api.routes_auth import router as auth_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)

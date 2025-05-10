@@ -1,0 +1,98 @@
+Perfeito! Abaixo está o prompt completo para o Replit AI implementar corretamente o módulo de login/autenticação com JWT, seguindo os padrões do HUBB Assist:
+
+💬 Prompt para o Replit AI — Implementar Login com JWT (FastAPI)
+Olá Replit! Vamos agora implementar a funcionalidade de login no projeto HUBB ONE Assist.
+
+❗ANTES DE COMEÇAR:
+Leia o arquivo rules.md. Não tome decisões fora do escopo. Siga todas as regras definidas.
+
+📦 Tarefa: Implementar sistema de autenticação (login)
+📌 Objetivo
+Criar endpoint de login que:
+
+Receba email e senha em POST /auth/login
+
+Verifique as credenciais usando bcrypt
+
+Emita um access_token e um refresh_token como cookies HttpOnly
+
+O usuário deve ser buscado na tabela users
+
+🔐 Tokens JWT
+Use biblioteca python-jose para gerar os tokens
+
+Os tokens devem conter:
+
+user_id
+
+email
+
+role
+
+Tokens devem ser assinados com uma chave secreta (JWT_SECRET)
+
+Tokens devem ser retornados como cookies seguros (HttpOnly, Secure, SameSite=Lax)
+
+🔄 Refresh de Token
+Criar rota POST /auth/refresh-token que:
+
+Leia o refresh_token via cookie
+
+Gere um novo access_token
+
+🚪 Logout
+Criar rota POST /auth/logout que:
+
+Apague os cookies (access_token, refresh_token)
+
+🔒 Proteção de Rotas
+Criar utilitário get_current_user() usando Depends
+
+Criar get_current_super_admin() para proteger rotas administrativas
+
+Proteger rotas como /users/, /plans/ para somente usuários autenticados
+
+🧾 Estrutura esperada:
+Rota	Método	Ação
+/auth/login	POST	Autenticar usuário e emitir tokens
+/auth/refresh-token	POST	Gerar novo access_token
+/auth/logout	POST	Encerrar sessão
+
+📁 Arquivos esperados:
+pgsql
+Copiar
+Editar
+app/
+├── api/
+│   └── routes_auth.py
+├── services/
+│   └── auth_service.py
+├── core/
+│   ├── jwt_handler.py
+│   └── security.py
+├── schemas/
+│   └── auth.py
+✅ Regras obrigatórias:
+Usar bcrypt para verificar senha
+
+Tokens via cookies (não em headers)
+
+Nada de Flask, nem simplificações
+
+Nome das rotas e variáveis sempre em inglês
+
+Toda resposta deve estar em português, como:
+
+json
+Copiar
+Editar
+{
+  "mensagem": "Login realizado com sucesso."
+}
+📝 Após finalizar:
+Atualize o arquivo TAREFAS.md com:
+
+pgsql
+Copiar
+Editar
+✅ TAREFA BACKEND - Login com JWT implementado com sucesso, incluindo autenticação, refresh, logout e 
