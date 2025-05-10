@@ -221,7 +221,7 @@ async def home():
                     <ul>
                         <li><code>/public/segments</code> - Lista todos os segmentos ativos</li>
                         <li><code>/public/plans</code> - Lista todos os planos ativos</li>
-                        <li><code>/public/plans/{{plan_id}}</code> - Obtém detalhes de um plano ativo específico</li>
+                        <li><code>/public/plans/[UUID]</code> - Obtém detalhes de um plano ativo específico</li>
                     </ul>
                 </div>
             </div>
