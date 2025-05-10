@@ -8,8 +8,8 @@ from sqlalchemy import engine_from_config, pool
 # Add the parent directory to sys.path so we can import the app package
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.config import settings
-from app.db.base import Base
+# Importar os modelos SQLAlchemy para que o Alembic possa detectá-los
+from app.db.models import Base, User, Segment, Module, Plan, PlanModule, Subscriber
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -29,7 +29,9 @@ target_metadata = Base.metadata
 # ... etc.
 
 # Set the SQLAlchemy URL for migrations
-config.set_main_option("sqlalchemy.url", str(settings.DATABASE_URL))
+database_url = os.environ.get("DATABASE_URL")
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url)
 
 
 def run_migrations_offline():
