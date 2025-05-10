@@ -40,6 +40,7 @@ app.add_middleware(
 )
 
 # Incluir routers
+app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(segments_router)
 app.include_router(modules_router)

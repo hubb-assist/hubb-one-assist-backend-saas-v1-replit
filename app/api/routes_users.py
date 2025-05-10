@@ -10,7 +10,8 @@ from sqlalchemy.orm import Session
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, PaginatedUserResponse
 from app.services.user_service import UserService
 from app.db.session import get_db
-from app.db.models import UserRole
+from app.db.models import UserRole, User
+from app.core.dependencies import get_current_user, get_current_super_admin, get_current_admin_or_director
 
 # Criar router para usuários
 router = APIRouter(
@@ -22,6 +23,7 @@ router = APIRouter(
 @router.get("/", response_model=PaginatedUserResponse, status_code=status.HTTP_200_OK)
 async def list_users(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director),
     skip: int = Query(0, ge=0, description="Quantos usuários pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de usuários retornados"),
     name: Optional[str] = Query(None, description="Filtrar por nome"),
@@ -48,7 +50,8 @@ async def list_users(
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def get_user(
     user_id: int = Path(..., description="ID do usuário"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Obter um usuário pelo ID.
@@ -64,7 +67,8 @@ async def get_user(
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     user_data: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Criar um novo usuário.
@@ -75,7 +79,8 @@ async def create_user(
 async def update_user(
     user_data: UserUpdate,
     user_id: int = Path(..., description="ID do usuário"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Atualizar um usuário existente.
@@ -91,7 +96,8 @@ async def update_user(
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: int = Path(..., description="ID do usuário"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_super_admin)
 ):
     """
     Excluir um usuário.
@@ -108,7 +114,8 @@ async def delete_user(
 @router.patch("/{user_id}/activate", response_model=UserResponse)
 async def activate_user(
     user_id: int = Path(..., description="ID do usuário"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Ativar um usuário.
@@ -125,7 +132,8 @@ async def activate_user(
 @router.patch("/{user_id}/deactivate", response_model=UserResponse)
 async def deactivate_user(
     user_id: int = Path(..., description="ID do usuário"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Desativar um usuário.
