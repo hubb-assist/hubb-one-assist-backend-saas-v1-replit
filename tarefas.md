@@ -29,9 +29,21 @@
 - [x] Configurar validações e tratamento de erros
 - [x] Adicionar endpoints específicos para ativar/desativar módulos (PATCH /modules/{module_id}/activate, /modules/{module_id}/deactivate)
 
+## Módulo de Planos
+
+- [x] Criar modelo de dados para Plan e PlanModule com os campos especificados
+- [x] Implementar relacionamento N-N entre planos e módulos com atributos adicionais (preço, gratuidade, dias de teste)
+- [x] Implementar esquemas Pydantic para validação de entrada e saída
+- [x] Criar serviço de planos com operações CRUD completas e regras de negócio
+- [x] Implementar rotas REST para planos (/plans/)
+- [x] Configurar validações e tratamento de erros
+- [x] Adicionar endpoints específicos para ativar/desativar planos
+
 ## Configuração do Ambiente
 
 - [x] Configurar adaptador ASGI para WSGI para compatibilidade com FastAPI/Uvicorn e Gunicorn
 - [x] Configurar banco de dados PostgreSQL
 - [x] Configurar estrutura de diretórios do projeto conforme arquitetura DDD
 - [x] Documentar regras do projeto (rules.md)
+
+✅ TAREFA BACKEND - CRUD de Planos (Plan) implementado com sucesso, incluindo associação com módulos
