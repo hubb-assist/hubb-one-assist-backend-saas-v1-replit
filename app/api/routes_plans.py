@@ -9,9 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.db.models import PlanModule
+from app.db.models import PlanModule, User
 from app.services.plan_service import PlanService
 from app.schemas.plan import PlanCreate, PlanUpdate, PlanResponse, PaginatedPlanResponse
+from app.core.dependencies import get_current_user, get_current_admin_or_director, get_current_super_admin
 
 # Criar router
 router = APIRouter(
@@ -24,6 +25,7 @@ router = APIRouter(
 @router.get("/", response_model=PaginatedPlanResponse)
 async def list_plans(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
     skip: int = Query(0, ge=0, description="Quantos planos pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de planos retornados"),
     name: Optional[str] = Query(None, description="Filtrar por nome"),
@@ -47,7 +49,8 @@ async def list_plans(
 @router.get("/{plan_id}", response_model=PlanResponse)
 async def get_plan(
     plan_id: UUID = Path(..., description="ID do plano"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Obter um plano pelo ID.
@@ -89,7 +92,8 @@ async def get_plan(
 @router.post("/", response_model=PlanResponse, status_code=status.HTTP_201_CREATED)
 async def create_plan(
     plan_data: PlanCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Criar um novo plano.
@@ -127,7 +131,8 @@ async def create_plan(
 async def update_plan(
     plan_data: PlanUpdate,
     plan_id: UUID = Path(..., description="ID do plano"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Atualizar um plano existente.
@@ -169,7 +174,8 @@ async def update_plan(
 @router.delete("/{plan_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_plan(
     plan_id: UUID = Path(..., description="ID do plano"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_super_admin)
 ):
     """
     Excluir um plano.
@@ -186,7 +192,8 @@ async def delete_plan(
 @router.patch("/{plan_id}/activate", response_model=PlanResponse)
 async def activate_plan(
     plan_id: UUID = Path(..., description="ID do plano"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Ativar um plano.
@@ -228,7 +235,8 @@ async def activate_plan(
 @router.patch("/{plan_id}/deactivate", response_model=PlanResponse)
 async def deactivate_plan(
     plan_id: UUID = Path(..., description="ID do plano"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Desativar um plano.
