@@ -2,7 +2,7 @@
 Dependências para injeção em rotas e outros componentes
 """
 
-from typing import Optional
+from typing import Optional, Any
 
 from fastapi import Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ async def get_current_user(
     request: Request,
     token_data: Optional[TokenData] = Depends(get_token_data),
     db: Session = Depends(get_db)
-) -> User:
+) -> Any:
     """
     Obtém o usuário autenticado atual
     
@@ -46,18 +46,19 @@ async def get_current_user(
     Raises:
         HTTPException: Se o usuário não estiver autenticado ou for inválido
     """
+    # Verificar se é a rota /users/me e se não há token
     if token_data is None:
-        # Resposta amigável para o frontend, usado especificamente para a tela de login
-        # Isso evita que erros 401 apareçam no console quando usuário não está logado
+        # Para a rota /users/me, tratamento especial
         if request.url.path == "/users/me":
-            # Para a rota /users/me, retornamos uma resposta modificada que minimiza o erro visual
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={"message": "Não autenticado", "status": "redirect_to_login"},
-                headers={"WWW-Authenticate": "Bearer"}
+            # Importar aqui para evitar problemas de circular import
+            from fastapi.responses import JSONResponse
+            # Retornar 200 com informações de usuário não autenticado
+            return JSONResponse(
+                status_code=status.HTTP_200_OK, 
+                content={"authenticated": False, "status": "not_authenticated", "message": "Usuário não autenticado"}
             )
         else:
-            # Para outras rotas, mantemos o comportamento padrão
+            # Para outras rotas, manter o padrão 401
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Não autenticado",

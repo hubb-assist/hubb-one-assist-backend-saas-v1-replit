@@ -47,25 +47,19 @@ async def list_users(
     
     return UserService.get_users(db, skip=skip, limit=limit, filter_params=filters)
 
-@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+@router.get("/me", response_model=None, status_code=status.HTTP_200_OK)
 async def get_current_user_info(
     request: Request,
     current_user: User = Depends(get_current_user),
 ):
     """
     Obter dados do usuário atual autenticado.
-    Se não houver autenticação, a dependência get_current_user tratará o erro.
+    Se não houver autenticação, a dependência get_current_user tratará o erro,
+    retornando um status 200 com informações de que o usuário não está autenticado.
     """
-    try:
-        return current_user
-    except HTTPException:
-        # Retorna 401, mas com uma resposta mais amigável para o frontend
-        # Isso ajuda a evitar erros visuais desnecessários no console
-        return Response(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content='{"detail":"Não autenticado","status":"redirect_to_login"}',
-            media_type="application/json"
-        )
+    # Se chegou aqui, o usuário está autenticado (a dependência não lançou exceção)
+    # e current_user contém o objeto do usuário
+    return current_user
 
 
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
