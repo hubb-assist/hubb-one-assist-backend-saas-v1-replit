@@ -85,12 +85,15 @@ class UserService:
         # Aplicar paginação
         users = query.offset(skip).limit(limit).all()
         
+        # Converter os objetos User para dicionários e depois para UserResponse
+        user_responses = [UserResponse.model_validate(user) for user in users]
+        
         # Criar resposta paginada
         return PaginatedUserResponse(
             total=total,
             page=skip // limit + 1 if limit > 0 else 1,
             size=limit,
-            items=users
+            items=user_responses
         )
     
     @staticmethod
@@ -182,9 +185,9 @@ class UserService:
             return None
         
         # Verificar se o novo email já está em uso por outro usuário
-        if user_data.email and user_data.email != db_user.email:
+        if user_data.email is not None and user_data.email != db_user.email:
             existing_user = UserService.get_user_by_email(db, user_data.email)
-            if existing_user and existing_user.id != user_id:
+            if existing_user is not None and existing_user.id != user_id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Email já está em uso por outro usuário"

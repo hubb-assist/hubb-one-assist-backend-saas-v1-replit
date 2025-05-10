@@ -16,8 +16,11 @@ load_dotenv()
 # Obter a URL de conexão do PostgreSQL de variáveis de ambiente ou usar valor padrão
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+if DATABASE_URL is None:
+    raise ValueError("DATABASE_URL não está definido nas variáveis de ambiente")
+
 # Criar engine do SQLAlchemy
-engine = create_engine(DATABASE_URL)
+engine = create_engine(str(DATABASE_URL))
 
 # Criar fábrica de sessões
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
