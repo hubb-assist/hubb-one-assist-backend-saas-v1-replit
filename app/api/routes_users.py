@@ -4,7 +4,7 @@ Rotas da API para gerenciamento de usuários
 
 from typing import Optional, List, Dict, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Path
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Path, Request, Response
 from sqlalchemy.orm import Session
 
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, PaginatedUserResponse
@@ -49,12 +49,23 @@ async def list_users(
 
 @router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def get_current_user_info(
-    current_user: User = Depends(get_current_user)
+    request: Request,
+    current_user: User = Depends(get_current_user),
 ):
     """
     Obter dados do usuário atual autenticado.
+    Se não houver autenticação, a dependência get_current_user tratará o erro.
     """
-    return current_user
+    try:
+        return current_user
+    except HTTPException:
+        # Retorna 401, mas com uma resposta mais amigável para o frontend
+        # Isso ajuda a evitar erros visuais desnecessários no console
+        return Response(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content='{"detail":"Não autenticado","status":"redirect_to_login"}',
+            media_type="application/json"
+        )
 
 
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)

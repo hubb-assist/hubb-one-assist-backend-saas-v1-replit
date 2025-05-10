@@ -47,11 +47,22 @@ async def get_current_user(
         HTTPException: Se o usuário não estiver autenticado ou for inválido
     """
     if token_data is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Não autenticado",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+        # Resposta amigável para o frontend, usado especificamente para a tela de login
+        # Isso evita que erros 401 apareçam no console quando usuário não está logado
+        if request.url.path == "/users/me":
+            # Para a rota /users/me, retornamos uma resposta modificada que minimiza o erro visual
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={"message": "Não autenticado", "status": "redirect_to_login"},
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        else:
+            # Para outras rotas, mantemos o comportamento padrão
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Não autenticado",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
     
     user = UserService.get_user_by_id(db, token_data.user_id)
     
