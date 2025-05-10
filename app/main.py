@@ -33,7 +33,12 @@ app = FastAPI(
 # Adicionar middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Frontend Vite
+    allow_origins=[
+        "http://localhost:5173",  # Frontend Vite local
+        "http://localhost:3000",  # Frontend React padrão
+        "https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev",  # URL temporário do Replit
+        "https://*.replit.dev",  # Qualquer subdomínio do Replit
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
     allow_headers=["*"],

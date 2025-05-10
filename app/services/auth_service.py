@@ -2,6 +2,7 @@
 Serviço para autenticação de usuários
 """
 
+import os
 from datetime import timedelta
 from typing import Optional, Dict, Any, Tuple
 
