@@ -34,7 +34,8 @@ async def list_public_plans(
     Retorna apenas planos com is_active=True.
     """
     # Sempre força o filtro is_active=True para rotas públicas
-    filter_params = {"is_active": True}
+    filter_params = {}
+    filter_params["is_active"] = True
     
     if name:
         filter_params["name"] = name
@@ -54,7 +55,14 @@ async def get_public_plan(
     Retorna apenas planos com is_active=True.
     """
     db_plan = PlanService.get_plan_by_id(db, plan_id)
-    if not db_plan or not db_plan.is_active:
+    if not db_plan:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Plano não encontrado"
+        )
+        
+    # Verificar se o plano está ativo
+    if db_plan.is_active is False:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Plano não encontrado ou inativo"

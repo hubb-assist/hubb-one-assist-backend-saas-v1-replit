@@ -31,7 +31,8 @@ async def list_public_segments(
     """
     try:
         # Sempre força o filtro is_active=True para rotas públicas
-        filter_params = {"is_active": True}
+        filter_params = {}
+        filter_params["is_active"] = True
         
         # Adiciona filtro por nome se fornecido
         if nome is not None:

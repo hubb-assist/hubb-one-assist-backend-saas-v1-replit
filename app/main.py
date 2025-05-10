@@ -20,6 +20,8 @@ from app.api.routes_modules import router as modules_router
 from app.api.routes_plans import router as plans_router
 from app.api.routes_auth import router as auth_router
 from app.api.routes_subscribers import router as subscribers_router
+from app.api.routes_public_segments import router as public_segments_router
+from app.api.routes_public_plans import router as public_plans_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
