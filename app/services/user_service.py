@@ -236,6 +236,29 @@ class UserService:
         db.commit()
         
         return True
+        
+    @staticmethod
+    def toggle_user_status(db: Session, user_id: int, activate: bool) -> Optional[User]:
+        """
+        Ativa ou desativa um usuário
+        
+        Args:
+            db: Sessão do banco de dados
+            user_id: ID do usuário
+            activate: True para ativar, False para desativar
+            
+        Returns:
+            Optional[User]: Usuário atualizado ou None se não for encontrado
+        """
+        db_user = UserService.get_user_by_id(db, user_id)
+        if not db_user:
+            return None
+            
+        db_user.is_active = activate
+        db.commit()
+        db.refresh(db_user)
+        
+        return db_user
     
     @staticmethod
     def create_admin_user(db: Session) -> None:

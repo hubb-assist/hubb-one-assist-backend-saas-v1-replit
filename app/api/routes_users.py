@@ -103,3 +103,37 @@ async def delete_user(
             detail="Usuário não encontrado"
         )
     return None
+
+
+@router.patch("/{user_id}/activate", response_model=UserResponse)
+async def activate_user(
+    user_id: int = Path(..., description="ID do usuário"),
+    db: Session = Depends(get_db)
+):
+    """
+    Ativar um usuário.
+    """
+    updated_user = UserService.toggle_user_status(db, user_id, activate=True)
+    if not updated_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuário não encontrado"
+        )
+    return updated_user
+
+
+@router.patch("/{user_id}/deactivate", response_model=UserResponse)
+async def deactivate_user(
+    user_id: int = Path(..., description="ID do usuário"),
+    db: Session = Depends(get_db)
+):
+    """
+    Desativar um usuário.
+    """
+    updated_user = UserService.toggle_user_status(db, user_id, activate=False)
+    if not updated_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Usuário não encontrado"
+        )
+    return updated_user
