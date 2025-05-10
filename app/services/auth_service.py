@@ -175,17 +175,18 @@ class AuthService:
             response: Resposta HTTP para adicionar cookies
             token: Tokens JWT
         """
-        # Verificar se estamos em ambiente de produção
-        is_prod = os.getenv("ENVIRONMENT", "development") == "production"
+        # Sempre use Secure=True para todas as conexões
+        # A maioria dos ambientes de desenvolvimento atual usa HTTPS
+        # incluindo Replit, Netlify, Vercel, etc.
         
         # Configurar cookie de access token (curta duração)
         response.set_cookie(
             key="access_token",
             value=token.access_token,
             httponly=True,
-            secure=is_prod,  # Secure em produção
+            secure=True,  # Sempre use Secure para HTTPS
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            samesite="lax",
+            samesite="none",  # Permitir cross-site em qualquer contexto
             path="/"
         )
         
@@ -194,9 +195,9 @@ class AuthService:
             key="refresh_token",
             value=token.refresh_token,
             httponly=True,
-            secure=is_prod,  # Secure em produção
+            secure=True,  # Sempre use Secure para HTTPS
             max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-            samesite="lax",
+            samesite="none",  # Permitir cross-site em qualquer contexto
             path="/"
         )
         
@@ -208,5 +209,17 @@ class AuthService:
         Args:
             response: Resposta HTTP para remover cookies
         """
-        response.delete_cookie(key="access_token", path="/")
-        response.delete_cookie(key="refresh_token", path="/")
+        response.delete_cookie(
+            key="access_token", 
+            path="/", 
+            secure=True, 
+            httponly=True, 
+            samesite="none"
+        )
+        response.delete_cookie(
+            key="refresh_token", 
+            path="/", 
+            secure=True, 
+            httponly=True, 
+            samesite="none"
+        )
