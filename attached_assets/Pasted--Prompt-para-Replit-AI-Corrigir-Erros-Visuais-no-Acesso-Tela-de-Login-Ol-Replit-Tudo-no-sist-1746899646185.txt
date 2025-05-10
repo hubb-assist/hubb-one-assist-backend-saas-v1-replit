@@ -1,0 +1,70 @@
+🧠 Prompt para Replit AI — Corrigir Erros Visuais no Acesso à Tela de Login
+Olá Replit!
+Tudo no sistema HUBB ONE Assist está funcionando corretamente neste momento (login, dashboard, rotas protegidas, etc.).
+Porém, temos dois erros visuais recorrentes ao acessar a rota /login, que queremos resolver de forma limpa e definitiva.
+
+🧩 Problema 1 — Uncaught SyntaxError: Unexpected token '<' em api-config.js
+Esse erro indica que o navegador está tentando interpretar um arquivo JavaScript (api-config.js), mas o conteúdo retornado é um HTML, provavelmente por erro de path ou import incorreto.
+
+🧩 Problema 2 — 401 Unauthorized na rota /users/me antes de logar
+Toda vez que a página /login é acessada, o frontend tenta checar se o usuário já está autenticado.
+Essa chamada (GET /users/me) retorna 401, o que é esperado quando não há sessão — mas gera um alerta feio no console.
+
+✅ Objetivo desta tarefa:
+Corrigir o erro do api-config.js (import incorreto ou mal servido como arquivo público)
+
+Tratar ou silenciar com clareza a resposta 401 de /users/me, já que ela não é erro lógico (é esperado)
+
+Não modificar nada além do necessário
+
+Não interferir no fluxo de autenticação que já está funcionando
+
+⚠️ Importante — Leia antes de iniciar:
+📁 Se for mexer no frontend, leia obrigatoriamente:
+Arquivos na raiz:
+README.md
+
+rules.md
+
+TAREFAS.md
+
+Arquivos em /docs:
+API_GUIDELINES.md
+
+CORS_CONFIGURATION.md
+
+CRIACAO_PAGINAS.md
+
+design_system.md
+
+ESTRUTURA_COMPONENTES.md
+
+INTEGRACAO_TEMP.md
+
+padrao_layout.md
+
+README.md (índice)
+
+📁 Se for mexer no backend:
+Leia obrigatoriamente o arquivo rules.md antes de tudo.
+
+🔒 Regras da tarefa:
+❗ Todas as mensagens e comentários devem estar em português
+
+❌ Não crie páginas, rotas ou modais novos
+
+❌ Não reestruture layout ou navegação
+
+✅ Siga o padrão visual Tailwind + ShadCN
+
+✅ Trabalhe dentro da stack React + Vite + FastAPI
+
+Você pode agora identificar com clareza a origem do problema e aplicar apenas as correções necessárias para deixarmos a tela de login visualmente limpa e sem erros desnecessários no console.
+Aguardo a sua solução dentro dessas diretrizes.
+
+
+
+
+
+
+
