@@ -47,6 +47,16 @@ async def list_users(
     
     return UserService.get_users(db, skip=skip, limit=limit, filter_params=filters)
 
+@router.get("/me", response_model=UserResponse, status_code=status.HTTP_200_OK)
+async def get_current_user_info(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Obter dados do usuário atual autenticado.
+    """
+    return current_user
+
+
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def get_user(
     user_id: int = Path(..., description="ID do usuário"),

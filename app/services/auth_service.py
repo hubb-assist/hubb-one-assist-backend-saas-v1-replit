@@ -174,11 +174,15 @@ class AuthService:
             response: Resposta HTTP para adicionar cookies
             token: Tokens JWT
         """
+        # Verificar se estamos em ambiente de produção
+        is_prod = os.getenv("ENVIRONMENT", "development") == "production"
+        
         # Configurar cookie de access token (curta duração)
         response.set_cookie(
             key="access_token",
             value=token.access_token,
             httponly=True,
+            secure=is_prod,  # Secure em produção
             max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
             samesite="lax",
             path="/"
@@ -189,6 +193,7 @@ class AuthService:
             key="refresh_token",
             value=token.refresh_token,
             httponly=True,
+            secure=is_prod,  # Secure em produção
             max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
             samesite="lax",
             path="/"
