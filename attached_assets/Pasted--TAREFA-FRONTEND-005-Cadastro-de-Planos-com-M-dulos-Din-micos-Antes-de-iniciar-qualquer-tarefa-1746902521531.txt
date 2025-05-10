@@ -1,0 +1,135 @@
+✅ TAREFA FRONTEND 005 — Cadastro de Planos com Módulos Dinâmicos
+📘 Antes de iniciar qualquer tarefa, o desenvolvedor DEVE obrigatoriamente ler:
+Arquivos na raiz:
+README.md
+
+rules.md
+
+TAREFAS.md
+
+Arquivos em /docs:
+API_GUIDELINES.md
+
+CORS_CONFIGURATION.md
+
+CRIACAO_PAGINAS.md
+
+design_system.md
+
+ESTRUTURA_COMPONENTES.md
+
+INTEGRACAO_TEMP.md
+
+padrao_layout.md
+
+README.md
+
+🎯 Objetivo
+Criar uma interface para criar, listar, editar e excluir planos, com a possibilidade de:
+
+Informar nome, segmento, preço, descrição
+
+Associar vários módulos
+
+Definir preço individual para cada módulo
+
+Definir se o módulo é gratuito, inativo ou com período de teste (em dias)
+
+Controle do status is_active
+
+📁 Página
+src/pages/admin/plans.tsx
+
+📦 Estrutura de dados (exemplo simplificado):
+ts
+Copiar
+Editar
+interface Plan {
+  id: string;
+  name: string;
+  segment_id: string;
+  price: number;
+  description?: string;
+  is_active: boolean;
+  modules: Array<{
+    module_id: string;
+    custom_price: number | null; // ou 0 se for gratuito
+    trial_days?: number | null;
+  }>
+}
+A estrutura exata deve ser validada com o backend via Swagger /docs.
+
+🔧 Funcionalidade esperada
+🖼️ Formulário de criação (Dialog ou Drawer):
+Etapa 1 — Dados principais
+
+Nome do plano (input obrigatório)
+
+Segmento (select com fetch de /segments)
+
+Preço base do plano (input number)
+
+Descrição (textarea opcional)
+
+Etapa 2 — Seleção de Módulos
+
+Listar todos os módulos ativos (GET /modules)
+
+Para cada módulo selecionado:
+
+Exibir:
+
+Preço (number)
+
+Gratuito (checkbox)
+
+Período de teste (dias) (input number opcional)
+
+Validação:
+
+Se marcar “gratuito”, desabilita campo de preço
+
+Se informar trial, pode deixar preço 0
+
+Etapa 3 — Ativação
+
+Switch para is_active
+
+📋 Listagem (DataTable)
+Nome do plano
+
+Segmento (nome)
+
+Preço base
+
+Status Ativo/Inativo
+
+Ações: Editar / Excluir
+
+🧠 Considerações Técnicas
+Validação com Zod
+
+Formulário multi-etapas se possível (ou agrupado com tabs/divs)
+
+Os módulos devem ser buscados via API e renderizados dinamicamente
+
+Use Dialog ou Drawer do ShadCN para edição/criação
+
+Exiba feedbacks via Sonner
+
+Mostre Skeleton enquanto os dados são carregados
+
+🔄 Endpoints esperados (confirmar com backend):
+Método	Endpoint	Ação
+GET	/plans/	Listar planos
+POST	/plans/	Criar plano
+PUT	/plans/{id}	Atualizar plano
+DELETE	/plans/{id}	Excluir plano
+
+📥 Ao concluir:
+Atualize o TAREFAS.md com:
+
+md
+Copiar
+Editar
+✅ TAREFA FRONTEND 005 — CRUD completo de planos criado, com associação de módulos personalizados, a
