@@ -1,0 +1,126 @@
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+api.ts:13 Configurando API - usando URL direta: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev
+auth.ts:60 Verificando autenticação...
+api.ts:75 Solicitando verificação de autenticação: /users/me
+api.ts:42 Fazendo requisição para API: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/users/me
+login:1 Access to XMLHttpRequest at 'https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/users/me' from origin 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.
+api.ts:51 Erro na requisição: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_NETWORK"
+config
+: 
+{transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}
+message
+: 
+"Network Error"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}
+stack
+: 
+"AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=74415c8e:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=74415c8e:2119:41)\n    at async Object.verificarAutenticacao (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api.ts:56:24)\n    at async checkAuth (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/auth.ts:38:24)"
+[[Prototype]]
+: 
+Error
+(anonymous)	@	api.ts:51
+Promise.then		
+verificarAutenticacao	@	api.ts:76
+checkAuth	@	auth.ts:61
+(anonymous)	@	App.tsx:23
+api.ts:80 Erro na verificação de autenticação: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_NETWORK"
+config
+: 
+adapter
+: 
+(3) ['xhr', 'http', 'fetch']
+allowAbsoluteUrls
+: 
+true
+baseURL
+: 
+"https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev"
+data
+: 
+undefined
+env
+: 
+{FormData: ƒ, Blob: ƒ}
+headers
+: 
+AxiosHeaders {Accept: 'application/json', Content-Type: 'application/json'}
+maxBodyLength
+: 
+-1
+maxContentLength
+: 
+-1
+method
+: 
+"get"
+timeout
+: 
+10000
+transformRequest
+: 
+[ƒ]
+transformResponse
+: 
+[ƒ]
+transitional
+: 
+{silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false}
+url
+: 
+"/users/me"
+validateStatus
+: 
+ƒ validateStatus(status)
+withCredentials
+: 
+true
+xsrfCookieName
+: 
+"XSRF-TOKEN"
+xsrfHeaderName
+: 
+"X-XSRF-TOKEN"
+[[Prototype]]
+: 
+Object
+message
+: 
+"Network Error"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}
+stack
+: 
+"AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=74415c8e:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=74415c8e:2119:41)\n    at async Object.verificarAutenticacao (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api.ts:56:24)\n    at async checkAuth (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/auth.ts:38:24)"
+[[Prototype]]
+: 
+Error
+verificarAutenticacao	@	api.ts:80
+await in verificarAutenticacao		
+checkAuth	@	auth.ts:61
+(anonymous)	@	App.tsx:23
+auth.ts:66 Usuário não autenticado (resposta vazia)
+
+ Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+api.ts:76 
+ GET https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/users/me net::ERR_FAILED 500 (Internal Server Error)
+Promise.then		
+verificarAutenticacao	@	api.ts:76
+checkAuth	@	auth.ts:61
+(anonymous)	@	App.tsx:23

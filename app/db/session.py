@@ -3,9 +3,10 @@ Configuração da sessão de conexão com o banco de dados
 """
 
 import os
+import time
 from typing import Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from dotenv import load_dotenv
@@ -62,7 +63,7 @@ def get_db() -> Generator[Session, None, None]:
         try:
             db = SessionLocal()
             # Teste de conexão para verificar se está funcionando
-            db.execute("SELECT 1")  
+            db.execute(text("SELECT 1"))  
             try:
                 yield db
                 break  # Sair do loop se tudo ocorreu bem

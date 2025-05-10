@@ -1,0 +1,115 @@
+proxy
+2api.ts:44 Fazendo requisição via proxy: /api-proxy/users/me
+segments.tsx:52 Buscando segmentos...
+api-segments.ts:34 Buscando segmentos via proxy: /segments com params: undefined
+api.ts:44 Fazendo requisição via proxy: /api-proxy/segments
+api-segments.ts:38 Resposta da API: <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">
+import { createHotContext } from "/@vite/client";
+const hot = createHotContext("/__dummy__runtime-error-plugin");
+
+function sendError(error) {
+  if (!(error instanceof Error)) {
+    error = new Error("(unknown runtime error)");
+  }
+  const serialized = {
+    message: error.message,
+    stack: error.stack,
+  };
+  hot.send("runtime-error-plugin:error", serialized);
+}
+
+window.addEventListener("error", (evt) => {
+  sendError(evt.error);
+});
+
+window.addEventListener("unhandledrejection", (evt) => {
+  sendError(evt.reason);
+});
+</script>
+
+    <script type="module">
+import RefreshRuntime from "/@react-refresh"
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true
+</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <script type="module">"use strict";(()=>{var P="0.1.2";var T={HIGHLIGHT_COLOR:"#0079F2",HIGHLIGHT_BG:"#0079F210",ALLOWED_DOMAIN:".replit.dev"},I={highlighter:{position:"absolute",zIndex:Number.MAX_SAFE_INTEGER-3,boxSizing:"border-box",pointerEvents:"none",border:`2px solid ${T.HIGHLIGHT_COLOR}`,borderRadius:"4px",background:T.HIGHLIGHT_BG,transition:"opacity 0.2s",willChange:"opacity",opacity:"0"},label:{position:"absolute",backgroundColor:T.HIGHLIGHT_COLOR,color:"#FFFFFF",padding:"2px 6px",borderRadius:"4px",fontSize:"12px",fontFamily:"monospace",transform:"translateY(-100%)",marginTop:"-4px",zIndex:Number.MAX_SAFE_INTEGER-2,pointerEvents:"none",opacity:"0"}};function xe(e,t){return e[13]=1,e[14]=t>>8,e[15]=t&255,e[16]=t>>8,e[17]=t&255,e}var re=112,oe=72,ie=89,se=115,W;function Ie(){let e=new Int32Array(256);for(let t=0;t<256;t++){let n=t;for(let r=0;r<8;r++)n=n&1?3988292384^n>>>1:n>>>1;e[t]=n}return e}function De(e){let t=-1;W||(W=Ie());for(let n=0;n<e.length;n++)t=W[(t^e[n])&255]^t>>>8;return t^-1}function He(e){let t=e.length-1;for(let n=t;n>=4;n--)if(e[n-4]===9&&e[n-3]===re&&e[n-2]===oe&&e[n-1]===ie&&e[n]===se)return n-3;return 0}function Re(e,t,n=!1){let r=new Uint8Array(13);t*=39.3701,r[0]=re,r[1]=oe,r[2]=ie,r[3]=se,r[4]=t>>>24,r[5]=t>>>16,r[6]=t>>>8,r[7]=t&255,r[8]=r[4],r[9]=r[5],r[10]=r[6],r[11]=r[7],r[12]=1;let s=De(r),i=new Uint8Array(4);if(i[0]=s>>>24,i[1]=s>>>16,i[2]=s>>>8,i[3]=s&255,n){let a=He(e);return e.set(r,a),e.set(i,a+13),e}else{let a=new Uint8Array(4);a[0]=0,a[1]=0,a[2]=0,a[3]=9;let o=new Uint8Array(54);return o.set(e,0),o.set(a,33),o.set(r,37),o.set(i,50),o}}var ae="[modern-screenshot]",A=typeof window<"u",_e=A&&"Worker"in window,Me=A&&"atob"in window,jt=A&&"btoa"in window,j=A?window.navigator?.userAgent:"",le=j.includes("Chrome"),O=j.includes("AppleWebKit")&&!le,z=j.includes("Firefox"),Fe=e=>e&&"__CONTEXT__"in e,Pe=e=>e.constructor.name==="CSSFontFaceRule",Oe=e=>e.constructor.name==="CSSImportRule",v=e=>e.nodeType===1,_=e=>typeof e.className=="object",ce=e=>e.tagName==="image",ke=e=>e.tagName==="use",D=e=>v(e)&&typeof e.style<"u"&&!_(e),Be=e=>e.nodeType===8,Ue=e=>e.nodeType===3,x=e=>e.tagName==="IMG",k=e=>e.tagName==="VIDEO",$e=e=>e.tagName==="CANVAS",We=e=>e.tagName==="TEXTAREA",Ge=e=>e.tagName==="INPUT",je=e=>e.tagName==="STYLE",ze=e=>e.tagName==="SCRIPT",Ve=e=>e.tagName==="SELECT",qe=e=>e.tagName==="SLOT",Xe=e=>e.tagName==="IFRAME",Ye=(...e)=>console.warn(ae,...e);function Je(e){let t=e?.createElement?.("canvas");return t&&(t.height=t.width=1),!!t&&"toDataURL"in t&&!!t.toDataURL("image/webp").includes("image/webp")}var G=e=>e.startsWith("data:");function ue(e,t){if(e.match(/^[a-z]+:\/\//i))return e;if(A&&e.match(/^\/\//))return window.location.protocol+e;if(e.match(/^[a-z]+:/i)||!A)return e;let n=B().implementation.createHTMLDocument(),r=n.createElement("base"),s=n.createElement("a");return n.head.appendChild(r),n.body.appendChild(s),t&&(r.href=t),s.href=e,s.href}function B(e){return(e&&v(e)?e?.ownerDocument:e)??window.document}var U="http://www.w3.org/2000/svg";function Ke(e,t,n){let r=B(n).createElementNS(U,"svg");return r.setAttributeNS(null,"width",e.toString()),r.setAttributeNS(null,"height",t.toString()),r.setAttributeNS(null,"viewBox",`0 0 ${e} ${t}`),r}function Qe(e,t){let n=new XMLSerializer().serializeToString(e);return t&&(n=n.replace(/[\u0000-\u0008\v\f\u000E-\u001F\uD800-\uDFFF\uFFFE\uFFFF]/gu,"")),`data:image/svg+xml;charset=utf-8,${encodeURIComponent(n)}`}async function Ze(e,t="image/png",n=1){try{return await new Promise((r,s)=>{e.toBlob(i=>{i?r(i):s(new Error("Blob is null"))},t,n)})}catch(r){if(Me)return et(e.toDataURL(t,n));throw r}}function et(e){let[t,n]=e.split(","),r=t.match(/data:(.+);/)?.[1]??void 0,s=window.atob(n),i=s.length,a=new Uint8Array(i);for(let o=0;o<i;o+=1)a[o]=s.charCodeAt(o);return new Blob([a],{type:r})}function de(e,t){return new Promise((n,r)=>{let s=new FileReader;s.onload=()=>n(s.result),s.onerror=()=>r(s.error
+api-segments.ts:44 A resposta da API não contém o campo "items": <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">
+import { createHotContext } from "/@vite/client";
+const hot = createHotContext("/__dummy__runtime-error-plugin");
+
+function sendError(error) {
+  if (!(error instanceof Error)) {
+    error = new Error("(unknown runtime error)");
+  }
+  const serialized = {
+    message: error.message,
+    stack: error.stack,
+  };
+  hot.send("runtime-error-plugin:error", serialized);
+}
+
+window.addEventListener("error", (evt) => {
+  sendError(evt.error);
+});
+
+window.addEventListener("unhandledrejection", (evt) => {
+  sendError(evt.reason);
+});
+</script>
+
+    <script type="module">
+import RefreshRuntime from "/@react-refresh"
+RefreshRuntime.injectIntoGlobalHook(window)
+window.$RefreshReg$ = () => {}
+window.$RefreshSig$ = () => (type) => type
+window.__vite_plugin_react_preamble_installed__ = true
+</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <script type="module">"use strict";(()=>{var P="0.1.2";var T={HIGHLIGHT_COLOR:"#0079F2",HIGHLIGHT_BG:"#0079F210",ALLOWED_DOMAIN:".replit.dev"},I={highlighter:{position:"absolute",zIndex:Number.MAX_SAFE_INTEGER-3,boxSizing:"border-box",pointerEvents:"none",border:`2px solid ${T.HIGHLIGHT_COLOR}`,borderRadius:"4px",background:T.HIGHLIGHT_BG,transition:"opacity 0.2s",willChange:"opacity",opacity:"0"},label:{position:"absolute",backgroundColor:T.HIGHLIGHT_COLOR,color:"#FFFFFF",padding:"2px 6px",borderRadius:"4px",fontSize:"12px",fontFamily:"monospace",transform:"translateY(-100%)",marginTop:"-4px",zIndex:Number.MAX_SAFE_INTEGER-2,pointerEvents:"none",opacity:"0"}};function xe(e,t){return e[13]=1,e[14]=t>>8,e[15]=t&255,e[16]=t>>8,e[17]=t&255,e}var re=112,oe=72,ie=89,se=115,W;function Ie(){let e=new Int32Array(256);for(let t=0;t<256;t++){let n=t;for(let r=0;r<8;r++)n=n&1?3988292384^n>>>1:n>>>1;e[t]=n}return e}function De(e){let t=-1;W||(W=Ie());for(let n=0;n<e.length;n++)t=W[(t^e[n])&255]^t>>>8;return t^-1}function He(e){let t=e.length-1;for(let n=t;n>=4;n--)if(e[n-4]===9&&e[n-3]===re&&e[n-2]===oe&&e[n-1]===ie&&e[n]===se)return n-3;return 0}function Re(e,t,n=!1){let r=new Uint8Array(13);t*=39.3701,r[0]=re,r[1]=oe,r[2]=ie,r[3]=se,r[4]=t>>>24,r[5]=t>>>16,r[6]=t>>>8,r[7]=t&255,r[8]=r[4],r[9]=r[5],r[10]=r[6],r[11]=r[7],r[12]=1;let s=De(r),i=new Uint8Array(4);if(i[0]=s>>>24,i[1]=s>>>16,i[2]=s>>>8,i[3]=s&255,n){let a=He(e);return e.set(r,a),e.set(i,a+13),e}else{let a=new Uint8Array(4);a[0]=0,a[1]=0,a[2]=0,a[3]=9;let o=new Uint8Array(54);return o.set(e,0),o.set(a,33),o.set(r,37),o.set(i,50),o}}var ae="[modern-screenshot]",A=typeof window<"u",_e=A&&"Worker"in window,Me=A&&"atob"in window,jt=A&&"btoa"in window,j=A?window.navigator?.userAgent:"",le=j.includes("Chrome"),O=j.includes("AppleWebKit")&&!le,z=j.includes("Firefox"),Fe=e=>e&&"__CONTEXT__"in e,Pe=e=>e.constructor.name==="CSSFontFaceRule",Oe=e=>e.constructor.name==="CSSImportRule",v=e=>e.nodeType===1,_=e=>typeof e.className=="object",ce=e=>e.tagName==="image",ke=e=>e.tagName==="use",D=e=>v(e)&&typeof e.style<"u"&&!_(e),Be=e=>e.nodeType===8,Ue=e=>e.nodeType===3,x=e=>e.tagName==="IMG",k=e=>e.tagName==="VIDEO",$e=e=>e.tagName==="CANVAS",We=e=>e.tagName==="TEXTAREA",Ge=e=>e.tagName==="INPUT",je=e=>e.tagName==="STYLE",ze=e=>e.tagName==="SCRIPT",Ve=e=>e.tagName==="SELECT",qe=e=>e.tagName==="SLOT",Xe=e=>e.tagName==="IFRAME",Ye=(...e)=>console.warn(ae,...e);function Je(e){let t=e?.createElement?.("canvas");return t&&(t.height=t.width=1),!!t&&"toDataURL"in t&&!!t.toDataURL("image/webp").includes("image/webp")}var G=e=>e.startsWith("data:");function ue(e,t){if(e.match(/^[a-z]+:\/\//i))return e;if(A&&e.match(/^\/\//))return window.location.protocol+e;if(e.match(/^[a-z]+:/i)||!A)return e;let n=B().implementation.createHTMLDocument(),r=n.createElement("base"),s=n.createElement("a");return n.head.appendChild(r),n.body.appendChild(s),t&&(r.href=t),s.href=e,s.href}function B(e){return(e&&v(e)?e?.ownerDocument:e)??window.document}var U="http://www.w3.org/2000/svg";function Ke(e,t,n){let r=B(n).createElementNS(U,"svg");return r.setAttributeNS(null,"width",e.toString()),r.setAttributeNS(null,"height",t.toString()),r.setAttributeNS(null,"viewBox",`0 0 ${e} ${t}`),r}function Qe(e,t){let n=new XMLSerializer().serializeToString(e);return t&&(n=n.replace(/[\u0000-\u0008\v\f\u000E-\u001F\uD800-\uDFFF\uFFFE\uFFFF]/gu,"")),`data:image/svg+xml;charset=utf-8,${encodeURIComponent(n)}`}async function Ze(e,t="image/png",n=1){try{return await new Promise((r,s)=>{e.toBlob(i=>{i?r(i):s(new Error("Blob is null"))},t,n)})}catch(r){if(Me)return et(e.toDataURL(t,n));throw r}}function et(e){let[t,n]=e.split(","),r=t.match(/data:(.+);/)?.[1]??void 0,s=window.atob(n),i=s.length,a=new Uint8Array(i);for(let o=0;o<i;o+=1)a[o]=s.charCodeAt(o);return new Blob([a],{type:r})}function de(e,t){return new Promise((n,r)=>{let s=new FileReader;s.onload=()=>n(s.result),s.onerror=()=>r(s.error
+getAll @ api-segments.ts:44
+await in getAll
+queryFn @ segments.tsx:53
+fetchFn @ @tanstack_react-query.js?v=9f428841:840
+run @ @tanstack_react-query.js?v=9f428841:494
+start @ @tanstack_react-query.js?v=9f428841:536
+fetch @ @tanstack_react-query.js?v=9f428841:926
+executeFetch_fn @ @tanstack_react-query.js?v=9f428841:2211
+onSubscribe @ @tanstack_react-query.js?v=9f428841:1898
+subscribe @ @tanstack_react-query.js?v=9f428841:24
+(anonymous) @ @tanstack_react-query.js?v=9f428841:3022
+subscribeToStore @ chunk-WERSD76P.js?v=4995138b:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=4995138b:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=4995138b:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=4995138b:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=4995138b:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=4995138b:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=4995138b:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=4995138b:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=4995138b:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=4995138b:9119
+commitRootImpl @ chunk-WERSD76P.js?v=4995138b:19432
+commitRoot @ chunk-WERSD76P.js?v=4995138b:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=4995138b:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=4995138b:18718
+workLoop @ chunk-WERSD76P.js?v=4995138b:197
+flushWork @ chunk-WERSD76P.js?v=4995138b:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=4995138b:384Understand this warning
+segments.tsx:54 Segmentos recebidos da API: []
+segments.tsx:69 Segmentos mapeados: []length: 0[[Prototype]]: Array(0)

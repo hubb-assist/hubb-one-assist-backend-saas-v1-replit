@@ -67,6 +67,9 @@ app.add_middleware(
         "http://localhost:3000",  # Frontend React padrão
         "https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev",  # URL temporário do Replit
         "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",  # Frontend específico
+        "https://hubb-one-assist-v1-frontend-replit.replit.app",  # Nome da app do frontend no Replit
+        "https://*.replit.dev",  # Qualquer app no domínio replit.dev
+        "https://*.replit.app",  # Qualquer app no domínio replit.app
     ],
     allow_credentials=True,
     allow_methods=["*"],
