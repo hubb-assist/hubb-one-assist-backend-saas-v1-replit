@@ -68,7 +68,7 @@ class PlanBase(BaseModel):
 
 class PlanCreate(PlanBase):
     """Schema para criação de novo plano"""
-    modules: List[PlanModuleCreate] = []
+    modules: Optional[List[PlanModuleCreate]] = []
 
 
 class PlanUpdate(BaseModel):

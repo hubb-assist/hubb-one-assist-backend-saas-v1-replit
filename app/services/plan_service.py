@@ -204,30 +204,32 @@ class PlanService:
         # Validar se o segmento existe
         PlanService.validate_segment(db, plan_data.segment_id)
         
-        # Obter IDs dos módulos
-        module_ids = [module_data.module_id for module_data in plan_data.modules]
-        
-        # Validar se os módulos existem
-        if module_ids:
-            PlanService.validate_modules(db, module_ids)
-        
         # Criar plano
         plan_dict = plan_data.model_dump(exclude={"modules"})
         db_plan = Plan(**plan_dict)
         db.add(db_plan)
         db.flush()  # Para gerar o ID do plano
         
-        # Criar associações com módulos
-        for module_data in plan_data.modules:
-            # Criar relacionamento com cada módulo
-            plan_module = PlanModule(
-                plan_id=db_plan.id,
-                module_id=module_data.module_id,
-                price=0 if module_data.is_free else module_data.price,
-                is_free=module_data.is_free,
-                trial_days=module_data.trial_days
-            )
-            db.add(plan_module)
+        # Verificar se há módulos para adicionar
+        if plan_data.modules is not None and len(plan_data.modules) > 0:
+            # Obter IDs dos módulos
+            module_ids = [module_data.module_id for module_data in plan_data.modules]
+            
+            # Validar se os módulos existem
+            if module_ids:
+                PlanService.validate_modules(db, module_ids)
+                
+            # Criar associações com módulos
+            for module_data in plan_data.modules:
+                # Criar relacionamento com cada módulo
+                plan_module = PlanModule(
+                    plan_id=db_plan.id,
+                    module_id=module_data.module_id,
+                    price=0 if module_data.is_free else module_data.price,
+                    is_free=module_data.is_free,
+                    trial_days=module_data.trial_days
+                )
+                db.add(plan_module)
         
         db.commit()
         db.refresh(db_plan)
