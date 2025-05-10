@@ -9,6 +9,7 @@
 - [x] Adicionar funcionalidade de busca e filtros
 - [x] Implementar paginação na listagem de usuários
 - [x] Configurar validações e tratamento de erros
+- [x] Adicionar endpoints específicos para ativar/desativar usuários (PATCH /users/{user_id}/activate, /users/{user_id}/deactivate)
 
 ## Módulo de Segmentos
 
@@ -17,6 +18,7 @@
 - [x] Criar serviço de segmentos com operações CRUD completas
 - [x] Implementar rotas REST para segmentos (/segments/)
 - [x] Configurar validações e tratamento de erros
+- [x] Adicionar endpoints específicos para ativar/desativar segmentos (PATCH /segments/{segment_id}/activate, /segments/{segment_id}/deactivate)
 
 ## Configuração do Ambiente
 

@@ -102,3 +102,37 @@ async def delete_segment(
             detail="Segmento não encontrado"
         )
     return None
+
+
+@router.patch("/{segment_id}/activate", response_model=SegmentResponse)
+async def activate_segment(
+    segment_id: UUID = Path(..., description="ID do segmento"),
+    db: Session = Depends(get_db)
+):
+    """
+    Ativar um segmento.
+    """
+    updated_segment = SegmentService.toggle_segment_status(db, segment_id, activate=True)
+    if not updated_segment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Segmento não encontrado"
+        )
+    return updated_segment
+
+
+@router.patch("/{segment_id}/deactivate", response_model=SegmentResponse)
+async def deactivate_segment(
+    segment_id: UUID = Path(..., description="ID do segmento"),
+    db: Session = Depends(get_db)
+):
+    """
+    Desativar um segmento.
+    """
+    updated_segment = SegmentService.toggle_segment_status(db, segment_id, activate=False)
+    if not updated_segment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Segmento não encontrado"
+        )
+    return updated_segment

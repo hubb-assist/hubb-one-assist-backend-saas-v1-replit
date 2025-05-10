@@ -195,3 +195,26 @@ class SegmentService:
         db.commit()
         
         return True
+        
+    @staticmethod
+    def toggle_segment_status(db: Session, segment_id: UUID, activate: bool) -> Optional[Segment]:
+        """
+        Ativa ou desativa um segmento
+        
+        Args:
+            db: Sessão do banco de dados
+            segment_id: ID do segmento
+            activate: True para ativar, False para desativar
+            
+        Returns:
+            Optional[Segment]: Segmento atualizado ou None se não for encontrado
+        """
+        db_segment = SegmentService.get_segment_by_id(db, segment_id)
+        if not db_segment:
+            return None
+            
+        db_segment.is_active = activate
+        db.commit()
+        db.refresh(db_segment)
+        
+        return db_segment
