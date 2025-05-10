@@ -95,6 +95,10 @@ app.include_router(modules_router)
 app.include_router(plans_router)
 app.include_router(subscribers_router)
 
+# Incluir routers públicos (sem autenticação)
+app.include_router(public_segments_router)
+app.include_router(public_plans_router)
+
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)
 async def home():
@@ -204,6 +208,20 @@ async def home():
                     <p><strong>Módulos Implementados:</strong></p>
                     <ul>
                         <li><strong>Usuários</strong> - CRUD completo para gerenciamento de usuários</li>
+                        <li><strong>Segmentos</strong> - Gerenciamento de segmentos de negócio</li>
+                        <li><strong>Módulos</strong> - Gerenciamento de módulos funcionais do sistema</li>
+                        <li><strong>Planos</strong> - Gerenciamento de planos com módulos vinculados</li>
+                        <li><strong>Assinantes</strong> - Gerenciamento de assinantes do sistema</li>
+                    </ul>
+                </div>
+                
+                <div class="note">
+                    <p><strong>Rotas Públicas:</strong></p>
+                    <p>Para facilitar o processo de onboarding, as seguintes rotas estão disponíveis sem autenticação:</p>
+                    <ul>
+                        <li><code>/public/segments</code> - Lista todos os segmentos ativos</li>
+                        <li><code>/public/plans</code> - Lista todos os planos ativos</li>
+                        <li><code>/public/plans/{{plan_id}}</code> - Obtém detalhes de um plano ativo específico</li>
                     </ul>
                 </div>
             </div>
