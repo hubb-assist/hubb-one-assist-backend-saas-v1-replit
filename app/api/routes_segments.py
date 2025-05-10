@@ -34,14 +34,26 @@ async def list_segments(
     """
     Listar todos os segmentos com opções de paginação e filtros.
     """
-    # Preparar parâmetros de filtro
-    filter_params = {}
-    if nome is not None:
-        filter_params["nome"] = nome
-    if is_active is not None:
-        filter_params["is_active"] = is_active
-    
-    return SegmentService.get_segments(db, skip, limit, filter_params)
+    try:
+        print(f"[DEBUG] Requisição para listar segmentos recebida: skip={skip}, limit={limit}, nome={nome}, is_active={is_active}")
+        print(f"[DEBUG] Usuário autenticado: id={current_user.id}, email={current_user.email}")
+        
+        # Preparar parâmetros de filtro
+        filter_params = {}
+        if nome is not None:
+            filter_params["nome"] = nome
+        if is_active is not None:
+            filter_params["is_active"] = is_active
+        
+        print(f"[DEBUG] Filtros aplicados: {filter_params}")
+        
+        result = SegmentService.get_segments(db, skip, limit, filter_params)
+        print(f"[DEBUG] Segmentos encontrados: {len(result.items)}")
+        
+        return result
+    except Exception as e:
+        print(f"[ERROR] Erro ao listar segmentos: {str(e)}")
+        raise
 
 
 @router.get("/{segment_id}", response_model=SegmentResponse)

@@ -44,20 +44,27 @@ async def force_https(request: Request, call_next):
     Returns:
         Response: Redirecionamento ou resposta da próxima função
     """
-    # Verificar o protocolo via cabeçalho X-Forwarded-Proto (comum em proxies como Replit/Vercel)
-    forwarded_proto = request.headers.get("X-Forwarded-Proto", "")
-    host = request.headers.get("Host", "")
-    
-    # Se o protocolo for HTTP e não for localhost, redirecionar para HTTPS
-    if forwarded_proto == "http" and not host.startswith("localhost"):
-        url = request.url
-        https_url = f"https://{host}{url.path}"
-        if url.query:
-            https_url = f"{https_url}?{url.query}"
+    try:
+        # Verificar o protocolo via cabeçalho X-Forwarded-Proto (comum em proxies como Replit/Vercel)
+        forwarded_proto = request.headers.get("X-Forwarded-Proto", "")
+        host = request.headers.get("Host", "")
         
-        return RedirectResponse(https_url, status_code=301)
-    
-    return await call_next(request)
+        # Se o protocolo for HTTP e não for localhost, redirecionar para HTTPS
+        if forwarded_proto == "http" and not host.startswith("localhost"):
+            url = request.url
+            https_url = f"https://{host}{url.path}"
+            if url.query:
+                https_url = f"{https_url}?{url.query}"
+            
+            return RedirectResponse(https_url, status_code=301)
+        
+        # Continuar com a requisição original
+        return await call_next(request)
+    except Exception as e:
+        # Registrar o erro para diagnóstico, mas permitir que a requisição continue
+        print(f"Erro no middleware HTTPS: {str(e)}")
+        # Continuar mesmo se houver um erro no middleware
+        return await call_next(request)
 
 # Adicionar middleware CORS
 app.add_middleware(
@@ -66,10 +73,10 @@ app.add_middleware(
         "http://localhost:5173",  # Frontend Vite local
         "http://localhost:3000",  # Frontend React padrão
         "https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev",  # URL temporário do Replit
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",  # Frontend específico
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",  # Frontend específico mencionado
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.replit.dev",  # Frontend específico sem subdomínio
         "https://hubb-one-assist-v1-frontend-replit.replit.app",  # Nome da app do frontend no Replit
-        "https://*.replit.dev",  # Qualquer app no domínio replit.dev
-        "https://*.replit.app",  # Qualquer app no domínio replit.app
+        "*",  # Permitir qualquer origem durante o desenvolvimento (temporário)
     ],
     allow_credentials=True,
     allow_methods=["*"],

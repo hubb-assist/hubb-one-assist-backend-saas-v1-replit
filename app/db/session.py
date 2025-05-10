@@ -55,30 +55,17 @@ def get_db() -> Generator[Session, None, None]:
     Yields:
         Session: Uma sessão do banco de dados.
     """
-    max_retries = 3
-    retry_count = 0
-    retry_backoff = 1  # segundos
-    
-    while retry_count < max_retries:
-        try:
-            db = SessionLocal()
-            # Teste de conexão para verificar se está funcionando
-            db.execute(text("SELECT 1"))  
-            try:
-                yield db
-                break  # Sair do loop se tudo ocorreu bem
-            finally:
-                db.close()
-        except Exception as e:
-            retry_count += 1
-            if retry_count >= max_retries:
-                # Se já atingiu o número máximo de tentativas, propagar a exceção
-                raise
-            
-            # Log do erro (sem expor dados sensíveis)
-            print(f"Erro de conexão com o banco de dados (tentativa {retry_count}/{max_retries}): {str(e)}")
-            
-            # Esperar um pouco antes de tentar novamente (backoff exponencial)
-            import time
-            time.sleep(retry_backoff)
-            retry_backoff *= 2  # Duplicar o tempo de espera a cada tentativa
+    db = None
+    try:
+        # Usar uma conexão sem teste inicial para evitar erros que podem impedir o acesso
+        db = SessionLocal()
+        yield db
+    except Exception as e:
+        # Registrar o erro para diagnóstico
+        print(f"Erro ao conectar com o banco de dados: {str(e)}")
+        # Propagar a exceção para que o FastAPI possa tratá-la adequadamente
+        raise
+    finally:
+        # Garantir que a conexão seja fechada mesmo em caso de erro
+        if db is not None:
+            db.close()

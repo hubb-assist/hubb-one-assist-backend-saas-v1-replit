@@ -38,37 +38,57 @@ class SegmentService:
         Returns:
             PaginatedSegmentResponse: Lista paginada de segmentos
         """
-        query = db.query(Segment)
-        
-        # Aplicar filtros se fornecidos
-        if filter_params:
-            for key, value in filter_params.items():
-                if value is not None and hasattr(Segment, key):
-                    # Usar LIKE para busca parcial em campos de texto
-                    if key == "nome" and isinstance(value, str):
-                        query = query.filter(getattr(Segment, key).ilike(f"%{value}%"))
-                    elif key == "descricao" and isinstance(value, str):
-                        query = query.filter(getattr(Segment, key).ilike(f"%{value}%"))
-                    else:
-                        # Para outros campos (não texto), usar igualdade exata
-                        query = query.filter(getattr(Segment, key) == value)
-        
-        # Contar total antes de aplicar paginação
-        total = query.count()
-        
-        # Aplicar paginação
-        segments = query.offset(skip).limit(limit).all()
-        
-        # Converter os objetos Segment para dicionários e depois para SegmentResponse
-        segment_responses = [SegmentResponse.model_validate(segment) for segment in segments]
-        
-        # Criar resposta paginada
-        return PaginatedSegmentResponse(
-            total=total,
-            page=skip // limit + 1 if limit > 0 else 1,
-            size=limit,
-            items=segment_responses
-        )
+        try:
+            print(f"[DEBUG] SegmentService.get_segments: iniciando com skip={skip}, limit={limit}, filters={filter_params}")
+            
+            # Verificar se o banco retorna dados
+            test_query = db.query(Segment)
+            print(f"[DEBUG] Testando consulta: total de segmentos sem filtro: {test_query.count()}")
+            
+            query = db.query(Segment)
+            
+            # Aplicar filtros se fornecidos
+            if filter_params:
+                for key, value in filter_params.items():
+                    if value is not None and hasattr(Segment, key):
+                        # Usar LIKE para busca parcial em campos de texto
+                        if key == "nome" and isinstance(value, str):
+                            query = query.filter(getattr(Segment, key).ilike(f"%{value}%"))
+                            print(f"[DEBUG] Filtro aplicado - nome: {value}")
+                        elif key == "descricao" and isinstance(value, str):
+                            query = query.filter(getattr(Segment, key).ilike(f"%{value}%"))
+                            print(f"[DEBUG] Filtro aplicado - descricao: {value}")
+                        else:
+                            # Para outros campos (não texto), usar igualdade exata
+                            query = query.filter(getattr(Segment, key) == value)
+                            print(f"[DEBUG] Filtro aplicado - {key}: {value}")
+            
+            # Contar total antes de aplicar paginação
+            total = query.count()
+            print(f"[DEBUG] Total de segmentos encontrados após filtros: {total}")
+            
+            # Aplicar paginação
+            segments = query.offset(skip).limit(limit).all()
+            print(f"[DEBUG] Segmentos retornados após paginação: {len(segments)}")
+            
+            # Listar IDs para verificação
+            segment_ids = [str(segment.id) for segment in segments]
+            print(f"[DEBUG] IDs dos segmentos: {segment_ids}")
+            
+            # Converter os objetos Segment para dicionários e depois para SegmentResponse
+            segment_responses = [SegmentResponse.model_validate(segment) for segment in segments]
+            
+            # Criar resposta paginada
+            return PaginatedSegmentResponse(
+                total=total,
+                page=skip // limit + 1 if limit > 0 else 1,
+                size=limit,
+                items=segment_responses
+            )
+        except Exception as e:
+            print(f"[ERROR] Erro no SegmentService.get_segments: {str(e)}")
+            # Re-throw a exceção para ser tratada na camada superior
+            raise
     
     @staticmethod
     def get_segment_by_id(db: Session, segment_id: UUID) -> Optional[Segment]:
