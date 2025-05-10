@@ -1,0 +1,284 @@
+Representam funcionalidades do sistema (ex: HOF, Vision, Talk, RH, IA)
+
+
+Cada módulo pode ser ativado ou não conforme o plano
+
+
+✅ Aplicação dos Princípios SOLID no Projeto hubb-one-assist-v1-backend-replit
+1. S — Single Responsibility Principle (Princípio da Responsabilidade Única)
+"Cada módulo ou classe deve ter uma única responsabilidade, e essa responsabilidade deve estar completamente encapsulada."
+Aplicação no projeto:
+Cada camada tem responsabilidade clara:
+
+
+app/api/: somente define rotas e recebe requisições.
+
+
+app/services/: concentra as regras de negócio (casos de uso).
+
+
+app/db/models/: define a estrutura do banco.
+
+
+app/schemas/: define as validações de entrada e saída.
+
+
+app/core/: configurações gerais, autenticação, segurança.
+
+
+Nenhum módulo deve misturar responsabilidades de domínio com lógica de requisição, nem lógica de banco com validações.
+
+
+
+2. O — Open/Closed Principle (Aberto para Extensão, Fechado para Modificação)
+"Entidades devem estar abertas para extensão, mas fechadas para modificação."
+Aplicação no projeto:
+O backend será modular: novos módulos (como financeiro, agenda, custos) podem ser adicionados sem alterar os existentes, apenas integrando novos arquivos no padrão já definido.
+
+
+Utilização de interfaces e serviços desacoplados: por exemplo, um serviço de envio de e-mail pode ser substituído por outro sem alterar as chamadas do código que o consome.
+
+
+
+3. L — Liskov Substitution Principle (Princípio da Substituição de Liskov)
+"Objetos devem poder ser substituídos por instâncias de suas subclasses sem afetar o funcionamento do sistema."
+Aplicação no projeto:
+Serviços e controladores usarão tipagem explícita e Pydantic com herança segura, permitindo que UserBase, UserCreate, UserUpdate compartilhem atributos, mas sejam usados conforme o contexto, sem quebrar validações.
+
+
+Em testes, será possível substituir classes de serviços reais por mocks, sem comprometer o comportamento da aplicação.
+
+
+
+4. I — Interface Segregation Principle (Princípio da Segregação de Interface)
+"Muitos contratos específicos são melhores do que um contrato único e geral."
+Aplicação no projeto:
+Os endpoints e serviços seguirão contratos pequenos e separados:
+
+
+Em vez de um controller gigantesco, haverá divisão clara de rotas por domínio (auth_routes.py, user_routes.py, etc.).
+
+
+Serviços também seguem esse padrão: AuthService, UserService, PlanoService, etc.
+
+
+
+5. D — Dependency Inversion Principle (Princípio da Inversão de Dependência)
+"Módulos de alto nível não devem depender de módulos de baixo nível, ambos devem depender de abstrações."
+Aplicação no projeto:
+Utilização de injeção de dependência do FastAPI para entregar serviços (Depends(AuthService)).
+
+
+Serviços de repositório e lógica de negócio serão injetados, nunca instanciados diretamente.
+
+
+Isso permite trocar implementações facilmente (ex: trocar o serviço de envio de notificação por outro, apenas mudando a dependência).
+
+
+
+✳️ Resultado esperado:
+Seguindo esses princípios, o backend do HUBB Assist será:
+Robusto
+
+
+Testável
+
+
+Modular
+
+
+Fácil de manter e expandir
+
+
+Pronto para escalar com segurança
+
+
+A seguir está uma explicação clara, prática e totalmente contextualizada de como o DDD (Domain-Driven Design) será aplicado no backend do projeto hubb-one-assist-v1-backend-replit:
+
+✅ Aplicação de DDD — Domain-Driven Design no Backend do HUBB Assist
+Objetivo do DDD:
+ Manter a complexidade do sistema sob controle ao modelar o código diretamente com base na lógica de negócio real, separando as responsabilidades técnicas da regra de negócio central.
+
+🧱 Camadas do Projeto com DDD
+1. Camada de Domínio (app/services/ e app/schemas/)
+Representa a lógica de negócio do HUBB Assist: cadastro de assinantes, planos, usuários, permissões, etc.
+
+
+Cada serviço de domínio encapsula um "caso de uso", por exemplo:
+
+
+CreateAssinanteService
+
+
+ChangeUserPasswordService
+
+
+CalculatePlanCostService
+
+
+Essa camada não depende de FastAPI, banco ou rotas.
+
+
+2. Camada de Aplicação (app/api/)
+Responsável por expor a aplicação ao mundo exterior (HTTP).
+
+
+Define as rotas (@router.get, @router.post) e orquestra chamadas aos serviços de domínio.
+
+
+Essa camada não implementa regra de negócio, apenas chama os casos de uso da camada de domínio e responde com JSONResponse.
+
+
+3. Camada de Infraestrutura (app/db/ e app/core/)
+Contém os detalhes técnicos: acesso ao banco (SQLAlchemy), migrações (Alembic), autenticação, middlewares, configurações de ambiente.
+
+
+Também pode conter serviços de integração externa, como: envio de e-mail, storage, webhooks, etc.
+
+
+Essas implementações são injetadas como dependências nos serviços de domínio, nunca chamadas diretamente da camada de aplicação.
+
+
+
+📦 Organização Modular por Domínio
+O código será dividido por módulos de negócio, com subpastas contendo os arquivos de cada camada:
+css
+CopiarEditar
+app/
+├── domains/
+│   ├── assinantes/
+│   │   ├── service.py
+│   │   ├── schemas.py
+│   │   └── repository.py
+│   ├── auth/
+│   ├── usuarios/
+│   └── planos/
+├── api/
+│   ├── routes_assinantes.py
+│   ├── routes_auth.py
+│   └── ...
+├── core/
+├── db/
+├── main.py
+
+
+💡 Exemplo real no projeto HUBB Assist:
+A criação de um novo assinante:
+
+
+routes_assinantes.py → recebe os dados e chama:
+
+
+CriarAssinanteService.handle() → executa as regras, validações e chama:
+
+
+AssinanteRepository.create() → persiste no banco via SQLAlchemy.
+
+
+A rota não conhece os detalhes do banco, nem o banco conhece a regra de negócio.
+
+📌 Benefícios esperados com DDD:
+Clareza sobre as regras de negócio
+
+
+Isolamento de complexidade técnica
+
+
+Facilidade de testes unitários
+
+
+Escalabilidade horizontal da aplicação
+
+
+Flexibilidade para troca de tecnologias (ex: outro banco ou API externa)
+
+
+✅ Aplicação de Clean Code no Backend do HUBB Assist
+Objetivo do Clean Code:
+ Escrever código legível, simples, sem duplicação e fácil de entender, mesmo por outros desenvolvedores que não participaram da implementação original. Código limpo não apenas funciona — ele comunica.
+
+🧼 Práticas de Clean Code no projeto
+1. Nomeação clara e sem ambiguidade
+Funções, variáveis, rotas e arquivos terão nomes descritivos com intenção explícita.
+
+
+Ruim: def proc(data):
+
+
+Bom: def create_assinante(assinante_data: AssinanteCreateSchema):
+
+
+Pastas organizadas por contexto, não por tipo genérico (ex: usuarios/service.py ao invés de services/users.py).
+
+
+2. Funções pequenas com responsabilidade única
+Nenhuma função deve fazer mais de uma coisa.
+
+
+Regras complexas serão quebradas em pequenos métodos reutilizáveis dentro do service.
+
+
+3. Sem código duplicado
+Qualquer lógica repetida será extraída para:
+
+
+utils/
+
+
+core/validators.py
+
+
+ou funções reutilizáveis nos próprios serviços.
+
+
+4. Tratamento explícito de erros
+Toda exceção será tratada com mensagens claras, usando o sistema de HTTPException e handlers globais.
+
+
+Logs serão estruturados com contexto: quem, onde e por quê algo falhou.
+
+
+5. Separação entre lógica e efeitos colaterais
+Nenhum código de banco, envio de email ou integração externa dentro dos services diretamente.
+
+
+Toda interação com o mundo externo será mediada por repositories ou adapters.
+
+
+6. Arquivos curtos e objetivos
+Cada arquivo terá um foco. Exemplo:
+
+
+auth_service.py trata apenas de login e tokens.
+
+
+user_service.py trata criação, edição e deleção de usuários.
+
+
+Quando um arquivo crescer demais, ele será dividido em múltiplos por função ou contexto.
+
+
+
+✳️ Convenções e boas práticas adotadas
+PEP8: Estilo Python padronizado.
+
+
+Tipagem estática com mypy e pyright para validação de tipos.
+
+
+Black e isort: formatação e ordenação automática dos arquivos.
+
+
+Comentários e docstrings serão usados apenas quando o nome da função não for autoexplicativo.
+
+
+
+✅ Resultado esperado
+Com Clean Code aplicado junto a SOLID e DDD:
+O backend será autoexplicativo, testável e sustentável.
+
+
+Novos desenvolvedores entenderão o projeto rapidamente.
+
+
+Bugs serão minimizados e mudanças se tornarão seguras e previsíveis.
