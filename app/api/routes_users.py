@@ -2,10 +2,9 @@
 Rotas da API para gerenciamento de usuários
 """
 
-import uuid
 from typing import Optional, List, Dict, Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Path
 from sqlalchemy.orm import Session
 
 from app.schemas.user import UserCreate, UserUpdate, UserResponse, PaginatedUserResponse
@@ -25,7 +24,7 @@ async def list_users(
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0, description="Quantos usuários pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de usuários retornados"),
-    nome: Optional[str] = Query(None, description="Filtrar por nome"),
+    name: Optional[str] = Query(None, description="Filtrar por nome"),
     email: Optional[str] = Query(None, description="Filtrar por email"),
     role: Optional[UserRole] = Query(None, description="Filtrar por role"),
     is_active: Optional[bool] = Query(None, description="Filtrar por status de ativação")
@@ -35,8 +34,8 @@ async def list_users(
     """
     # Montar filtros
     filters = {}
-    if nome:
-        filters["nome"] = nome
+    if name:
+        filters["name"] = name
     if email:
         filters["email"] = email
     if role:
@@ -48,7 +47,7 @@ async def list_users(
 
 @router.get("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def get_user(
-    user_id: uuid.UUID,
+    user_id: int = Path(..., description="ID do usuário"),
     db: Session = Depends(get_db)
 ):
     """
@@ -74,8 +73,8 @@ async def create_user(
 
 @router.put("/{user_id}", response_model=UserResponse, status_code=status.HTTP_200_OK)
 async def update_user(
-    user_id: uuid.UUID,
-    user_data: UserUpdate,
+    user_id: int = Path(..., description="ID do usuário"),
+    user_data: UserUpdate = ...,
     db: Session = Depends(get_db)
 ):
     """
@@ -91,7 +90,7 @@ async def update_user(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    user_id: uuid.UUID,
+    user_id: int = Path(..., description="ID do usuário"),
     db: Session = Depends(get_db)
 ):
     """

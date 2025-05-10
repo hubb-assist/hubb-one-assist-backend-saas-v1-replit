@@ -2,7 +2,6 @@
 Serviço para operações CRUD de usuários
 """
 
-import uuid
 from typing import Optional, List, Dict, Any, Union
 
 from sqlalchemy.orm import Session
@@ -97,7 +96,7 @@ class UserService:
         )
     
     @staticmethod
-    def get_user_by_id(db: Session, user_id: uuid.UUID) -> Optional[User]:
+    def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
         """
         Busca um usuário pelo ID
         
@@ -147,12 +146,12 @@ class UserService:
             )
         
         # Criar usuário com hash da senha
-        hashed_password = UserService.get_password_hash(user_data.senha)
+        hashed_password = UserService.get_password_hash(user_data.password)
         
         db_user = User(
-            nome=user_data.nome,
+            name=user_data.name,
             email=user_data.email,
-            senha_hashed=hashed_password,
+            password_hash=hashed_password,
             role=user_data.role,
             is_active=user_data.is_active
         )
@@ -164,7 +163,7 @@ class UserService:
         return db_user
     
     @staticmethod
-    def update_user(db: Session, user_id: uuid.UUID, user_data: UserUpdate) -> Optional[User]:
+    def update_user(db: Session, user_id: int, user_data: UserUpdate) -> Optional[User]:
         """
         Atualiza um usuário existente
         
@@ -187,7 +186,7 @@ class UserService:
         # Verificar se o novo email já está em uso por outro usuário
         if user_data.email is not None and user_data.email != db_user.email:
             existing_user = UserService.get_user_by_email(db, user_data.email)
-            if existing_user is not None and existing_user.id != user_id:
+            if existing_user and existing_user.id != user_id:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Email já está em uso por outro usuário"
@@ -197,9 +196,9 @@ class UserService:
         update_data = user_data.model_dump(exclude_unset=True)
         
         # Tratar senha separadamente para aplicar hash
-        if "senha" in update_data:
-            hashed_password = UserService.get_password_hash(update_data.pop("senha"))
-            setattr(db_user, "senha_hashed", hashed_password)
+        if "password" in update_data:
+            hashed_password = UserService.get_password_hash(update_data.pop("password"))
+            setattr(db_user, "password_hash", hashed_password)
         
         # Atualizar os outros campos
         for key, value in update_data.items():
@@ -211,7 +210,7 @@ class UserService:
         return db_user
     
     @staticmethod
-    def delete_user(db: Session, user_id: uuid.UUID) -> bool:
+    def delete_user(db: Session, user_id: int) -> bool:
         """
         Exclui um usuário pelo ID
         
@@ -246,9 +245,9 @@ class UserService:
         if not existing_admin:
             # Criar usuário admin
             admin_data = UserCreate(
-                nome="Admin",
+                name="Admin",
                 email=admin_email,
-                senha="admin123",
+                password="admin123",
                 role=UserRole.SUPER_ADMIN,
                 is_active=True
             )

@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 from typing import Optional
 
-from sqlalchemy import Column, String, Boolean, DateTime, Enum, text
+from sqlalchemy import Column, String, Boolean, DateTime, Enum, Integer, text
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.session import Base
@@ -26,10 +26,11 @@ class User(Base):
     """
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, server_default=text("gen_random_uuid()"))
-    nome = Column(String, nullable=False)
+    # Usando as colunas existentes no banco de dados
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False, index=True)
-    senha_hashed = Column(String, nullable=False)
+    password_hash = Column(String, nullable=False)
     role = Column(Enum(UserRole), nullable=False, default=UserRole.COLABORADOR_NIVEL_2)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
