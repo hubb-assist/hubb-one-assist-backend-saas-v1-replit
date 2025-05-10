@@ -1,0 +1,76 @@
+✅ TAREFA FRONTEND 004 — CRUD de Módulos Funcionais (ex: HUBB HOF)
+📌 Antes de iniciar, o desenvolvedor DEVE obrigatoriamente ler:
+README.md
+
+rules.md
+
+PADRAO_LAYOUT.md
+
+CRIACAO_PAGINAS.md
+
+ESTRUTURA_COMPONENTES.md
+
+docs/INTEGRACAO_TEMP.md
+
+⚠️ Regras estruturais obrigatórias:
+A nova página deve estar localizada em:
+src/pages/admin/modules.tsx
+
+A página deve usar o layout padrão global (<MainLayout> ou equivalente).
+
+Não criar novo sidebar, layout, ou duplicar estrutura já existente.
+
+❗ O único ajuste no sidebar é adicionar um novo item de menu apontando para /admin/modules, com nome: "Módulos".
+
+❌ Não mover, excluir ou renomear arquivos existentes no layout.
+
+🧩 Objetivo da funcionalidade:
+Criar uma interface CRUD simples para Módulos Funcionais, que futuramente serão utilizados dentro da criação de planos.
+
+📦 Modelo de dados:
+Campo	Tipo	Obrigatório	Observação
+id	UUID	auto	Identificador automático
+name	string	✅	Nome do módulo (ex: HUBB HOF)
+description	string	❌	Descrição explicativa do módulo
+is_active	boolean	✅	Switch para ativar/desativar (padrão: true)
+
+🖥️ Componentes e UX esperados:
+Componente	Uso
+DataTable	Exibir lista de módulos
+Dialog	Criar / Editar módulo
+AlertDialog	Confirmação de exclusão
+Switch	Alterar is_active diretamente na tabela
+Sonner (toast)	Feedback de sucesso / erro
+Skeleton	Feedback visual enquanto dados estão carregando
+
+📤 Endpoints a serem usados (API):
+Método	Rota	Descrição
+GET	/modules/	Listar módulos
+POST	/modules/	Criar módulo
+PUT	/modules/{id}	Editar módulo
+DELETE	/modules/{id}	Remover módulo
+
+✅ Regras de implementação:
+Formulário validado com Zod
+
+Nome do módulo é obrigatório
+
+Descrição é opcional
+
+O campo is_active pode ser alterado direto na listagem
+
+Mostrar badge visual para status ativo/inativo
+
+Exibir loading com Skeleton e toasts em todas as ações
+
+Não é necessário vincular ao segmento nesta etapa
+
+📥 Ao concluir:
+Atualizar o TAREFAS.md com:
+
+Copiar
+Editar
+✅ TAREFA FRONTEND 004 — CRUD de módulos implementado com sucesso, com listagem, criação, edição, exclusão e controle de ativação.
+Validar se o menu aparece corretamente no sidebar e redireciona para a nova tela
+
+Validar a integração real com o backend (inserindo e consultando dados no banco)

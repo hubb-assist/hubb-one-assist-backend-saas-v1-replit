@@ -1,0 +1,59 @@
+para API: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/users/me
+index-DS3Afm99.js:292 Erro na requisição: Oe {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}code: "ERR_NETWORK"config: {transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}message: "Network Error"name: "AxiosError"request: XMLHttpRequest {url: 'https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/users/me', onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, …}stack: "AxiosError: Network Error\n    at g.onerror (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:289:6064)\n    at qa.request (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:291:2066)\n    at async Object.verificarAutenticacao (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:5982)\n    at async checkAuth (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:6691)"[[Prototype]]: Error
+(anônimo) @ index-DS3Afm99.js:292
+Promise.then
+_request @ index-DS3Afm99.js:292
+request @ index-DS3Afm99.js:291
+qa.<computed> @ index-DS3Afm99.js:292
+(anônimo) @ index-DS3Afm99.js:287
+verificarAutenticacao @ index-DS3Afm99.js:292
+checkAuth @ index-DS3Afm99.js:292
+(anônimo) @ index-DS3Afm99.js:363
+qm @ index-DS3Afm99.js:40
+Ys @ index-DS3Afm99.js:40
+iO @ index-DS3Afm99.js:40
+aa @ index-DS3Afm99.js:38
+m4 @ index-DS3Afm99.js:40
+ba @ index-DS3Afm99.js:40
+L$ @ index-DS3Afm99.js:40
+x @ index-DS3Afm99.js:25
+T @ index-DS3Afm99.js:25Entenda o erro
+index-DS3Afm99.js:292 Erro na verificação de autenticação: Oe {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}code: "ERR_NETWORK"config: {transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}message: "Network Error"name: "AxiosError"request: XMLHttpRequest {url: 'https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/users/me', onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, …}stack: "AxiosError: Network Error\n    at g.onerror (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:289:6064)\n    at qa.request (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:291:2066)\n    at async Object.verificarAutenticacao (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:5982)\n    at async checkAuth (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:6691)"[[Prototype]]: Error
+verificarAutenticacao @ index-DS3Afm99.js:292
+await in verificarAutenticacao
+checkAuth @ index-DS3Afm99.js:292
+(anônimo) @ index-DS3Afm99.js:363
+qm @ index-DS3Afm99.js:40
+Ys @ index-DS3Afm99.js:40
+iO @ index-DS3Afm99.js:40
+aa @ index-DS3Afm99.js:38
+m4 @ index-DS3Afm99.js:40
+ba @ index-DS3Afm99.js:40
+L$ @ index-DS3Afm99.js:40
+x @ index-DS3Afm99.js:25
+T @ index-DS3Afm99.js:25Entenda o erro
+index-DS3Afm99.js:292 Usuário não autenticado (resposta vazia)
+index-DS3Afm99.js:292 Fazendo requisição para API: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/auth/login
+index-DS3Afm99.js:292 Erro na requisição: Oe {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}code: "ERR_NETWORK"config: {transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}message: "Network Error"name: "AxiosError"request: XMLHttpRequesturl: "https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/auth/login"onabort: ƒ ()onerror: ƒ ()onload: nullonloadend: ƒ y()onloadstart: nullonprogress: nullonreadystatechange: nullontimeout: ƒ ()readyState: 4response: ""responseText: ""responseType: ""responseURL: ""responseXML: nullstatus: 0statusText: ""timeout: 10000upload: XMLHttpRequestUpload {onloadstart: null, onprogress: null, onabort: null, onerror: null, onload: null, …}withCredentials: true[[Prototype]]: XMLHttpRequeststack: "AxiosError: Network Error\n    at g.onerror (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:289:6064)\n    at qa.request (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:291:2066)\n    at async Object.login (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:5799)\n    at async login (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:6356)\n    at async f (https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:292:7401)\n    at async https://hubb-one-assist-front-hubb-one.replit.app/assets/index-DS3Afm99.js:287:119005"[[Prototype]]: Errorconstructor: ƒ Oe(e,t,n,r,i)toJSON: ƒ ()isAxiosError: true[[Prototype]]: Object
+(anônimo) @ index-DS3Afm99.js:292
+Promise.then
+_request @ index-DS3Afm99.js:292
+request @ index-DS3Afm99.js:291
+(anônimo) @ index-DS3Afm99.js:292
+(anônimo) @ index-DS3Afm99.js:287
+login @ index-DS3Afm99.js:292
+login @ index-DS3Afm99.js:292
+f @ index-DS3Afm99.js:292
+(anônimo) @ index-DS3Afm99.js:287
+await in (anônimo)
+NF @ index-DS3Afm99.js:37
+IF @ index-DS3Afm99.js:37
+DF @ index-DS3Afm99.js:37
+A_ @ index-DS3Afm99.js:37
+Hk @ index-DS3Afm99.js:37
+(anônimo) @ index-DS3Afm99.js:37
+Fw @ index-DS3Afm99.js:40
+hk @ index-DS3Afm99.js:37
+$v @ index-DS3Afm99.js:37
+pw @ index-DS3Afm99.js:37
+JF @ index-DS3Afm99.js:37Entenda o erro

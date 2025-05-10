@@ -66,7 +66,7 @@ async def force_https(request: Request, call_next):
         # Continuar mesmo se houver um erro no middleware
         return await call_next(request)
 
-# Adicionar middleware CORS
+# Adicionar middleware CORS com origens específicas (não pode usar * com credentials)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -76,7 +76,7 @@ app.add_middleware(
         "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",  # Frontend específico mencionado
         "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.replit.dev",  # Frontend específico sem subdomínio
         "https://hubb-one-assist-v1-frontend-replit.replit.app",  # Nome da app do frontend no Replit
-        "*",  # Permitir qualquer origem durante o desenvolvimento (temporário)
+        "https://hubb-one-assist-front-hubb-one.replit.app",  # URL de produção do frontend
     ],
     allow_credentials=True,
     allow_methods=["*"],
