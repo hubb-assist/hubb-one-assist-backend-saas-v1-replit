@@ -46,4 +46,12 @@
 - [x] Configurar estrutura de diretórios do projeto conforme arquitetura DDD
 - [x] Documentar regras do projeto (rules.md)
 
+## Integração e Segurança
+
+- [x] Implementar autenticação JWT com cookies HttpOnly
+- [x] Configurar proteção CORS para permitir a origem do frontend específico
+- [x] Adicionar endpoint `/users/me` para obter usuário atual autenticado
+- [x] Implementar refresh automático de tokens para manter sessão
+
 ✅ TAREFA BACKEND - CRUD de Planos (Plan) implementado com sucesso, incluindo associação com módulos
+✅ TAREFA BACKEND - Configurado CORS para permitir requisições do frontend específico (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev)
