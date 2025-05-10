@@ -9,8 +9,10 @@ from fastapi import APIRouter, Depends, Path, Query, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.db.models import User
 from app.schemas.segment import SegmentCreate, SegmentUpdate, SegmentResponse, PaginatedSegmentResponse
 from app.services.segment_service import SegmentService
+from app.core.dependencies import get_current_user, get_current_admin_or_director, get_current_super_admin
 
 # Definir o router
 router = APIRouter(
@@ -23,6 +25,7 @@ router = APIRouter(
 @router.get("/", response_model=PaginatedSegmentResponse)
 async def list_segments(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
     skip: int = Query(0, ge=0, description="Quantos segmentos pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de segmentos retornados"),
     nome: Optional[str] = Query(None, description="Filtrar por nome"),
@@ -44,7 +47,8 @@ async def list_segments(
 @router.get("/{segment_id}", response_model=SegmentResponse)
 async def get_segment(
     segment_id: UUID = Path(..., description="ID do segmento"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Obter um segmento pelo ID.
@@ -61,7 +65,8 @@ async def get_segment(
 @router.post("/", response_model=SegmentResponse, status_code=status.HTTP_201_CREATED)
 async def create_segment(
     segment_data: SegmentCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Criar um novo segmento.
@@ -73,7 +78,8 @@ async def create_segment(
 async def update_segment(
     segment_data: SegmentUpdate,
     segment_id: UUID = Path(..., description="ID do segmento"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Atualizar um segmento existente.
@@ -90,7 +96,8 @@ async def update_segment(
 @router.delete("/{segment_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_segment(
     segment_id: UUID = Path(..., description="ID do segmento"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_super_admin)
 ):
     """
     Excluir um segmento.
@@ -107,7 +114,8 @@ async def delete_segment(
 @router.patch("/{segment_id}/activate", response_model=SegmentResponse)
 async def activate_segment(
     segment_id: UUID = Path(..., description="ID do segmento"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Ativar um segmento.
