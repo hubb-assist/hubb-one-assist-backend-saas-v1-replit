@@ -8,7 +8,7 @@ import markdown
 
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, get_db
@@ -262,6 +262,33 @@ async def api_info():
         "version": "0.1.0",
         "description": "Backend para o sistema HUBB ONE Assist",
     }
+
+# Rota para servir o arquivo api-config.js
+@app.get("/api-config.js", response_class=Response)
+async def api_config_js():
+    """
+    Serve o arquivo de configuração da API para o frontend.
+    Este endpoint foi criado para resolver o erro "Unexpected token '<'"
+    quando o navegador tenta carregar um arquivo JavaScript mas recebe HTML.
+    """
+    js_content = """
+// Configuração da API
+const API_CONFIG = {
+  BASE_URL: window.location.hostname.includes('localhost') 
+    ? 'http://localhost:5000' 
+    : 'https://hubb-one-assist-back-hubb-one.replit.app',
+  API_VERSION: 'v1',
+  TIMEOUT: 30000,
+  WITH_CREDENTIALS: true
+};
+
+// Exportar a configuração
+export default API_CONFIG;
+"""
+    return Response(
+        content=js_content,
+        media_type="application/javascript"
+    )
 
 # Inicialização do usuário admin padrão
 @app.on_event("startup")
