@@ -18,6 +18,7 @@ class UserRole(str, PyEnum):
     SUPER_ADMIN = "SUPER_ADMIN"
     DIRETOR = "DIRETOR"
     COLABORADOR_NIVEL_2 = "COLABORADOR_NIVEL_2"
+    DONO_ASSINANTE = "DONO_ASSINANTE"
 
 class User(Base):
     """
@@ -34,6 +35,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Relacionamento com Subscriber para usuários do tipo DONO_ASSINANTE
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=True)
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -119,3 +122,35 @@ class PlanModule(Base):
 
     def __repr__(self):
         return f"<PlanModule {self.plan_id}:{self.module_id}>"
+
+
+class Subscriber(Base):
+    """
+    Modelo SQLAlchemy para a tabela de assinantes do sistema
+    """
+    __tablename__ = "subscribers"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False)  # Nome do responsável
+    clinic_name = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False, index=True)
+    phone = Column(String)
+    document = Column(String, unique=True)  # CPF ou CNPJ
+    zip_code = Column(String)
+    address = Column(String)
+    number = Column(String)  # Número do endereço
+    city = Column(String)
+    state = Column(String)
+    segment_id = Column(UUID(as_uuid=True), ForeignKey("segments.id"))
+    plan_id = Column(UUID(as_uuid=True), ForeignKey("plans.id"))
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relacionamentos
+    segment = relationship("Segment")
+    plan = relationship("Plan")
+    users = relationship("User", backref="subscriber")
+    
+    def __repr__(self):
+        return f"<Subscriber {self.clinic_name}>"

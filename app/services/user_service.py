@@ -3,6 +3,7 @@ Serviço para operações CRUD de usuários
 """
 
 from typing import Optional, List, Dict, Any, Union
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -131,13 +132,14 @@ class UserService:
         return db.query(User).filter(User.email == email).first()
     
     @staticmethod
-    def create_user(db: Session, user_data: UserCreate) -> User:
+    def create_user(db: Session, user_data: UserCreate, subscriber_id: UUID = None) -> User:
         """
         Cria um novo usuário
         
         Args:
             db: Sessão do banco de dados
             user_data: Dados do novo usuário
+            subscriber_id: ID do assinante (opcional, para usuários vinculados a assinantes)
             
         Returns:
             User: Usuário criado
@@ -160,7 +162,8 @@ class UserService:
             email=user_data.email,
             password_hash=hashed_password,
             role=user_data.role,
-            is_active=user_data.is_active
+            is_active=user_data.is_active,
+            subscriber_id=subscriber_id
         )
         
         db.add(db_user)
