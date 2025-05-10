@@ -132,7 +132,8 @@ async def activate_segment(
 @router.patch("/{segment_id}/deactivate", response_model=SegmentResponse)
 async def deactivate_segment(
     segment_id: UUID = Path(..., description="ID do segmento"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Desativar um segmento.

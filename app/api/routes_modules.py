@@ -9,8 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, Path, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.db.models import User
 from app.services.module_service import ModuleService
 from app.schemas.module import ModuleCreate, ModuleUpdate, ModuleResponse, PaginatedModuleResponse
+from app.core.dependencies import get_current_user, get_current_admin_or_director, get_current_super_admin
 
 # Criar router
 router = APIRouter(
@@ -23,6 +25,7 @@ router = APIRouter(
 @router.get("/", response_model=PaginatedModuleResponse)
 async def list_modules(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
     skip: int = Query(0, ge=0, description="Quantos módulos pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de módulos retornados"),
     nome: Optional[str] = Query(None, description="Filtrar por nome"),
@@ -43,7 +46,8 @@ async def list_modules(
 @router.get("/{module_id}", response_model=ModuleResponse)
 async def get_module(
     module_id: UUID = Path(..., description="ID do módulo"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """
     Obter um módulo pelo ID.
@@ -60,7 +64,8 @@ async def get_module(
 @router.post("/", response_model=ModuleResponse, status_code=status.HTTP_201_CREATED)
 async def create_module(
     module_data: ModuleCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Criar um novo módulo.
@@ -72,7 +77,8 @@ async def create_module(
 async def update_module(
     module_data: ModuleUpdate,
     module_id: UUID = Path(..., description="ID do módulo"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Atualizar um módulo existente.
@@ -89,7 +95,8 @@ async def update_module(
 @router.delete("/{module_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_module(
     module_id: UUID = Path(..., description="ID do módulo"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_super_admin)
 ):
     """
     Excluir um módulo.
@@ -106,7 +113,8 @@ async def delete_module(
 @router.patch("/{module_id}/activate", response_model=ModuleResponse)
 async def activate_module(
     module_id: UUID = Path(..., description="ID do módulo"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Ativar um módulo.
@@ -123,7 +131,8 @@ async def activate_module(
 @router.patch("/{module_id}/deactivate", response_model=ModuleResponse)
 async def deactivate_module(
     module_id: UUID = Path(..., description="ID do módulo"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_or_director)
 ):
     """
     Desativar um módulo.
