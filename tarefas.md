@@ -20,6 +20,15 @@
 - [x] Configurar validações e tratamento de erros
 - [x] Adicionar endpoints específicos para ativar/desativar segmentos (PATCH /segments/{segment_id}/activate, /segments/{segment_id}/deactivate)
 
+## Módulo de Módulos Funcionais
+
+- [x] Criar modelo de dados para Module com UUID, nome, descrição, is_active e timestamps
+- [x] Implementar esquemas Pydantic para validação de entrada e saída
+- [x] Criar serviço de módulos com operações CRUD completas
+- [x] Implementar rotas REST para módulos (/modules/)
+- [x] Configurar validações e tratamento de erros
+- [x] Adicionar endpoints específicos para ativar/desativar módulos (PATCH /modules/{module_id}/activate, /modules/{module_id}/deactivate)
+
 ## Configuração do Ambiente
 
 - [x] Configurar adaptador ASGI para WSGI para compatibilidade com FastAPI/Uvicorn e Gunicorn

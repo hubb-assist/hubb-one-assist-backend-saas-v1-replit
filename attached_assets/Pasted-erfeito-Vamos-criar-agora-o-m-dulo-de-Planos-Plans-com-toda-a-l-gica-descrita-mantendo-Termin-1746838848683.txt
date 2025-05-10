@@ -1,0 +1,83 @@
+erfeito! Vamos criar agora o módulo de Planos (Plans), com toda a lógica descrita, mantendo:
+
+Terminologia sempre em inglês nos nomes de entidades (Plan, Module, Segment)
+
+Regras de negócios com flexibilidade de preço por módulo dentro do plano
+
+Atributos como gratuidade do módulo ou tempo de teste
+
+Padrão de ativação com is_active
+
+E atualização automática do arquivo TAREFAS.md ao final com status ✅ concluído
+
+📄 Prompt para o Replit AI — Criar Módulo de Planos
+💬 Prompt:
+Olá Replit! Vamos criar agora o módulo de Planos (Plan) para o projeto HUBB ONE Assist.
+
+❗ANTES DE INICIAR:
+Leia o arquivo rules.md e siga todas as regras com rigor.
+Não tome decisões proativas. Implemente exatamente o que está descrito.
+
+📦 Objetivo: Criar o CRUD de Planos (Plan)
+🧾 Estrutura da entidade Plan
+Campo	Tipo	Descrição
+id	UUID	Identificador único
+name	str	Nome do plano
+description	str	Descrição do plano
+segment_id	UUID (FK)	Segmento vinculado ao plano
+base_price	float	Valor base do plano (sem módulos)
+is_active	bool	Se o plano está ativo
+created_at	datetime	Data de criação
+
+🔗 Relação: Plan <-> Modules
+Cada plano pode ter vários módulos vinculados, com os seguintes atributos adicionais dentro da associação:
+
+Campo	Tipo	Descrição
+module_id	UUID	ID do módulo selecionado
+price	float	Preço do módulo neste plano
+is_free	bool	Se este módulo é gratuito no plano
+trial_days	int	Se tem dias de teste (ex: 7, 14, 30), opcional
+
+Essa relação será feita através de uma tabela associativa plan_modules.
+
+🧭 Rotas REST a implementar
+Método	Rota	Função
+GET	/plans/	Listar planos
+GET	/plans/{id}	Ver plano por ID
+POST	/plans/	Criar plano (com módulos)
+PUT	/plans/{id}	Atualizar plano e seus módulos
+DELETE	/plans/{id}	Remover plano
+
+📁 Estrutura de arquivos
+pgsql
+Copiar
+Editar
+app/
+├── api/
+│   └── routes_plans.py
+├── services/
+│   └── plan_service.py
+├── schemas/
+│   └── plan.py
+├── db/
+│   └── models.py (Plan, PlanModule)
+⚙️ Regras técnicas:
+Um módulo só terá preço quando vinculado a um plano
+
+Se is_free=True, price deve ser ignorado
+
+Se trial_days for informado, deve ser um número positivo
+
+O plano deve ser criado com is_active=True por padrão
+
+Todos os relacionamentos devem ser persistidos corretamente com SQLAlchemy
+
+Use validação Pydantic nos schemas de entrada e saída
+
+📝 Finalização obrigatória:
+Ao concluir essa tarefa, atualize o arquivo TAREFAS.md com a linha:
+
+java
+Copiar
+Editar
+✅ TAREFA BACKEND - CRUD de Planos (Plan) implementado com sucesso, incluindo associação com módulos, 

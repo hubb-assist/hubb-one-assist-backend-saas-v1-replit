@@ -5,10 +5,11 @@ Modelos de banco de dados usando SQLAlchemy
 import uuid
 from datetime import datetime
 from enum import Enum as PyEnum
-from typing import Optional
+from typing import Optional, List
 
-from sqlalchemy import Column, String, Boolean, DateTime, Enum, Integer, Text, text
+from sqlalchemy import Column, String, Boolean, DateTime, Enum, Integer, Text, Float, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship, declarative_base
 
 from app.db.session import Base
 
@@ -70,3 +71,51 @@ class Module(Base):
 
     def __repr__(self):
         return f"<Module {self.nome}>"
+
+
+class Plan(Base):
+    """
+    Modelo SQLAlchemy para a tabela de planos
+    """
+    __tablename__ = "plans"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String, nullable=False, index=True)
+    description = Column(Text, nullable=True)
+    segment_id = Column(UUID(as_uuid=True), ForeignKey("segments.id"), nullable=False)
+    base_price = Column(Float, nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relacionamentos
+    segment = relationship("Segment", backref="plans")
+    plan_modules = relationship("PlanModule", cascade="all, delete-orphan")
+    
+    # Propriedade para acessar módulos
+    @property
+    def modules(self):
+        return [pm.module for pm in self.plan_modules]
+
+    def __repr__(self):
+        return f"<Plan {self.name}>"
+
+
+class PlanModule(Base):
+    """
+    Tabela associativa entre Plan e Module com atributos adicionais
+    """
+    __tablename__ = "plan_modules"
+
+    plan_id = Column(UUID(as_uuid=True), ForeignKey("plans.id"), primary_key=True)
+    module_id = Column(UUID(as_uuid=True), ForeignKey("modules.id"), primary_key=True)
+    price = Column(Float, nullable=False, default=0.0)
+    is_free = Column(Boolean, nullable=False, default=False)
+    trial_days = Column(Integer, nullable=True)
+    
+    # Relacionamentos
+    plan = relationship("Plan")
+    module = relationship("Module")
+
+    def __repr__(self):
+        return f"<PlanModule {self.plan_id}:{self.module_id}>"

@@ -12,10 +12,11 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, get_db
-from app.db.models import User, Segment
+from app.db.models import User, Segment, Module
 from app.services.user_service import UserService
 from app.api.routes_users import router as users_router
 from app.api.routes_segments import router as segments_router
+from app.api.routes_modules import router as modules_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -39,6 +40,7 @@ app.add_middleware(
 # Incluir routers
 app.include_router(users_router)
 app.include_router(segments_router)
+app.include_router(modules_router)
 
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)
