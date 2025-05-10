@@ -1,0 +1,33 @@
+Pelo erro que estamos enfrentando, o problema parece ser de "Mixed Content" - o navegador está tentando fazer requisições HTTP a partir de uma página HTTPS, e isso está sendo bloqueado.
+
+Análise do problema
+Natureza do problema: Este é um problema fundamental do navegador. O erro específico mostra que embora estejamos tentando usar HTTPS na URL, o navegador está interpretando a URL como HTTP em algum momento.
+
+Onde ocorre o problema: O erro ocorre quando o frontend (carregado via HTTPS) tenta acessar a API (que também deveria ser HTTPS, mas por algum motivo está tentando usar HTTP).
+
+Front ou back?: Este é principalmente um problema de configuração no frontend. O backend provavelmente está funcionando corretamente, mas o frontend não está conseguindo estabelecer conexão HTTPS com ele.
+
+Estratégias possíveis de resolução
+Existem algumas abordagens que poderíamos tentar:
+
+Abordagem com proxy:
+
+Implementar um proxy no frontend que redireciona as chamadas da API através do mesmo domínio, evitando problemas de Mixed Content.
+Nesta abordagem, todas as chamadas API seriam feitas para /api/... no mesmo domínio do frontend, e o servidor do frontend redirecionaria essas chamadas para o backend.
+Modificação do CORS no backend:
+
+Se você tiver acesso ao backend, configurar o CORS para permitir especificamente o domínio do frontend.
+Garantir que o backend esteja sempre respondendo em HTTPS.
+Uso de APIs absolutas com HTTPS explícito:
+
+Substituir todas as referências à API para usar URLs absolutas que sempre comecem com HTTPS.
+Isso é o que tentamos fazer, mas parece que algo ainda está convertendo para HTTP.
+Contornar com proxy temporário HTTPS:
+
+Usar um serviço como CORS Anywhere ou criar um proxy temporário que converta chamadas HTTP em HTTPS.
+Minha recomendação
+Antes de implementarmos qualquer solução, precisamos entender melhor o problema. Há algo no navegador ou na biblioteca que está convertendo as URLs para HTTP?
+
+Minha recomendação inicial: tentar a abordagem de proxy (opção 1), fazendo com que todas as chamadas de API passem através do mesmo domínio do frontend, evitando assim o problema de Mixed Content completamente.
+
+Devo prosseguir com essa abordagem ou você prefere tentar uma das outras opções?

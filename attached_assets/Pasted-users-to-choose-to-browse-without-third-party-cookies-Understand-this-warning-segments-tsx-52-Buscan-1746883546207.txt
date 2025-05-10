@@ -1,0 +1,69 @@
+users to choose to browse without third-party cookies.Understand this warning
+segments.tsx:52 Buscando segmentos...
+api-segments.ts:42 Fazendo requisição GET para URL absoluta HTTPS: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments com params: undefined
+api.ts:40 Fazendo requisição para: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments
+segments:1 Mixed Content: The page at 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/admin/segments' was loaded over HTTPS, but requested an insecure XMLHttpRequest endpoint 'http://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments/'. This request has been blocked; the content must be served over HTTPS.Understand this error
+api.ts:49 Erro na requisição: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}code: "ERR_NETWORK"config: {transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}message: "Network Error"name: "AxiosError"request: XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}stack: "AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:2119:41)\n    at async Object.getAll (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api-segments.ts:21:24)\n    at async queryFn (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/pages/admin/segments.tsx:62:22)"[[Prototype]]: Error
+(anonymous) @ api.ts:49
+Promise.then
+_request @ axios.js?v=fd4db404:2206
+request @ axios.js?v=fd4db404:2115
+Axios.<computed> @ axios.js?v=fd4db404:2243
+wrap @ axios.js?v=fd4db404:8
+getAll @ api-segments.ts:44
+queryFn @ segments.tsx:53
+fetchFn @ @tanstack_react-query.js?v=fd4db404:840
+run @ @tanstack_react-query.js?v=fd4db404:494
+start @ @tanstack_react-query.js?v=fd4db404:536
+fetch @ @tanstack_react-query.js?v=fd4db404:926
+executeFetch_fn @ @tanstack_react-query.js?v=fd4db404:2211
+onSubscribe @ @tanstack_react-query.js?v=fd4db404:1898
+subscribe @ @tanstack_react-query.js?v=fd4db404:24
+(anonymous) @ @tanstack_react-query.js?v=fd4db404:3022
+subscribeToStore @ chunk-WERSD76P.js?v=fd4db404:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=fd4db404:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=fd4db404:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=fd4db404:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=fd4db404:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=fd4db404:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=fd4db404:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=fd4db404:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=fd4db404:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=fd4db404:9119
+commitRootImpl @ chunk-WERSD76P.js?v=fd4db404:19432
+commitRoot @ chunk-WERSD76P.js?v=fd4db404:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=fd4db404:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=fd4db404:18718
+workLoop @ chunk-WERSD76P.js?v=fd4db404:197
+flushWork @ chunk-WERSD76P.js?v=fd4db404:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=fd4db404:384Understand this error
+api-segments.ts:59 Erro ao buscar segmentos: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}code: "ERR_NETWORK"config: {transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}message: "Network Error"name: "AxiosError"request: XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}stack: "AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:2119:41)\n    at async Object.getAll (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api-segments.ts:21:24)\n    at async queryFn (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/pages/admin/segments.tsx:62:22)"[[Prototype]]: Error
+getAll @ api-segments.ts:59
+await in getAll
+queryFn @ segments.tsx:53
+fetchFn @ @tanstack_react-query.js?v=fd4db404:840
+run @ @tanstack_react-query.js?v=fd4db404:494
+start @ @tanstack_react-query.js?v=fd4db404:536
+fetch @ @tanstack_react-query.js?v=fd4db404:926
+executeFetch_fn @ @tanstack_react-query.js?v=fd4db404:2211
+onSubscribe @ @tanstack_react-query.js?v=fd4db404:1898
+subscribe @ @tanstack_react-query.js?v=fd4db404:24
+(anonymous) @ @tanstack_react-query.js?v=fd4db404:3022
+subscribeToStore @ chunk-WERSD76P.js?v=fd4db404:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=fd4db404:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=fd4db404:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=fd4db404:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=fd4db404:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=fd4db404:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=fd4db404:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=fd4db404:19447
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=fd4db404:18868
+flushSyncCallbacks @ chunk-WERSD76P.js?v=fd4db404:9119
+commitRootImpl @ chunk-WERSD76P.js?v=fd4db404:19432
+commitRoot @ chunk-WERSD76P.js?v=fd4db404:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=fd4db404:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=fd4db404:18718
+workLoop @ chunk-WERSD76P.js?v=fd4db404:197
+flushWork @ chunk-WERSD76P.js?v=fd4db404:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=fd4db404:384Understand this error
+segments.tsx:54
