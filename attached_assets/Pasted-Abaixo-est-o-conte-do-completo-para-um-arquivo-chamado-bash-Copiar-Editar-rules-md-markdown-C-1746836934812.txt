@@ -1,0 +1,105 @@
+Abaixo está o conteúdo completo para um arquivo chamado:
+
+bash
+Copiar
+Editar
+📄 /rules.md
+markdown
+Copiar
+Editar
+# 📐 HUBB Assist — Regras Oficiais do Projeto (Replit + FastAPI)
+
+Este arquivo define as **regras obrigatórias** para o desenvolvimento do backend do projeto **HUBB ONE Assist** dentro do ambiente Replit.  
+Todas as ações executadas pelo Replit AI ou por colaboradores devem seguir fielmente estas diretrizes.
+
+---
+
+## 🚫 Regras de Proibição (NUNCA fazer)
+
+- ❌ **Nunca usar Flask, Flash ou qualquer servidor WSGI**  
+  > Este projeto utiliza exclusivamente o framework **FastAPI**, que é baseado em ASGI.  
+  > *Por favor, não tente usar Flask como proxy, servidor ou intermediário.*
+
+- ❌ **Não utilizar Gunicorn diretamente**  
+  > O servidor padrão é **Uvicorn**. Gunicorn só deve ser usado com workers ASGI avançados (não se aplica aqui).
+
+- ❌ **Não criar arquivos como `run_fastapi.py`, `app.py`, `main_flask.py`**  
+  > O ponto de entrada único da aplicação deve ser `main.py`, dentro da estrutura do projeto.
+
+- ❌ **Não sobrescrever o Swagger UI (/docs)**  
+  > A página `/` pode exibir uma mensagem HTML informativa, mas **jamais deve redirecionar ou bloquear o acesso ao `/docs`**.
+
+---
+
+## ✅ Padrões obrigatórios
+
+- ✅ **Framework principal:** `FastAPI`
+- ✅ **Servidor:** `Uvicorn`
+- ✅ **Banco de Dados:** `PostgreSQL` via `SQLAlchemy`
+- ✅ **ORM:** `SQLAlchemy 2.0` + Alembic
+- ✅ **Validações:** `Pydantic v2`
+- ✅ **Autenticação:** JWT com Cookies HttpOnly (em módulos futuros)
+- ✅ **Hash de senha:** `bcrypt`
+- ✅ **Env vars:** Lidas via `python-dotenv`
+- ✅ **Repositório organizado por camadas:**  
+  - `app/api/` — rotas  
+  - `app/services/` — lógica de negócio  
+  - `app/db/` — modelos, sessão, migrations  
+  - `app/schemas/` — validações com Pydantic
+
+---
+
+## 📁 Estrutura mínima de diretórios
+
+app/
+├── api/
+├── db/
+├── services/
+├── schemas/
+├── main.py
+├── init.py
+
+yaml
+Copiar
+Editar
+
+---
+
+## 🌍 Localização e idioma
+
+- Todos os comentários, mensagens de log e respostas da API devem estar em **português**.
+- A documentação da API (`/docs`) deve estar legível em português para facilitar uso clínico e comercial.
+
+---
+
+## 🧪 Boas práticas adicionais
+
+- ✅ Utilizar nomes de variáveis claros e autoexplicativos (ex: `usuario`, `email`, `senha_hashed`)
+- ✅ Usar UUID como chave primária para usuários e recursos principais
+- ✅ Rotas sempre com prefixo `/api/v1/` e organizadas por domínio
+- ✅ Não duplicar lógica entre service e controller
+- ✅ Comentários devem ser objetivos e somente quando o código não for autoexplicativo
+
+---
+
+## 🔐 Segurança
+
+- ✅ JWT com HttpOnly cookies
+- ✅ Proteção de rotas com roles/papéis (`SUPER_ADMIN`, `DIRETOR`, `COLABORADOR`)
+- ✅ Logs sensíveis devem ser filtrados (nunca logar senhas ou tokens)
+
+---
+
+## 🧠 Inteligência Artificial (Replit AI Agent)
+
+- 📌 Ao utilizar o Replit AI, **instruções devem ser dadas sempre com clareza no início do prompt**.
+- Sempre reforce:  
+  > “**Não use Flask. Use apenas FastAPI com Uvicorn.**”
+
+---
+
+## 📌 Última atualização
+
+- Versão: `v1.0`
+- Data: `2025-05-09`
+- Responsável técnico: **Luis Paim**

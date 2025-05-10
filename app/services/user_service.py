@@ -76,7 +76,14 @@ class UserService:
         if filter_params:
             for key, value in filter_params.items():
                 if value is not None and hasattr(User, key):
-                    query = query.filter(getattr(User, key) == value)
+                    # Usar LIKE para busca parcial em campos de texto
+                    if key == "name" and isinstance(value, str):
+                        query = query.filter(getattr(User, key).ilike(f"%{value}%"))
+                    elif key == "email" and isinstance(value, str):
+                        query = query.filter(getattr(User, key).ilike(f"%{value}%"))
+                    else:
+                        # Para outros campos (não texto), usar igualdade exata
+                        query = query.filter(getattr(User, key) == value)
         
         # Contar total antes de aplicar paginação
         total = query.count()
