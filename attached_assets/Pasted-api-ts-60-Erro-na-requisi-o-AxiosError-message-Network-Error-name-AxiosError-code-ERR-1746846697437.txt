@@ -1,0 +1,155 @@
+api.ts:60 Erro na requisição: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_NETWORK"
+config
+: 
+{transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}
+message
+: 
+"Network Error"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}
+stack
+: 
+"AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:2119:41)\n    at async Object.update (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api-segments.ts?t=1746846553468:75:24)"
+[[Prototype]]
+: 
+Error
+(anonymous)	@	api.ts:60
+Promise.then		
+update	@	api-segments.ts:119
+mutationFn	@	segments.tsx:94
+await in execute		
+handleSubmit	@	segments.tsx:145
+handleSubmit	@	segment-form.tsx:54
+
+api-segments.ts:122 Erro ao atualizar segmento 72d0f4e3-3eb0-4e7e-90d7-ae192de340e8: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_NETWORK"
+config
+: 
+adapter
+: 
+(3) ['xhr', 'http', 'fetch']
+allowAbsoluteUrls
+: 
+true
+baseURL
+: 
+"https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev"
+data
+: 
+"{\"name\":\"teste1\",\"description\":\"teste\"}"
+env
+: 
+{FormData: ƒ, Blob: ƒ}
+headers
+: 
+AxiosHeaders {Accept: 'application/json', Content-Type: 'application/json'}
+maxBodyLength
+: 
+-1
+maxContentLength
+: 
+-1
+method
+: 
+"put"
+timeout
+: 
+10000
+transformRequest
+: 
+[ƒ]
+transformResponse
+: 
+[ƒ]
+transitional
+: 
+{silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false}
+url
+: 
+"https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments/72d0f4e3-3eb0-4e7e-90d7-ae192de340e8/"
+validateStatus
+: 
+ƒ validateStatus(status)
+withCredentials
+: 
+true
+xsrfCookieName
+: 
+"XSRF-TOKEN"
+xsrfHeaderName
+: 
+"X-XSRF-TOKEN"
+[[Prototype]]
+: 
+Object
+message
+: 
+"Network Error"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}
+stack
+: 
+"AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:2119:41)\n    at async Object.update (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api-segments.ts?t=1746846553468:75:24)"
+[[Prototype]]
+: 
+Error
+update	@	api-segments.ts:122
+await in update		
+mutationFn	@	segments.tsx:94
+await in execute		
+handleSubmit	@	segments.tsx:145
+handleSubmit	@	segment-form.tsx:54
+api-segments.ts:132 Excluindo segmento com URL absoluta HTTPS: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments/72d0f4e3-3eb0-4e7e-90d7-ae192de340e8/
+api.ts:47 Fazendo requisição para: https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments/72d0f4e3-3eb0-4e7e-90d7-ae192de340e8/
+segments:1 Mixed Content: The page at 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/admin/segments' was loaded over HTTPS, but requested an insecure XMLHttpRequest endpoint 'http://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev/segments/72d0f4e3-3eb0-4e7e-90d7-ae192de340e8'. This request has been blocked; the content must be served over HTTPS.
+api.ts:60 Erro na requisição: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_NETWORK"
+config
+: 
+{transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 10000, …}
+message
+: 
+"Network Error"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 10000, withCredentials: true, upload: XMLHttpRequestUpload, …}
+stack
+: 
+"AxiosError: Network Error\n    at XMLHttpRequest.handleError (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:1591:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=fd4db404:2119:41)\n    at async Object.delete (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api-segments.ts?t=1746846553468:87:7)"
+[[Prototype]]
+: 
+Error
+(anonymous)	@	api.ts:60
+Promise.then		
+delete	@	api-segments.ts:133
+mutationFn	@	segments.tsx:107
+await in execute		
+confirmDelete	@	segments.tsx:158
+api-segments.ts:135 Erro ao excluir segmento 72d0f4e3-3eb0-4e7e-90d7-ae192de340e8: 
+AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+delete	@	api-segments.ts:135
+await in delete		
+mutationFn	@	segments.tsx:107
+await in execute		
+confirmDelete	@	segments.tsx:158
