@@ -1,0 +1,95 @@
+Perfeito! Vamos então preparar o próximo módulo: CRUD de Módulos Funcionais — que representam funcionalidades como HUBB HOF, HUBB Vision, HUBB RH, etc.
+
+📌 Contexto e arquitetura:
+O cadastro de módulos (como funcionalidades do sistema) será independente dos planos.
+
+Um plano poderá usar vários módulos já cadastrados, e atribuir um preço específico a cada módulo no momento da criação do plano.
+
+Isso permite que o mesmo módulo (ex: "HUBB HOF") tenha preços diferentes em cada plano.
+
+📦 Estrutura esperada da entidade Module
+Campo	Tipo	Descrição
+id	UUID	Chave primária
+nome	string	Nome do módulo (ex: HUBB HOF)
+descricao	string	Texto explicativo
+is_active	boolean	Se o módulo está ativo ou inativo
+created_at	datetime	Timestamp de criação
+
+O preço não é salvo no módulo — ele será vinculado ao módulo no momento da criação do plano.
+
+🛠️ Rotas do CRUD de Módulos
+Método	Rota	Descrição
+GET	/modules/	Listar todos os módulos
+GET	/modules/{id}	Obter um módulo por ID
+POST	/modules/	Criar um novo módulo funcional
+PUT	/modules/{id}	Atualizar um módulo
+DELETE	/modules/{id}	Deletar um módulo
+
+📁 Estrutura esperada de arquivos
+vbnet
+Copiar
+Editar
+app/
+├── api/
+│   └── routes_modules.py
+├── services/
+│   └── module_service.py
+├── schemas/
+│   └── module.py
+├── db/
+│   └── models.py (adicionar a classe Module)
+💬 Prompt para o Replit AI — Criar Módulo de Módulos Funcionais
+Olá Replit! Vamos agora criar o CRUD de módulos funcionais (ex: HUBB HOF, HUBB Vision, etc.) para o projeto HUBB ONE Assist.
+
+❗ANTES DE TUDO:
+Leia o arquivo rules.md e siga todas as regras descritas ali.
+Não implemente nada além do que está descrito abaixo.
+
+🛠️ Requisitos para o CRUD de Módulos
+Crie o modelo Module com os campos:
+
+id: UUID
+
+nome: str
+
+descricao: str
+
+is_active: bool = True
+
+created_at: datetime = datetime.utcnow()
+
+Crie os arquivos:
+
+schemas/module.py
+
+services/module_service.py
+
+api/routes_modules.py
+
+Implementar as rotas:
+
+GET /modules/
+
+GET /modules/{id}
+
+POST /modules/
+
+PUT /modules/{id}
+
+DELETE /modules/{id}
+
+O campo is_active deve ser exibido no retorno e editável no PUT.
+
+⚠️ Observações importantes
+O campo preço não faz parte do módulo — ele será tratado no cadastro de planos.
+
+O módulo representa apenas uma funcionalidade que pode ser ativada nos planos.
+
+Todos os nomes devem estar em português.
+
+As validações devem ser feitas com Pydantic.
+
+O banco é PostgreSQL e deve usar SQLAlchemy como ORM.
+
+Quando terminar, vou testar GET /modules/ para validar.
+Na próxima tarefa vamos usar esses módulos no cadastro de planos.

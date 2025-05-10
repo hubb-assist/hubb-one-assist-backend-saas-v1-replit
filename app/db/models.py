@@ -53,3 +53,20 @@ class Segment(Base):
 
     def __repr__(self):
         return f"<Segment {self.nome}>"
+
+
+class Module(Base):
+    """
+    Modelo SQLAlchemy para a tabela de módulos funcionais
+    """
+    __tablename__ = "modules"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    nome = Column(String, nullable=False, unique=True, index=True)
+    descricao = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Module {self.nome}>"
