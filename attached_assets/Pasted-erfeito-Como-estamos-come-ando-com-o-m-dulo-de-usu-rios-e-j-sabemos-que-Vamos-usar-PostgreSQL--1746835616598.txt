@@ -1,0 +1,126 @@
+erfeito! Como estamos começando com o módulo de usuários e já sabemos que:
+
+✅ Vamos usar PostgreSQL
+
+✅ Vamos usar SQLAlchemy como ORM
+
+✅ Precisamos de um usuário admin padrão criado no primeiro boot
+
+✅ Queremos o CRUD completo de usuários
+
+✅ E manter o projeto organizado por camadas (API, service, schema, model)
+
+Aqui está um prompt completíssimo para você colar no Replit AI Agent, orientando ele a criar tudo corretamente de forma profissional e escalável:
+
+💬 Prompt para o Replit AI — Implementar módulo de Usuários
+Olá Replit, agora que nosso servidor FastAPI está funcionando corretamente com Uvicorn, vamos criar o primeiro módulo da aplicação: CRUD de usuários.
+
+Por favor, siga exatamente as instruções abaixo:
+
+📦 1. Stack a ser usada
+Banco de dados: PostgreSQL
+
+ORM: SQLAlchemy 2.0
+
+Validação de dados: Pydantic v2
+
+Migrations: Alembic (iremos configurar depois)
+
+Hash de senha: bcrypt
+
+ID do usuário: UUID
+
+JWT e autenticação: será feito mais tarde (não incluir por enquanto)
+
+📁 2. Estrutura de arquivos
+Por favor, crie a seguinte estrutura dentro do diretório app/:
+
+bash
+Copiar
+Editar
+app/
+├── api/
+│   └── routes_users.py            # Endpoints REST
+├── db/
+│   ├── models.py                  # SQLAlchemy model User
+│   ├── session.py                 # Conexão com PostgreSQL
+├── schemas/
+│   └── user.py                    # Schemas Pydantic
+├── services/
+│   └── user_service.py            # Funções de negócio: CRUD
+👤 3. Modelo de Usuário (User)
+ID: UUID (chave primária)
+
+nome: string
+
+email: string (único)
+
+senha_hashed: string
+
+role: string (ex: SUPER_ADMIN, DIRETOR, etc.)
+
+is_active: bool
+
+created_at: datetime
+
+🧪 4. Endpoints a implementar
+Base path: /users
+
+Método	Rota	Função
+GET	/users/	Listar usuários
+GET	/users/{id}	Obter usuário por ID
+POST	/users/	Criar usuário
+PUT	/users/{id}	Atualizar usuário
+DELETE	/users/{id}	Deletar usuário (soft delete opcional)
+
+🔐 5. Usuário padrão
+No primeiro boot da aplicação, crie automaticamente um usuário admin com:
+
+nome: "Admin"
+
+email: "admin@hubbassist.com"
+
+senha: "admin123" (deve ser armazenada com hash bcrypt)
+
+role: "SUPER_ADMIN"
+
+is_active: True
+
+⚙️ 6. Conexão com PostgreSQL
+Configure a conexão usando SQLAlchemy. As credenciais devem ser lidas de variáveis de ambiente (os.getenv()), por exemplo:
+
+env
+Copiar
+Editar
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=hubbassist
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=senha123
+Crie um arquivo .env.example com essas chaves, e use python-dotenv se necessário.
+
+🧼 7. Requisitos no requirements.txt
+Certifique-se de instalar:
+
+php
+Copiar
+Editar
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+bcrypt
+python-dotenv
+🚨 Observações importantes
+✅ Não usar Flask
+
+✅ Não criar run_fastapi.py
+
+✅ Usar uvicorn main:app como está no .replit
+
+✅ Arquitetura limpa: API → Service → DB → Model
+
+🚫 Ainda não queremos autenticação com JWT — apenas CRUD aberto
+
+Quando concluir, me avise que eu vou testar o endpoint GET /users/ e conferir se o usuário admin foi criado com sucesso.
