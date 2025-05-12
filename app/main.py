@@ -79,24 +79,10 @@ async def force_https(request: Request, call_next):
         # Continuar mesmo se houver um erro no middleware
         return await call_next(request)
 
-# Adicionar middleware CORS com origens específicas (não pode usar * com credentials)
+# Adicionar middleware CORS com todas as origens (para desenvolvimento/testes)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Frontend Vite local
-        "http://localhost:3000",  # Frontend React padrão
-        "https://32c76b88-78ce-48ad-9c13-04975e5e14a3-00-12ynk9jfvcfqw.worf.replit.dev",  # URL temporário do Replit
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",  # Frontend específico mencionado
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.replit.dev",  # Frontend específico sem subdomínio
-        "https://hubb-one-assist-v1-frontend-replit.replit.app",  # Nome da app do frontend no Replit
-        "https://hubb-one-assist-front-hubb-one.replit.app",  # URL de produção do frontend
-        # URLs adicionais com variação de subdomínio
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.worf.replit.dev",
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.local.replit.dev",
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515.replit.dev",
-        # Domínio personalizado do frontend 
-        "https://app.hubbassist.com",
-    ],
+    allow_origins=["*"],  # Permite todas as origens durante o desenvolvimento
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
