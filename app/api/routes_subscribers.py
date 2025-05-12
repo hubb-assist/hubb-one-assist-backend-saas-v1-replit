@@ -122,11 +122,11 @@ async def update_subscriber(
     subscriber_data: SubscriberUpdate,
     subscriber_id: UUID = Path(..., description="ID do assinante"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_super_admin)
+    current_user: User = Depends(get_current_user)  # Alterado para permitir outros papéis além de SUPER_ADMIN
 ):
     """
     Atualizar um assinante existente.
-    Requer autenticação como SUPER_ADMIN.
+    Requer autenticação. Usuários com função DONO_ASSINANTE só podem editar seu próprio assinante.
     """
     updated_subscriber = SubscriberService.update_subscriber(db, subscriber_id, subscriber_data)
     if not updated_subscriber:
