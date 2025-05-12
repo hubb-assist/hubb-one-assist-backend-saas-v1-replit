@@ -46,7 +46,7 @@ class SubscriberService:
         # Importamos a função aqui para evitar circular imports
         if current_user:
             from app.core.dependencies import apply_subscriber_filter
-            query = apply_subscriber_filter(query, Subscriber, current_user)
+            query = apply_subscriber_filter(query, current_user, Subscriber)
         
         # Aplicar filtros se fornecidos
         if filter_params:
