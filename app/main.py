@@ -245,6 +245,73 @@ async def options_subscribers(request: Request):
         }
     )
 
+@app.options("/subscribers", include_in_schema=False)
+@app.options("/subscribers/", include_in_schema=False)
+async def options_subscribers_root(request: Request):
+    """
+    Tratamento especial para requisições OPTIONS nas rotas /subscribers e /subscribers/
+    """
+    origin = request.headers.get("Origin", "*")
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+            "Access-Control-Max-Age": "86400"  # Cache preflight por 24 horas
+        }
+    )
+
+@app.get("/subscribers", include_in_schema=False)
+@app.get("/subscribers/", include_in_schema=False)
+async def get_subscribers_direct(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user),
+    skip: int = Query(0, ge=0, description="Quantos assinantes pular"),
+    limit: int = Query(10, ge=1, le=100, description="Limite de assinantes retornados")
+):
+    """
+    Rota direta para resolver problemas com /subscribers
+    """
+    # Configurar cabeçalhos CORS
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    
+    try:
+        # Log detalhado
+        print(f"Rota direta /subscribers acessada por {current_user.email if current_user else 'anônimo'}")
+        
+        # Obter filtros da query string
+        params = dict(request.query_params)
+        filter_params = {k: v for k, v in params.items() if k not in ["skip", "limit"]}
+        
+        # Chamar serviço
+        from app.services.subscriber_service import SubscriberService
+        result = SubscriberService.get_subscribers(
+            db=db, 
+            current_user=current_user,
+            skip=skip,
+            limit=limit,
+            filter_params=filter_params
+        )
+        
+        return result
+    except Exception as e:
+        print(f"Erro ao processar /subscribers: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": "Erro interno ao processar a solicitação",
+                "message": str(e)
+            }
+        )
+
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)
 async def home():
