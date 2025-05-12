@@ -2,7 +2,7 @@
 Serviço para operações CRUD de segmentos
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Segment
 from app.schemas.segment import SegmentCreate, SegmentUpdate, SegmentResponse, PaginatedSegmentResponse
+
+if TYPE_CHECKING:
+    from app.db.models import User
 
 
 class SegmentService:
@@ -24,7 +27,8 @@ class SegmentService:
         db: Session, 
         skip: int = 0, 
         limit: int = 100,
-        filter_params: Optional[Dict[str, Any]] = None
+        filter_params: Optional[Dict[str, Any]] = None,
+        current_user: Optional["User"] = None
     ) -> PaginatedSegmentResponse:
         """
         Retorna uma lista paginada de segmentos com opção de filtros
@@ -34,6 +38,7 @@ class SegmentService:
             skip: Número de registros para pular (paginação)
             limit: Número máximo de registros para retornar (paginação)
             filter_params: Parâmetros para filtragem (opcional)
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             PaginatedSegmentResponse: Lista paginada de segmentos
@@ -46,6 +51,13 @@ class SegmentService:
             print(f"[DEBUG] Testando consulta: total de segmentos sem filtro: {test_query.count()}")
             
             query = db.query(Segment)
+            
+            # Aplicar filtro por subscriber_id
+            # Para segmentos, não aplicamos filtro por subscriber_id, pois são globais
+            # Mas o suporte está implementado para uso futuro caso os segmentos passem a ser por assinante
+            # if current_user:
+            #     from app.core.dependencies import apply_subscriber_filter
+            #     query = apply_subscriber_filter(query, Segment, current_user)
             
             # Aplicar filtros se fornecidos
             if filter_params:
@@ -91,18 +103,28 @@ class SegmentService:
             raise
     
     @staticmethod
-    def get_segment_by_id(db: Session, segment_id: UUID) -> Optional[Segment]:
+    def get_segment_by_id(db: Session, segment_id: UUID, current_user: Optional["User"] = None) -> Optional[Segment]:
         """
         Busca um segmento pelo ID
         
         Args:
             db: Sessão do banco de dados
             segment_id: ID do segmento
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             Optional[Segment]: Segmento encontrado ou None
         """
-        return db.query(Segment).filter(Segment.id == segment_id).first()
+        query = db.query(Segment).filter(Segment.id == segment_id)
+        
+        # Para segmentos, não aplicamos filtro por subscriber_id, pois são globais
+        # Mas o suporte está implementado para uso futuro caso os segmentos passem a ser por assinante
+        # if current_user:
+        #     # Se não for admin, aplicar filtro adicional
+        #     from app.core.dependencies import apply_subscriber_filter
+        #     query = apply_subscriber_filter(query, Segment, current_user)
+            
+        return query.first()
     
     @staticmethod
     def get_segment_by_nome(db: Session, nome: str) -> Optional[Segment]:

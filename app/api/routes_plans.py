@@ -43,7 +43,7 @@ async def list_plans(
     if is_active is not None:
         filter_params["is_active"] = is_active
         
-    return PlanService.get_plans(db, skip, limit, filter_params)
+    return PlanService.get_plans(db, skip, limit, filter_params, current_user=current_user)
 
 
 @router.get("/{plan_id}", response_model=PlanResponse)
@@ -55,7 +55,7 @@ async def get_plan(
     """
     Obter um plano pelo ID.
     """
-    db_plan = PlanService.get_plan_by_id(db, plan_id)
+    db_plan = PlanService.get_plan_by_id(db, plan_id, current_user=current_user)
     if not db_plan:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
