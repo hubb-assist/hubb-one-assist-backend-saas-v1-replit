@@ -224,6 +224,7 @@ async def home():
                         <li><code>/public/segments</code> - Lista todos os segmentos ativos</li>
                         <li><code>/public/plans</code> - Lista todos os planos ativos</li>
                         <li><code>/public/plans/[UUID]</code> - Obtém detalhes de um plano ativo específico</li>
+                        <li><code>/public/subscribers</code> - (POST) Cria um novo assinante durante o processo de onboarding</li>
                     </ul>
                 </div>
             </div>
@@ -237,21 +238,35 @@ async def home():
             <h2>Endpoints Disponíveis</h2>
             
             <div class="endpoints">
+                <h3>Endpoints Públicos (sem autenticação)</h3>
+                <div class="endpoint">
+                    <span class="method get">GET</span> <code>/public/segments/</code> - Listar segmentos ativos
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span> <code>/public/plans/</code> - Listar planos ativos
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span> <code>/public/plans/{"{"+"plan_id"+"}"}</code> - Obter detalhes de um plano
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span> <code>/public/subscribers/</code> - Criar novo assinante (processo de onboarding)
+                </div>
+                
                 <h3>Usuários do Sistema</h3>
                 <div class="endpoint">
                     <span class="method get">GET</span> <code>/users/</code> - Listar todos os usuários (com paginação e filtros)
                 </div>
                 <div class="endpoint">
-                    <span class="method get">GET</span> <code>/users/{{user_id}}</code> - Obter um usuário específico
+                    <span class="method get">GET</span> <code>/users/{"{"+"user_id"+"}"}</code> - Obter um usuário específico
                 </div>
                 <div class="endpoint">
                     <span class="method post">POST</span> <code>/users/</code> - Criar um novo usuário
                 </div>
                 <div class="endpoint">
-                    <span class="method put">PUT</span> <code>/users/{{user_id}}</code> - Atualizar um usuário existente
+                    <span class="method put">PUT</span> <code>/users/{"{"+"user_id"+"}"}</code> - Atualizar um usuário existente
                 </div>
                 <div class="endpoint">
-                    <span class="method delete">DELETE</span> <code>/users/{{user_id}}</code> - Remover um usuário
+                    <span class="method delete">DELETE</span> <code>/users/{"{"+"user_id"+"}"}</code> - Remover um usuário
                 </div>
                 
                 <h3>Assinantes</h3>
@@ -259,22 +274,22 @@ async def home():
                     <span class="method get">GET</span> <code>/subscribers/</code> - Listar todos os assinantes (com paginação e filtros)
                 </div>
                 <div class="endpoint">
-                    <span class="method get">GET</span> <code>/subscribers/{{subscriber_id}}</code> - Obter um assinante específico
+                    <span class="method get">GET</span> <code>/subscribers/{"{"+"subscriber_id"+"}"}</code> - Obter um assinante específico
                 </div>
                 <div class="endpoint">
                     <span class="method post">POST</span> <code>/subscribers/</code> - Criar um novo assinante (também cria um usuário DONO_ASSINANTE)
                 </div>
                 <div class="endpoint">
-                    <span class="method put">PUT</span> <code>/subscribers/{{subscriber_id}}</code> - Atualizar um assinante existente
+                    <span class="method put">PUT</span> <code>/subscribers/{"{"+"subscriber_id"+"}"}</code> - Atualizar um assinante existente
                 </div>
                 <div class="endpoint">
-                    <span class="method delete">DELETE</span> <code>/subscribers/{{subscriber_id}}</code> - Desativar um assinante
+                    <span class="method delete">DELETE</span> <code>/subscribers/{"{"+"subscriber_id"+"}"}</code> - Desativar um assinante
                 </div>
                 <div class="endpoint">
-                    <span class="method patch">PATCH</span> <code>/subscribers/{{subscriber_id}}/activate</code> - Ativar um assinante
+                    <span class="method patch">PATCH</span> <code>/subscribers/{"{"+"subscriber_id"+"}"}/activate</code> - Ativar um assinante
                 </div>
                 <div class="endpoint">
-                    <span class="method patch">PATCH</span> <code>/subscribers/{{subscriber_id}}/deactivate</code> - Desativar um assinante
+                    <span class="method patch">PATCH</span> <code>/subscribers/{"{"+"subscriber_id"+"}"}/deactivate</code> - Desativar um assinante
                 </div>
             </div>
             
