@@ -134,14 +134,14 @@ async def get_current_admin_or_director(
     return current_user
 
 
-def apply_subscriber_filter(query, model, current_user: User, admin_override: bool = True):
+def apply_subscriber_filter(query, current_user: User, model, admin_override: bool = True):
     """
     Aplica filtro por subscriber_id nas consultas, exceto para SUPER_ADMIN e DIRETOR (se admin_override=True)
     
     Args:
         query: Query SQLAlchemy para aplicar o filtro
-        model: Modelo SQLAlchemy que deve conter o campo subscriber_id
         current_user: Usuário autenticado atual
+        model: Modelo SQLAlchemy que deve conter o campo subscriber_id
         admin_override: Se True, não aplica filtro para SUPER_ADMIN e DIRETOR
         
     Returns:
