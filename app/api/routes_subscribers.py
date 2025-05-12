@@ -23,6 +23,8 @@ router = APIRouter(
 
 @router.get("/", response_model=PaginatedSubscriberResponse, status_code=status.HTTP_200_OK)
 async def list_subscribers(
+    request: Request,
+    response: Response,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user), # Mudado para get_current_user para permitir acesso baseado em subscriber_id
     skip: int = Query(0, ge=0, description="Quantos assinantes pular"),
@@ -39,6 +41,16 @@ async def list_subscribers(
     Listar todos os assinantes com opções de paginação e filtros.
     Requer autenticação e filtra automaticamente por subscriber_id para roles não administrativas.
     """
+    # Garantir cabeçalhos CORS explicitamente para esta rota
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    
+    # Log para debug
+    print(f"Listando assinantes para {current_user.email} com origin: {origin}")
+    
     # Montar filtros
     filters = {}
     if name:

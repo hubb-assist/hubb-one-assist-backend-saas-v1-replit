@@ -1,0 +1,43 @@
+Fazendo requisição para API: /external-api/subscribers
+api-subscribers.ts:107 Fazendo requisição para API: /subscribers/
+api.ts:52 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/subscribers/
+subscribers:1 Access to XMLHttpRequest at 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers/' from origin 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.ts:81 Erro na requisição: AxiosError
+(anonymous) @ api.ts:81Understand this error
+api-subscribers.ts:116 Erro ao buscar assinantes: AxiosError
+getAll @ api-subscribers.ts:116Understand this error
+api-subscribers.ts:126 Tentando endpoint fallback
+api.ts:52 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/api/subscribers/fallback/
+hubb-one-assist-back-hubb-one.replit.app/subscribers/:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this error
+hubb-one-assist-back-hubb-one.replit.app/api/subscribers/fallback/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()Understand this error
+api.ts:81 Erro na requisição: AxiosError
+(anonymous) @ api.ts:81Understand this error
+subscribers.tsx:63 Erro ao buscar assinantes: AxiosError
+queryFn @ subscribers.tsx:63Understand this error
+subscribers.tsx:59 Fazendo requisição para API: /external-api/subscribers
+api-subscribers.ts:107 Fazendo requisição para API: /subscribers/
+api.ts:52 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/subscribers/
+subscribers:1 Access to XMLHttpRequest at 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers/' from origin 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.ts:81 Erro na requisição: AxiosError
+(anonymous) @ api.ts:81Understand this error
+api-subscribers.ts:116 Erro ao buscar assinantes: AxiosError
+getAll @ api-subscribers.ts:116Understand this error
+api-subscribers.ts:126 Tentando endpoint fallback
+api.ts:52 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/api/subscribers/fallback/
+hubb-one-assist-back-hubb-one.replit.app/subscribers/:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this error
+hubb-one-assist-back-hubb-one.replit.app/api/subscribers/fallback/:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()Understand this error
+api.ts:81 Erro na requisição: AxiosError
+(anonymous) @ api.ts:81Understand this error
+subscribers.tsx:63 Erro ao buscar assinantes: AxiosError

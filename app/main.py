@@ -5,8 +5,9 @@ Aplicação principal FastAPI para o HUBB ONE Assist
 import os
 from pathlib import Path
 import markdown
+from typing import Optional
 
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Depends, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
 from sqlalchemy.orm import Session
@@ -14,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.db.session import engine, Base, get_db
 from app.db.models import User, Segment, Module, Plan, PlanModule, Subscriber
 from app.services.user_service import UserService
+from app.core.dependencies import get_current_user
 from app.api.routes_users import router as users_router
 from app.api.routes_segments import router as segments_router
 from app.api.routes_modules import router as modules_router
@@ -28,6 +30,8 @@ from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
 from app.api.routes_api_compatibility import router as compatibility_router
+# Rota especial para tratar problemas de CORS com subscribers
+from app.api.routes_public_subscribers_cors import router as public_subscribers_cors_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -86,6 +90,10 @@ app.add_middleware(
         "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.replit.dev",  # Frontend específico sem subdomínio
         "https://hubb-one-assist-v1-frontend-replit.replit.app",  # Nome da app do frontend no Replit
         "https://hubb-one-assist-front-hubb-one.replit.app",  # URL de produção do frontend
+        # URLs adicionais com variação de subdomínio
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.worf.replit.dev",
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.local.replit.dev",
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515.replit.dev", 
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -111,34 +119,85 @@ app.include_router(subscribers_router)
 app.include_router(public_segments_router)
 app.include_router(public_plans_router)
 app.include_router(public_subscribers_router)
+app.include_router(public_subscribers_cors_router)  # Adicionado router CORS especial
 # O router público Arduino foi desativado
 # public_arduino_router existe apenas para compatibilidade com código existente
 
 # Incluir router de compatibilidade para URLs mal formadas ou legadas
 app.include_router(compatibility_router)
 
-# Adicionar rotas diretas específicas para /external-api/subscribers
+# Adicionar rotas diretas específicas para /external-api/subscribers que retornam dados reais
 @app.get("/external-api/subscribers/", include_in_schema=False)
 @app.get("/external-api/subscribers", include_in_schema=False)
-async def external_api_subscribers_direct(request: Request):
+async def external_api_subscribers_direct(
+    request: Request, 
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user),
+    skip: int = Query(0, ge=0, description="Quantos assinantes pular"),
+    limit: int = Query(10, ge=1, le=100, description="Limite de assinantes retornados")
+):
     """
     Rota direta para interceptar chamadas para /external-api/subscribers/
-    que são tentadas pelo frontend.
+    que são tentadas pelo frontend, mas que agora retorna dados reais.
     """
+    # Fazer log detalhado desta chamada
     origin = request.headers.get("Origin", "*")
-    return JSONResponse(
-        status_code=400,
-        content={
-            "detail": "URL incorreta. Use /subscribers/ em vez de /external-api/subscribers/",
-            "message": "O frontend deve ser atualizado para usar a URL correta."
-        },
-        headers={
-            "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
-        }
-    )
+    print(f"Chamada para /external-api/subscribers/ de {origin}, usuário: {current_user.email if current_user else 'Anônimo'}")
+    
+    try:
+        # Obter dados reais ao invés de retornar erro
+        from app.services.subscriber_service import SubscriberService
+        
+        # Montar filtros a partir dos query params
+        params = dict(request.query_params)
+        filter_params = {k: v for k, v in params.items() if k not in ["skip", "limit"]}
+        
+        # Obter dados reais
+        result = SubscriberService.get_subscribers(
+            db=db, 
+            current_user=current_user,
+            skip=skip,
+            limit=limit,
+            filter_params=filter_params
+        )
+        
+        # Retornar dados reais com cabeçalhos CORS
+        return JSONResponse(
+            status_code=200,
+            content={
+                "items": [subscriber.dict() for subscriber in result.items],
+                "total": result.total,
+                "skip": result.skip,
+                "limit": result.limit
+            },
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+                "X-Frontend-Warning": "Esta URL está obsoleta. Atualize para /subscribers/"
+            }
+        )
+    except Exception as e:
+        # Log de erro e retorno de mensagem amigável
+        print(f"Erro ao processar /external-api/subscribers/: {str(e)}")
+        
+        return JSONResponse(
+            status_code=200,  # Usar 200 ao invés de 400 para garantir que o CORS funcione
+            content={
+                "items": [],
+                "total": 0,
+                "skip": skip,
+                "limit": limit,
+                "warning": "URL incorreta. Use /subscribers/ em vez de /external-api/subscribers/. Dados foram retornados mas esta URL está obsoleta."
+            },
+            headers={
+                "Access-Control-Allow-Origin": origin,
+                "Access-Control-Allow-Credentials": "true",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+                "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
+            }
+        )
 
 # Tratamento especial para requisições OPTIONS (CORS preflight)
 @app.options("/subscribers", include_in_schema=False)

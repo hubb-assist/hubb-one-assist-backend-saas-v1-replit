@@ -80,11 +80,11 @@ class CORSFixerMiddleware(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
             
-            # Se for uma resposta de erro 500 para /subscribers/
-            if path.startswith("/subscribers/") and response.status_code >= 500:
-                cors_fixer_logger.warning(f"Erro 500 em {path}, adicionando headers CORS")
+            # Para TODAS as rotas /subscribers/ (mesmo sem erro) ou qualquer erro 500/404
+            if path.startswith("/subscribers/") or response.status_code >= 400:
+                cors_fixer_logger.warning(f"Resposta {response.status_code} em {path}, adicionando headers CORS")
                 
-                # Adiciona headers CORS para garantir que o frontend receba-os mesmo com erro 500
+                # Adiciona headers CORS para garantir que o frontend receba-os sempre
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
