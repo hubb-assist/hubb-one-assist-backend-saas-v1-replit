@@ -4,6 +4,11 @@ Este documento especifica as regras CORS (Cross-Origin Resource Sharing) definit
 
 ## 🌐 Cenário de Implantação
 
+### URLs de Produção (Domínios Personalizados)
+**Backend:** https://api.hubbassist.com
+**Frontend:** https://app.hubbassist.com
+
+### URLs Alternativas (Replit)
 **Backend:** https://hubb-one-assist-back-hubb-one.replit.app
 **Frontend (Produção):** https://hubb-one-assist-front-hubb-one.replit.app
 **Frontend (Desenvolvimento):** Várias URLs do Replit (spock.replit.dev, worf.replit.dev, etc.)
@@ -192,8 +197,9 @@ async def log_cors_debug(request: Request, call_next):
 
 - [ ] Backend tem CORS configurado com `allow_credentials=True`
 - [ ] Todas as origens do frontend estão na lista `allow_origins`
+- [ ] O domínio personalizado `https://app.hubbassist.com` está na lista de origens permitidas
 - [ ] Frontend usa `withCredentials: true` ou `credentials: 'include'`
-- [ ] Frontend usa as URLs corretas para acessar a API
+- [ ] Frontend usa as URLs corretas para a API (`https://api.hubbassist.com` ou URL alternativa)
 - [ ] Ambos frontend e backend usam HTTPS
 - [ ] Cookies no backend estão configurados com `SameSite="none", Secure=True`
 

@@ -2,6 +2,11 @@
 
 Este documento define os padrões, boas práticas e regras para o desenvolvimento e manutenção das APIs do sistema HUBB ONE Assist. Seu objetivo é garantir consistência, segurança e clareza nas interfaces de comunicação, prevenindo problemas comuns de desenvolvimento.
 
+## 🌐 Domínios Oficiais do Sistema
+
+- **API/Backend:** https://api.hubbassist.com
+- **Frontend/App:** https://app.hubbassist.com
+
 ## 🎯 Contexto e Escopo do Sistema
 
 O HUBB ONE Assist é uma plataforma SaaS multitenancy para gestão profissional de clínicas e consultórios, com foco inicial nos segmentos de Odontologia e Veterinária. É um sistema de gestão administrativa completo, **sem componentes de hardware ou dispositivos físicos**.

@@ -93,7 +93,9 @@ app.add_middleware(
         # URLs adicionais com variação de subdomínio
         "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.worf.replit.dev",
         "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.local.replit.dev",
-        "https://977761fe-66ad-4e57-b1d5-f3356eb27515.replit.dev", 
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515.replit.dev",
+        # Domínio personalizado do frontend 
+        "https://app.hubbassist.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -161,14 +163,17 @@ async def external_api_subscribers_direct(
             filter_params=filter_params
         )
         
+        # Garantir que result é tratado como um dicionário
+        result_dict = result if isinstance(result, dict) else {}
+        
         # Retornar dados reais com cabeçalhos CORS
         return JSONResponse(
             status_code=200,
             content={
-                "items": [subscriber.dict() for subscriber in result.items],
-                "total": result.total,
-                "skip": result.skip,
-                "limit": result.limit
+                "items": [subscriber.model_dump() if hasattr(subscriber, 'model_dump') else subscriber.dict() for subscriber in result_dict.get("items", [])],
+                "total": result_dict.get("total", 0),
+                "skip": result_dict.get("skip", skip),
+                "limit": result_dict.get("limit", limit)
             },
             headers={
                 "Access-Control-Allow-Origin": origin,
