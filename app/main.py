@@ -20,11 +20,12 @@ from app.api.routes_modules import router as modules_router
 from app.api.routes_plans import router as plans_router
 from app.api.routes_auth import router as auth_router
 from app.api.routes_subscribers import router as subscribers_router
+# Módulo Arduino foi desativado como parte da refatoração do domínio
 from app.api.routes_arduino_devices import router as arduino_devices_router
+from app.api.routes_public_arduino import router as public_arduino_router
 from app.api.routes_public_segments import router as public_segments_router
 from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
-from app.api.routes_public_arduino import router as public_arduino_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -97,13 +98,15 @@ app.include_router(segments_router)
 app.include_router(modules_router)
 app.include_router(plans_router)
 app.include_router(subscribers_router)
-app.include_router(arduino_devices_router)
+# Módulo Arduino foi desativado como parte da refatoração do domínio
+# O router existe apenas para compatibilidade com código existente, mas não é exposto na API
 
 # Incluir routers públicos (sem autenticação)
 app.include_router(public_segments_router)
 app.include_router(public_plans_router)
 app.include_router(public_subscribers_router)
-app.include_router(public_arduino_router)
+# O router público Arduino foi desativado
+# public_arduino_router existe apenas para compatibilidade com código existente
 
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)
