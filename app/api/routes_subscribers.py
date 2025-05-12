@@ -128,6 +128,22 @@ async def update_subscriber(
     Atualizar um assinante existente.
     Requer autenticação. Usuários com função DONO_ASSINANTE só podem editar seu próprio assinante.
     """
+    # Verificar permissões - apenas SUPER_ADMIN pode editar qualquer assinante
+    if current_user.role != "SUPER_ADMIN":
+        # DONO_ASSINANTE só pode editar seu próprio assinante
+        if current_user.role == "DONO_ASSINANTE":
+            if not current_user.subscriber_id or str(current_user.subscriber_id) != str(subscriber_id):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Permissão negada. Você só pode editar seu próprio assinante."
+                )
+        else:
+            # Outros papéis não podem editar assinantes
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permissão negada. Apenas SUPER_ADMIN ou DONO_ASSINANTE podem editar assinantes."
+            )
+    
     updated_subscriber = SubscriberService.update_subscriber(db, subscriber_id, subscriber_data)
     if not updated_subscriber:
         raise HTTPException(
