@@ -151,6 +151,35 @@ class Subscriber(Base):
     segment = relationship("Segment")
     plan = relationship("Plan")
     users = relationship("User", backref="subscriber")
+    arduino_devices = relationship("ArduinoDevice", back_populates="subscriber")
     
     def __repr__(self):
         return f"<Subscriber {self.clinic_name}>"
+
+
+class ArduinoDevice(Base):
+    """
+    Modelo para dispositivos Arduino vinculados a assinantes
+    """
+    __tablename__ = "arduino_devices"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    device_id = Column(String(50), nullable=False, unique=True, index=True)
+    name = Column(String(100), nullable=False)
+    description = Column(String(255), nullable=True)
+    mac_address = Column(String(17), nullable=False, unique=True, index=True)
+    ip_address = Column(String(45), nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    firmware_version = Column(String(50), nullable=True)
+    last_connection = Column(DateTime, nullable=True)
+    
+    # Relacionamento com assinante
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    subscriber = relationship("Subscriber", back_populates="arduino_devices")
+    
+    # Campos de auditoria
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    def __repr__(self):
+        return f"<ArduinoDevice {self.name} ({self.device_id})>"
