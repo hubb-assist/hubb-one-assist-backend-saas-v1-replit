@@ -137,6 +137,9 @@ async def update_plan(
     """
     Atualizar um plano existente.
     """
+    # Para planos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_plan = PlanService.update_plan(db, plan_id, plan_data, current_user=current_user)
     updated_plan = PlanService.update_plan(db, plan_id, plan_data)
     if not updated_plan:
         raise HTTPException(
