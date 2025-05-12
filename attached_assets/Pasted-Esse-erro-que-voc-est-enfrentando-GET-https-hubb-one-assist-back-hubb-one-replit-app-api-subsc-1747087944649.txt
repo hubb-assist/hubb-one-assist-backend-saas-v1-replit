@@ -1,0 +1,120 @@
+Esse erro que você está enfrentando — GET https://hubb-one-assist-back-hubb-one.replit.app/api/subscribers/fallback 400 (Bad Request) — indica falha na requisição ao endpoint de fallback, e revela que o problema original na rota principal /subscribers ainda persiste ou foi encoberto com a tentativa de fallback.
+
+✅ Diagnóstico direto e objetivo:
+O frontend está fazendo uma requisição normal para GET /subscribers.
+
+Ela falha silenciosamente (provavelmente por CORS, 401 ou 500) e então tenta GET /api/subscribers/fallback.
+
+Esse fallback retorna 400 Bad Request, o que não deve acontecer nunca em um endpoint de fallback.
+
+O frontend está configurado para tentar o fallback errado e está mascarando o erro original, dificultando o debug.
+
+🔥 Solução DEFINITIVA e correta
+1. Desative o fallback temporariamente
+Edite sua função getAll e comente o bloco de fallback:
+
+ts
+Copiar
+Editar
+try {
+  const response = await api.get<ApiResponse>('/subscribers', {
+    params: paginationParams,
+    withCredentials: true
+  });
+
+  return {
+    data: response.data.items,
+    total: response.data.total,
+    page: response.data.page || 1,
+    pageSize: response.data.size || 10
+  };
+
+} catch (error) {
+  console.error('Erro ao buscar assinantes:', error);
+
+  // ❌ COMENTE ISSO:
+  // try {
+  //   const fallbackResponse = await api.get<ApiResponse>('/api/subscribers/fallback');
+  //   return {
+  //     data: fallbackResponse.data.items,
+  //     total: fallbackResponse.data.total || fallbackResponse.data.items.length,
+  //     page: 1,
+  //     pageSize: 10
+  //   };
+  // } catch (fallbackError) {
+  //   throw error;
+  // }
+
+  // ✅ Apenas relance o erro para o React Query lidar:
+  throw error;
+}
+2. Confirme se você está usando a URL correta
+O correto é:
+
+sql
+Copiar
+Editar
+GET https://hubb-one-assist-back-hubb-one.replit.app/subscribers?limit=10&skip=0
+Sem /api/
+
+Sem /external-api/
+
+Com withCredentials: true
+
+3. Teste esse endpoint diretamente via browser ou Insomnia
+Abra no navegador:
+
+bash
+Copiar
+Editar
+https://hubb-one-assist-back-hubb-one.replit.app/subscribers?limit=10&skip=0
+Se der 401, então o problema está no cookie.
+Se der 500, o erro está no backend.
+
+Deseja que eu gere uma versão limpa da função getAll sem fallback para você testar e ver o erro real?
+
+
+
+
+
+
+Você disse:
+
+veja 
+
+O ChatGPT disse:
+✅ Pronto. Agora temos a causa real do problema:
+
+🛑 Erro: {"detail":"Não autenticado"}
+Significa que o cookie de autenticação não está sendo enviado na requisição GET /subscribers.
+
+💡 Causa mais provável
+O frontend está tentando acessar um endpoint protegido sem withCredentials: true ou em domínios diferentes, o que impede o navegador de enviar cookies cross-origin.
+
+✅ Solução definitiva (checklist rápido):
+No frontend, na requisição axios.get(...) de assinantes:
+
+ts
+Copiar
+Editar
+axios.get('/subscribers', {
+  withCredentials: true // ← ESSENCIAL
+});
+No backend, configure CORS assim (já deve estar feito, mas revise):
+
+py
+Copiar
+Editar
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+O domínio do frontend precisa bater exatamente com o que está em allow_origins — sem localhost, sem http se o back está em https.
+

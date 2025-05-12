@@ -284,11 +284,21 @@ class SubscriberService:
         
         # Validar segmento se estiver sendo atualizado
         if subscriber_data.segment_id:
-            SubscriberService.validate_segment(db, subscriber_data.segment_id)
+            try:
+                SubscriberService.validate_segment(db, subscriber_data.segment_id)
+            except HTTPException as e:
+                # Se o segmento for inválido, manteremos o segmento existente
+                print(f"Segmento inválido na atualização: {str(e)}")
+                subscriber_data.segment_id = db_subscriber.segment_id
         
         # Validar plano se estiver sendo atualizado
         if subscriber_data.plan_id:
-            SubscriberService.validate_plan(db, subscriber_data.plan_id)
+            try:
+                SubscriberService.validate_plan(db, subscriber_data.plan_id)
+            except HTTPException as e:
+                # Se o plano for inválido, manteremos o plano existente
+                print(f"Plano inválido na atualização: {str(e)}")
+                subscriber_data.plan_id = db_subscriber.plan_id
         
         # Atualizar os dados
         update_data = subscriber_data.model_dump(exclude_unset=True)
