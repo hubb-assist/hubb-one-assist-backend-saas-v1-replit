@@ -40,7 +40,7 @@ async def list_modules(
     if is_active is not None:
         filter_params["is_active"] = is_active
         
-    return ModuleService.get_modules(db, skip, limit, filter_params)
+    return ModuleService.get_modules(db, skip, limit, filter_params, current_user=current_user)
 
 
 @router.get("/{module_id}", response_model=ModuleResponse)
@@ -52,7 +52,7 @@ async def get_module(
     """
     Obter um módulo pelo ID.
     """
-    db_module = ModuleService.get_module_by_id(db, module_id)
+    db_module = ModuleService.get_module_by_id(db, module_id, current_user=current_user)
     if not db_module:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

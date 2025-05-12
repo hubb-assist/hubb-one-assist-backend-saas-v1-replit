@@ -2,7 +2,7 @@
 Serviço para operações CRUD de planos
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Plan, Module, PlanModule, Segment
 from app.schemas.plan import PlanCreate, PlanUpdate, PaginatedPlanResponse, PlanModuleCreate
+
+if TYPE_CHECKING:
+    from app.db.models import User
 
 
 class PlanService:
@@ -24,7 +27,8 @@ class PlanService:
         db: Session, 
         skip: int = 0, 
         limit: int = 100,
-        filter_params: Optional[Dict[str, Any]] = None
+        filter_params: Optional[Dict[str, Any]] = None,
+        current_user: Optional["User"] = None
     ) -> PaginatedPlanResponse:
         """
         Retorna uma lista paginada de planos com opção de filtros
@@ -34,11 +38,19 @@ class PlanService:
             skip: Número de registros para pular (paginação)
             limit: Número máximo de registros para retornar (paginação)
             filter_params: Parâmetros para filtragem (opcional)
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             PaginatedPlanResponse: Lista paginada de planos
         """
         query = db.query(Plan)
+        
+        # Aplicar filtro por subscriber_id
+        # Para planos, não aplicamos filtro por subscriber_id, pois são globais
+        # Mas o suporte está implementado para uso futuro caso os planos passem a ser por assinante
+        # if current_user:
+        #     from app.core.dependencies import apply_subscriber_filter
+        #     query = apply_subscriber_filter(query, Plan, current_user)
         
         # Aplicar filtros se houver
         if filter_params:
@@ -97,18 +109,28 @@ class PlanService:
         )
     
     @staticmethod
-    def get_plan_by_id(db: Session, plan_id: UUID) -> Optional[Plan]:
+    def get_plan_by_id(db: Session, plan_id: UUID, current_user: Optional["User"] = None) -> Optional[Plan]:
         """
         Busca um plano pelo ID
         
         Args:
             db: Sessão do banco de dados
             plan_id: ID do plano
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             Optional[Plan]: Plano encontrado ou None
         """
-        return db.query(Plan).filter(Plan.id == plan_id).first()
+        query = db.query(Plan).filter(Plan.id == plan_id)
+        
+        # Para planos, não aplicamos filtro por subscriber_id, pois são globais
+        # Mas o suporte está implementado para uso futuro caso os planos passem a ser por assinante
+        # if current_user:
+        #     # Se não for admin, aplicar filtro adicional
+        #     from app.core.dependencies import apply_subscriber_filter
+        #     query = apply_subscriber_filter(query, Plan, current_user)
+            
+        return query.first()
     
     @staticmethod
     def get_plan_by_name(db: Session, name: str) -> Optional[Plan]:

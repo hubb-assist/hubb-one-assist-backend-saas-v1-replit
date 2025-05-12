@@ -2,7 +2,7 @@
 Serviço para operações CRUD de módulos funcionais
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -10,7 +10,10 @@ from sqlalchemy import desc, asc, or_
 from sqlalchemy.orm import Session
 
 from app.db.models import Module
-from app.schemas.module import ModuleCreate, ModuleUpdate, PaginatedModuleResponse
+from app.schemas.module import ModuleCreate, ModuleUpdate, PaginatedModuleResponse, ModuleResponse
+
+if TYPE_CHECKING:
+    from app.db.models import User
 
 
 class ModuleService:
@@ -75,18 +78,28 @@ class ModuleService:
         )
     
     @staticmethod
-    def get_module_by_id(db: Session, module_id: UUID) -> Optional[Module]:
+    def get_module_by_id(db: Session, module_id: UUID, current_user: Optional["User"] = None) -> Optional[Module]:
         """
         Busca um módulo pelo ID
         
         Args:
             db: Sessão do banco de dados
             module_id: ID do módulo
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             Optional[Module]: Módulo encontrado ou None
         """
-        return db.query(Module).filter(Module.id == module_id).first()
+        query = db.query(Module).filter(Module.id == module_id)
+        
+        # Para módulos, não aplicamos filtro por subscriber_id, pois são globais
+        # Mas o suporte está implementado para uso futuro caso os módulos passem a ser por assinante
+        # if current_user:
+        #     # Se não for admin, aplicar filtro adicional
+        #     from app.core.dependencies import apply_subscriber_filter
+        #     query = apply_subscriber_filter(query, Module, current_user)
+            
+        return query.first()
     
     @staticmethod
     def get_module_by_nome(db: Session, nome: str) -> Optional[Module]:
