@@ -20,7 +20,7 @@ async def login(
     db: Session = Depends(get_db)
 ):
     """
-    Autentica um usuário e retorna tokens JWT
+    Autentica um usuário e retorna tokens JWT e informações de usuário
     """
     # Autenticar usuário
     user = AuthService.authenticate_user(db, user_data.email, user_data.password)
@@ -38,8 +38,23 @@ async def login(
     # Configurar cookies
     AuthService.set_auth_cookies(response, tokens)
     
-    # Resposta de sucesso
-    return {"mensagem": "Login realizado com sucesso."}
+    # Informações sobre o usuário para ajudar no redirecionamento frontend
+    segment_id = None
+    if user.subscriber_id and user.subscriber:
+        segment_id = str(user.subscriber.segment_id) if user.subscriber.segment_id else None
+    
+    # Resposta de sucesso com informações adicionais
+    return {
+        "mensagem": "Login realizado com sucesso.",
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "role": user.role.value if user.role else None,
+            "subscriber_id": str(user.subscriber_id) if user.subscriber_id else None,
+            "segment_id": segment_id
+        }
+    }
 
 
 @router.post("/refresh-token", response_model=dict)

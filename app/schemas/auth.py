@@ -35,6 +35,7 @@ class TokenData(BaseModel):
     email: Optional[str] = None
     role: Optional[str] = None
     subscriber_id: Optional[str] = None
+    segment_id: Optional[str] = None
     permissions: Optional[list] = None
     exp: Optional[int] = None
 

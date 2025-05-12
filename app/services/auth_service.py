@@ -64,12 +64,18 @@ class AuthService:
         Returns:
             Token: Access token e refresh token
         """
+        # Obter segment_id do assinante associado ao usuário
+        segment_id = None
+        if user.subscriber_id and user.subscriber:
+            segment_id = str(user.subscriber.segment_id) if user.subscriber.segment_id else None
+        
         # Dados para incluir no token
         token_data = {
             "sub": str(user.id),
             "email": user.email,
             "role": user.role.value if user.role else None,
             "subscriber_id": str(user.subscriber_id) if user.subscriber_id else None,
+            "segment_id": segment_id,
             "permissions": []  # Implementação futura de permissões granulares
         }
         
@@ -158,6 +164,7 @@ class AuthService:
             email = payload.get("email")
             role = payload.get("role")
             subscriber_id = payload.get("subscriber_id")
+            segment_id = payload.get("segment_id")
             permissions = payload.get("permissions", [])
             exp = payload.get("exp")
             
@@ -166,6 +173,7 @@ class AuthService:
                 email=email,
                 role=role,
                 subscriber_id=subscriber_id,
+                segment_id=segment_id,
                 permissions=permissions,
                 exp=exp
             )
