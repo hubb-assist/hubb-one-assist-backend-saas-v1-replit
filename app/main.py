@@ -22,6 +22,7 @@ from app.api.routes_auth import router as auth_router
 from app.api.routes_subscribers import router as subscribers_router
 from app.api.routes_public_segments import router as public_segments_router
 from app.api.routes_public_plans import router as public_plans_router
+from app.api.routes_public_subscribers import router as public_subscribers_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -98,6 +99,7 @@ app.include_router(subscribers_router)
 # Incluir routers públicos (sem autenticação)
 app.include_router(public_segments_router)
 app.include_router(public_plans_router)
+app.include_router(public_subscribers_router)
 
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)
