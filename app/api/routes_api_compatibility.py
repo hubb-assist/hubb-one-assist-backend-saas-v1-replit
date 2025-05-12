@@ -19,6 +19,65 @@ router = APIRouter(tags=["compatibility"])
 # Router para /external-api
 external_api_router = APIRouter(prefix="/external-api", tags=["external-api-compatibility"])
 
+# Rota de login para external-api
+@external_api_router.post("/auth/login")
+@external_api_router.options("/auth/login")
+async def external_api_auth_login_direct(
+    request: Request,
+    response: Response,
+    credentials: Dict[str, Any] = Body(None),
+    db = Depends(get_db)
+):
+    """
+    Endpoint direto para /external-api/auth/login
+    """
+    # Adicionar headers CORS para preflight
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    
+    # Verificar se é uma requisição OPTIONS (preflight)
+    if request.method == "OPTIONS":
+        return {}
+    
+    # Se não há credenciais, retornar erro
+    if not credentials:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Credenciais não fornecidas"}
+        )
+        
+    # Extrair email e senha das credenciais
+    email = credentials.get("email")
+    password = credentials.get("password")
+    
+    # Validar se email e senha foram fornecidos
+    if not email or not password:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Email e senha são obrigatórios"}
+        )
+    
+    # Autenticar usuário
+    user = AuthService.authenticate_user(db, email, password)
+    
+    if not user:
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Credenciais inválidas"}
+        )
+    
+    # Gerar tokens
+    tokens = AuthService.create_login_tokens(user)
+    
+    # Configurar cookies
+    AuthService.set_auth_cookies(response, tokens)
+    
+    # Resposta de sucesso
+    return {"mensagem": "Login realizado com sucesso."}
+
 @router.get("/subscribers/", include_in_schema=False)
 async def api_subscribers_redirect(
     request: Request,

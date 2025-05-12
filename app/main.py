@@ -29,7 +29,7 @@ from app.api.routes_public_segments import router as public_segments_router
 from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
-from app.api.routes_api_compatibility import router as compatibility_router
+from app.api.routes_api_compatibility import router as compatibility_router, external_api_router
 # Rota especial para tratar problemas de CORS com subscribers
 from app.api.routes_public_subscribers_cors import router as public_subscribers_cors_router
 
@@ -127,6 +127,7 @@ app.include_router(public_subscribers_cors_router)  # Adicionado router CORS esp
 
 # Incluir router de compatibilidade para URLs mal formadas ou legadas
 app.include_router(compatibility_router)
+app.include_router(external_api_router)
 
 # Adicionar rotas diretas específicas para /external-api/subscribers que retornam dados reais
 @app.get("/external-api/subscribers/", include_in_schema=False)
