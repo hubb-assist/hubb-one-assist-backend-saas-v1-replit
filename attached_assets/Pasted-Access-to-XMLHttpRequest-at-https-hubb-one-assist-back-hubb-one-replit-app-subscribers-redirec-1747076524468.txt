@@ -1,0 +1,818 @@
+Access to XMLHttpRequest at 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers/' (redirected from 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers') from origin 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.ts:67 Erro na requisição: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+(anonymous) @ api.ts:67
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts?t=1747076138889:32
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+api-subscribers.ts?t=1747076138889:35 Erro ao buscar assinantes: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+getAll @ api-subscribers.ts?t=1747076138889:35
+await in getAll
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+subscribers.tsx:47 Erro ao buscar assinantes: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+queryFn @ subscribers.tsx:47
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+api-subscribers.ts?t=1747076138889:32 
+            
+            
+           GET https://hubb-one-assist-back-hubb-one.replit.app/subscribers/ net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts?t=1747076138889:32
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+api.ts:38 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/subscribers
+subscribers:1 Access to XMLHttpRequest at 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers/' (redirected from 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers') from origin 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.ts:67 Erro na requisição: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+(anonymous) @ api.ts:67
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts?t=1747076138889:32
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+api-subscribers.ts?t=1747076138889:35 Erro ao buscar assinantes: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+getAll @ api-subscribers.ts?t=1747076138889:35
+await in getAll
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+subscribers.tsx:47 Erro ao buscar assinantes: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+queryFn @ subscribers.tsx:47
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+api-subscribers.ts?t=1747076138889:32 
+            
+            
+           GET https://hubb-one-assist-back-hubb-one.replit.app/subscribers/ net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts?t=1747076138889:32
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=a4300399:18627
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+verificarAutenticacao @ api.ts:100
+checkAuth @ auth.ts:74
+performAuthCheck @ App.tsx:55
+(anonymous) @ App.tsx:64
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19432
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=a4300399:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18718
+workLoop @ chunk-RPCDYKBN.js?v=a4300399:197
+flushWork @ chunk-RPCDYKBN.js?v=a4300399:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=a4300399:384Understand this error
+api.ts:38 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/subscribers
+subscribers:1 Access to XMLHttpRequest at 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers/' (redirected from 'https://hubb-one-assist-back-hubb-one.replit.app/subscribers') from origin 'https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+api.ts:67 Erro na requisição: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+(anonymous) @ api.ts:67
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts?t=1747076138889:32
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+api-subscribers.ts?t=1747076138889:35 Erro ao buscar assinantes: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+getAll @ api-subscribers.ts?t=1747076138889:35
+await in getAll
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+subscribers.tsx:47 Erro ao buscar assinantes: AxiosError {message: 'Network Error', name: 'AxiosError', code: 'ERR_NETWORK', config: {…}, request: XMLHttpRequest, …}
+queryFn @ subscribers.tsx:47
+await in queryFn
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+api-subscribers.ts?t=1747076138889:32 
+            
+            
+           GET https://hubb-one-assist-back-hubb-one.replit.app/subscribers/ net::ERR_FAILED 500 (Internal Server Error)
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts?t=1747076138889:32
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+api.ts:38 Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/external-api/subscribers
+api-subscribers.ts:107 
+            
+            
+           GET https://hubb-one-assist-back-hubb-one.replit.app/external-api/subscribers 404 (Not Found)
+dispatchXhrRequest @ axios.js?v=a4300399:1648
+xhr @ axios.js?v=a4300399:1528
+dispatchRequest @ axios.js?v=a4300399:2003
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts:107
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+api.ts:67 Erro na requisição: AxiosError {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+(anonymous) @ api.ts:67
+Promise.then
+_request @ axios.js?v=a4300399:2206
+request @ axios.js?v=a4300399:2115
+Axios.<computed> @ axios.js?v=a4300399:2243
+wrap @ axios.js?v=a4300399:8
+getAll @ api-subscribers.ts:107
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+api-subscribers.ts:110 Erro ao buscar assinantes: AxiosError {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+getAll @ api-subscribers.ts:110
+await in getAll
+queryFn @ subscribers.tsx:44
+fetchFn @ @tanstack_react-query.js?v=a4300399:840
+run @ @tanstack_react-query.js?v=a4300399:494
+(anonymous) @ @tanstack_react-query.js?v=a4300399:519
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=a4300399:515
+Promise.catch
+run @ @tanstack_react-query.js?v=a4300399:498
+start @ @tanstack_react-query.js?v=a4300399:536
+fetch @ @tanstack_react-query.js?v=a4300399:926
+executeFetch_fn @ @tanstack_react-query.js?v=a4300399:2211
+onSubscribe @ @tanstack_react-query.js?v=a4300399:1898
+subscribe @ @tanstack_react-query.js?v=a4300399:24
+(anonymous) @ @tanstack_react-query.js?v=a4300399:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=a4300399:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=a4300399:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=a4300399:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=a4300399:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=a4300399:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=a4300399:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=a4300399:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=a4300399:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=a4300399:19416
+commitRoot @ chunk-RPCDYKBN.js?v=a4300399:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=a4300399:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=a4300399:9119
+flushSync @ chunk-RPCDYKBN.js?v=a4300399:18959
+scheduleRefresh @ chunk-RPCDYKBN.js?v=a4300399:20004
+(anonymous) @ @react-refresh:267
+performReactRefresh @ @react-refresh:256
+(anonymous) @ @react-refresh:677
+setTimeout
+(anonymous) @ @react-refresh:666
+validateRefreshBoundaryAndEnqueueUpdate @ @react-refresh:728
+(anonymous) @ onboarding-form.tsx:205
+(anonymous) @ client:34
+(anonymous) @ client:218
+(anonymous) @ client:193
+queueUpdate @ client:193
+await in queueUpdate
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550Understand this error
+subscribers.tsx:47 Erro ao buscar assinantes: AxiosError {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest,
