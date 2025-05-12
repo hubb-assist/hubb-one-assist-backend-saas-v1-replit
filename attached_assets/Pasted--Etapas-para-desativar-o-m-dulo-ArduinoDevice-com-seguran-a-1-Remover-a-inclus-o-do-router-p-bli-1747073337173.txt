@@ -1,0 +1,76 @@
+✅ Etapas para desativar o módulo ArduinoDevice com segurança
+1. ❌ Remover a inclusão do router público no main.py
+python
+Copiar
+Editar
+# main.py
+
+# ❌ Remova ou comente esta linha:
+# from src.routes.arduino_device import router as arduino_router
+# app.include_router(arduino_router)
+Motivo: Isso impede que as rotas fiquem acessíveis na API pública, mas mantém o código fonte disponível para consulta futura.
+
+2. 🔒 Desabilitar a exposição pública via CORS (opcional)
+Caso tenha deixado a rota acessível externamente:
+
+python
+Copiar
+Editar
+# src/routes/arduino_device.py
+
+# ❌ Comente ou remova prefixos como:
+# router = APIRouter(prefix="/public/arduino", tags=["Public"])
+Troque por:
+
+python
+Copiar
+Editar
+# Se quiser manter internamente para testes:
+router = APIRouter(prefix="/experimental/arduino", tags=["Experimental"], include_in_schema=False)
+3. ⚠️ Desabilitar uso em migrations (se aplicável)
+Se o modelo ArduinoDevice já foi incluído no banco com alembic:
+
+bash
+Copiar
+Editar
+alembic downgrade -1  # ⚠️ Rolar migration para remover Arduino
+E depois remova a model do arquivo models.py e exclua a migration gerada.
+
+Ou, se preferir manter a migration, comente a import do modelo no models/__init__.py:
+
+python
+Copiar
+Editar
+# from .arduino_device import ArduinoDevice  # ❌ Comentar para não registrar
+4. 🧾 Documentar o módulo como "Experimental / Em espera"
+No início de arduino_device.py, adicione:
+
+python
+Copiar
+Editar
+"""
+🔬 Experimental: Módulo de Dispositivos Arduino
+
+Este módulo foi criado como PoC (Prova de Conceito) para futura integração com dispositivos IoT.
+Atualmente, não está ativo no sistema nem disponível publicamente.
+
+Data de congelamento: [coloque data]
+Autor: [nome ou responsável]
+"""
+5. 📁 Mover para pasta opcional (se quiser deixar claro no projeto)
+Você pode mover o módulo para uma pasta separada:
+
+bash
+Copiar
+Editar
+src/experimental/arduino_device.py
+E deixar excluído do main.py.
+
+📌 Resultado Final
+Item	Status após ajuste
+Rota pública Arduino	❌ Desativada
+Código fonte	✅ Mantido para futura análise
+Impacto no schema ativo	❌ Nenhum
+Visibilidade externa	❌ Zero
+Arquitetura comprometida	❌ Não
+
