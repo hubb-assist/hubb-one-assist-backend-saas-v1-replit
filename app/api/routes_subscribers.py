@@ -24,7 +24,7 @@ router = APIRouter(
 @router.get("/", response_model=PaginatedSubscriberResponse, status_code=status.HTTP_200_OK)
 async def list_subscribers(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_super_admin),
+    current_user: User = Depends(get_current_user), # Mudado para get_current_user para permitir acesso baseado em subscriber_id
     skip: int = Query(0, ge=0, description="Quantos assinantes pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de assinantes retornados"),
     name: Optional[str] = Query(None, description="Filtrar por nome do responsável"),
@@ -37,7 +37,7 @@ async def list_subscribers(
 ):
     """
     Listar todos os assinantes com opções de paginação e filtros.
-    Requer autenticação como SUPER_ADMIN.
+    Requer autenticação e filtra automaticamente por subscriber_id para roles não administrativas.
     """
     # Montar filtros
     filters = {}
@@ -56,20 +56,26 @@ async def list_subscribers(
     if is_active is not None:
         filters["is_active"] = is_active
     
-    return SubscriberService.get_subscribers(db, skip=skip, limit=limit, filter_params=filters)
+    return SubscriberService.get_subscribers(
+        db, 
+        skip=skip, 
+        limit=limit, 
+        filter_params=filters,
+        current_user=current_user
+    )
 
 
 @router.get("/{subscriber_id}", response_model=SubscriberResponse, status_code=status.HTTP_200_OK)
 async def get_subscriber(
     subscriber_id: UUID = Path(..., description="ID do assinante"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_super_admin)
+    current_user: User = Depends(get_current_user) # Mudado para get_current_user para permitir acesso baseado em subscriber_id
 ):
     """
     Obter um assinante pelo ID.
-    Requer autenticação como SUPER_ADMIN.
+    Requer autenticação e filtra automaticamente por subscriber_id para roles não administrativas.
     """
-    subscriber = SubscriberService.get_subscriber_by_id(db, subscriber_id)
+    subscriber = SubscriberService.get_subscriber_by_id(db, subscriber_id, current_user=current_user)
     if not subscriber:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

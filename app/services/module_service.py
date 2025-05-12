@@ -24,7 +24,8 @@ class ModuleService:
         db: Session, 
         skip: int = 0, 
         limit: int = 100,
-        filter_params: Optional[Dict[str, Any]] = None
+        filter_params: Optional[Dict[str, Any]] = None,
+        current_user: Optional["User"] = None
     ) -> PaginatedModuleResponse:
         """
         Retorna uma lista paginada de módulos com opção de filtros
@@ -34,11 +35,19 @@ class ModuleService:
             skip: Número de registros para pular (paginação)
             limit: Número máximo de registros para retornar (paginação)
             filter_params: Parâmetros para filtragem (opcional)
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             PaginatedModuleResponse: Lista paginada de módulos
         """
         query = db.query(Module)
+        
+        # Aplicar filtro por subscriber_id se o usuário for DONO_ASSINANTE
+        # Para módulos, não aplicamos filtro por subscriber_id, pois são globais
+        # Mas o suporte está implementado para uso futuro caso os módulos passem a ser por assinante
+        # if current_user:
+        #     from app.core.dependencies import apply_subscriber_filter
+        #     query = apply_subscriber_filter(query, Module, current_user)
         
         # Aplicar filtros se houver
         if filter_params:

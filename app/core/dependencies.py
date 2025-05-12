@@ -132,3 +132,34 @@ async def get_current_admin_or_director(
         )
     
     return current_user
+
+
+def apply_subscriber_filter(query, model, current_user: User, admin_override: bool = True):
+    """
+    Aplica filtro por subscriber_id nas consultas, exceto para SUPER_ADMIN e DIRETOR (se admin_override=True)
+    
+    Args:
+        query: Query SQLAlchemy para aplicar o filtro
+        model: Modelo SQLAlchemy que deve conter o campo subscriber_id
+        current_user: Usuário autenticado atual
+        admin_override: Se True, não aplica filtro para SUPER_ADMIN e DIRETOR
+        
+    Returns:
+        Query filtrada
+    """
+    # Se o usuário for SUPER_ADMIN ou DIRETOR e admin_override for True, não aplicar filtro
+    if admin_override and current_user.role in [UserRole.SUPER_ADMIN, UserRole.DIRETOR]:
+        return query
+        
+    # Se o usuário for DONO_ASSINANTE, aplicar filtro pelo seu subscriber_id
+    if current_user.subscriber_id:
+        # Verificar se o modelo tem o campo subscriber_id
+        if hasattr(model, 'subscriber_id'):
+            return query.filter(model.subscriber_id == current_user.subscriber_id)
+    
+    # Caso o usuário não tenha subscriber_id, retornar query vazia (segurança)
+    if current_user.role == UserRole.DONO_ASSINANTE and not current_user.subscriber_id:
+        # No SQLAlchemy, filter(False) resulta em uma query que não retorna resultados
+        return query.filter(False)
+        
+    return query

@@ -24,7 +24,8 @@ class SubscriberService:
         db: Session, 
         skip: int = 0, 
         limit: int = 100,
-        filter_params: Optional[Dict[str, Any]] = None
+        filter_params: Optional[Dict[str, Any]] = None,
+        current_user: Optional[User] = None
     ) -> Dict[str, Any]:
         """
         Retorna uma lista paginada de assinantes com opção de filtros
@@ -34,11 +35,18 @@ class SubscriberService:
             skip: Número de registros para pular (paginação)
             limit: Número máximo de registros para retornar (paginação)
             filter_params: Parâmetros para filtragem (opcional)
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             Dict[str, Any]: Dicionário com total, página, tamanho e itens
         """
         query = db.query(Subscriber)
+        
+        # Aplicar filtro por subscriber_id se o usuário for DONO_ASSINANTE
+        # Importamos a função aqui para evitar circular imports
+        if current_user:
+            from app.core.dependencies import apply_subscriber_filter
+            query = apply_subscriber_filter(query, Subscriber, current_user)
         
         # Aplicar filtros se fornecidos
         if filter_params:
@@ -71,18 +79,31 @@ class SubscriberService:
         }
     
     @staticmethod
-    def get_subscriber_by_id(db: Session, subscriber_id: UUID) -> Optional[Subscriber]:
+    def get_subscriber_by_id(db: Session, subscriber_id: UUID, current_user: Optional[User] = None) -> Optional[Subscriber]:
         """
         Busca um assinante pelo ID
         
         Args:
             db: Sessão do banco de dados
             subscriber_id: ID do assinante
+            current_user: Usuário autenticado (para aplicar filtro por subscriber_id)
             
         Returns:
             Optional[Subscriber]: Assinante encontrado ou None
         """
-        return db.query(Subscriber).filter(Subscriber.id == subscriber_id).first()
+        query = db.query(Subscriber).filter(Subscriber.id == subscriber_id)
+        
+        # Aplicar filtro por subscriber_id se o usuário for DONO_ASSINANTE
+        if current_user:
+            # SUPER_ADMIN e DIRETOR podem acessar qualquer assinante
+            if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.DIRETOR]:
+                # DONO_ASSINANTE só pode acessar seu próprio assinante
+                if current_user.role == UserRole.DONO_ASSINANTE and current_user.subscriber_id:
+                    # Garante que o subscriber_id solicitado seja o mesmo associado ao usuário
+                    if current_user.subscriber_id != subscriber_id:
+                        return None
+        
+        return query.first()
     
     @staticmethod
     def get_subscriber_by_email(db: Session, email: str) -> Optional[Subscriber]:
