@@ -83,6 +83,9 @@ async def update_module(
     """
     Atualizar um módulo existente.
     """
+    # Para módulos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_module = ModuleService.update_module(db, module_id, module_data, current_user=current_user)
     updated_module = ModuleService.update_module(db, module_id, module_data)
     if not updated_module:
         raise HTTPException(
@@ -101,6 +104,9 @@ async def delete_module(
     """
     Excluir um módulo.
     """
+    # Para módulos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # success = ModuleService.delete_module(db, module_id, current_user=current_user)
     success = ModuleService.delete_module(db, module_id)
     if not success:
         raise HTTPException(
@@ -119,6 +125,9 @@ async def activate_module(
     """
     Ativar um módulo.
     """
+    # Para módulos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_module = ModuleService.toggle_module_status(db, module_id, activate=True, current_user=current_user)
     updated_module = ModuleService.toggle_module_status(db, module_id, activate=True)
     if not updated_module:
         raise HTTPException(
