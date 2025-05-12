@@ -132,8 +132,11 @@ app.include_router(external_api_router)
 # Adicionar rotas diretas específicas para /external-api/subscribers que retornam dados reais
 @app.get("/external-api/subscribers/", include_in_schema=False)
 @app.get("/external-api/subscribers", include_in_schema=False)
+@app.options("/external-api/subscribers/", include_in_schema=False)
+@app.options("/external-api/subscribers", include_in_schema=False)
 async def external_api_subscribers_direct(
     request: Request, 
+    response: Response,
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_current_user),
     skip: int = Query(0, ge=0, description="Quantos assinantes pular"),
@@ -143,8 +146,18 @@ async def external_api_subscribers_direct(
     Rota direta para interceptar chamadas para /external-api/subscribers/
     que são tentadas pelo frontend, mas que agora retorna dados reais.
     """
-    # Fazer log detalhado desta chamada
+    # Garantir cabeçalhos CORS para esta rota
     origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    
+    # Verificar se é uma requisição OPTIONS (preflight)
+    if request.method == "OPTIONS":
+        return {}
+    
+    # Fazer log detalhado desta chamada
     print(f"Chamada para /external-api/subscribers/ de {origin}, usuário: {current_user.email if current_user else 'Anônimo'}")
     
     try:

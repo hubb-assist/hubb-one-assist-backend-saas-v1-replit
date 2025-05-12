@@ -22,6 +22,7 @@ router = APIRouter(
 )
 
 @router.get("/", response_model=PaginatedSubscriberResponse, status_code=status.HTTP_200_OK)
+@router.options("/", include_in_schema=False)
 async def list_subscribers(
     request: Request,
     response: Response,
@@ -47,6 +48,10 @@ async def list_subscribers(
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    
+    # Verificar se é uma requisição OPTIONS (preflight)
+    if request.method == "OPTIONS":
+        return {}
     
     # Log para debug
     print(f"Listando assinantes para {current_user.email} com origin: {origin}")
