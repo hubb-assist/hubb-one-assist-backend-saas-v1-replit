@@ -58,6 +58,7 @@ class SubscriberUpdate(BaseModel):
     document: Optional[str] = None
     zip_code: Optional[str] = None
     address: Optional[str] = None
+    complement: Optional[str] = None  # Adicionado campo que faltava
     number: Optional[str] = None
     city: Optional[str] = None
     state: Optional[str] = None

@@ -290,6 +290,10 @@ class SubscriberService:
                 # Se o segmento for inválido, manteremos o segmento existente
                 print(f"Segmento inválido na atualização: {str(e)}")
                 subscriber_data.segment_id = db_subscriber.segment_id
+        else:
+            # Se segment_id não foi fornecido, mantenha o valor existente
+            print(f"Segmento não fornecido, mantendo existente: {db_subscriber.segment_id}")
+            subscriber_data.segment_id = db_subscriber.segment_id
         
         # Validar plano se estiver sendo atualizado
         if subscriber_data.plan_id:
@@ -299,6 +303,10 @@ class SubscriberService:
                 # Se o plano for inválido, manteremos o plano existente
                 print(f"Plano inválido na atualização: {str(e)}")
                 subscriber_data.plan_id = db_subscriber.plan_id
+        else:
+            # Se plan_id não foi fornecido, mantenha o valor existente
+            print(f"Plano não fornecido, mantendo existente: {db_subscriber.plan_id}")
+            subscriber_data.plan_id = db_subscriber.plan_id
         
         # Atualizar os dados
         update_data = subscriber_data.model_dump(exclude_unset=True)

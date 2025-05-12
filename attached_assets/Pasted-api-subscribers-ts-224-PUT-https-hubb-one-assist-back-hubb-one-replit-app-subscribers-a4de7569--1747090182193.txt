@@ -1,0 +1,34 @@
+api-subscribers.ts:224 
+ PUT https://hubb-one-assist-back-hubb-one.replit.app/subscribers/a4de7569-1f59-473c-98f3-a7b2c0930143 422 (Unprocessable Content)
+update	@	api-subscribers.ts:224
+onSubmit	@	subscriber-edit-form.tsx:179
+
+api-subscribers.ts:235 Erro ao editar assinante com ID a4de7569-1f59-473c-98f3-a7b2c0930143: 
+AxiosError {message: 'Request failed with status code 422', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ERR_BAD_REQUEST"
+config
+: 
+{transitional: {…}, adapter: Array(3), transformRequest: Array(1), transformResponse: Array(1), timeout: 0, …}
+message
+: 
+"Request failed with status code 422"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 0, withCredentials: true, upload: XMLHttpRequestUpload, …}
+response
+: 
+{data: {…}, status: 422, statusText: '', headers: AxiosHeaders, config: {…}, …}
+status
+: 
+422
+stack
+: 
+"AxiosError: Request failed with status code 422\n    at settle (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=a4300399:1229:12)\n    at XMLHttpRequest.onloadend (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=a4300399:1561:7)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=a4300399:2119:41)\n    at async Object.update (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api-subscribers.ts:124:24)\n    at async onSubmit (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/components/subscribers/subscriber-edit-form.tsx:145:7)\n    at async https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=a4300399:1465:9"
+[[Prototype]]
+: 
+Error
