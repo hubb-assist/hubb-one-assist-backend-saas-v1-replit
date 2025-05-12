@@ -3,17 +3,21 @@ Rotas de compatibilidade para lidar com caminhos incorretos ou legados
 que o frontend possa estar tentando usar
 """
 
-from fastapi import APIRouter, Request, Response, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request, Response, Depends, Body
+from fastapi.responses import JSONResponse, RedirectResponse
 from typing import Dict, Any, Optional
 
 from app.db.session import get_db
 from app.core.dependencies import get_current_user
 from app.db.models import User
 from app.services.subscriber_service import SubscriberService
+from app.services.auth_service import AuthService
 
 # Criar router separado para rotas de compatibilidade
-router = APIRouter(prefix="/api", tags=["compatibility"])
+router = APIRouter(tags=["compatibility"])
+
+# Router para /external-api
+external_api_router = APIRouter(prefix="/external-api", tags=["external-api-compatibility"])
 
 @router.get("/subscribers/", include_in_schema=False)
 async def api_subscribers_redirect(
@@ -121,3 +125,63 @@ async def external_api_subscribers_redirect(
             "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
         }
     )
+    
+# Adicionar nova rota para compatibilidade com o frontend usando /external-api/auth/login
+@router.post("/external-api/auth/login", include_in_schema=False)
+@router.options("/external-api/auth/login", include_in_schema=False)
+async def external_api_auth_login(
+    request: Request,
+    response: Response,
+    credentials: Dict[str, Any] = Body(None),
+    db = Depends(get_db)
+):
+    """
+    Rota de compatibilidade para /external-api/auth/login
+    Redireciona para a rota correta /auth/login
+    """
+    # Adicionar headers CORS para preflight
+    origin = request.headers.get("Origin", "*")
+    response.headers["Access-Control-Allow-Origin"] = origin
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    
+    # Verificar se é uma requisição OPTIONS (preflight)
+    if request.method == "OPTIONS":
+        return {}
+    
+    # Se não há credenciais, retornar erro
+    if not credentials:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Credenciais não fornecidas"}
+        )
+        
+    # Extrair email e senha das credenciais
+    email = credentials.get("email")
+    password = credentials.get("password")
+    
+    # Validar se email e senha foram fornecidos
+    if not email or not password:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Email e senha são obrigatórios"}
+        )
+    
+    # Autenticar usuário
+    user = AuthService.authenticate_user(db, email, password)
+    
+    if not user:
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Credenciais inválidas"}
+        )
+    
+    # Gerar tokens
+    tokens = AuthService.create_login_tokens(user)
+    
+    # Configurar cookies
+    AuthService.set_auth_cookies(response, tokens)
+    
+    # Resposta de sucesso
+    return {"mensagem": "Login realizado com sucesso."}

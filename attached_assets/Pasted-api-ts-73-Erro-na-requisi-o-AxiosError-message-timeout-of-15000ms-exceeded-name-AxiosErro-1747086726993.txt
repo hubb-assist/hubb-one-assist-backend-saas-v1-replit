@@ -1,0 +1,79 @@
+api.ts:73 Erro na requisição: 
+AxiosError {message: 'timeout of 15000ms exceeded', name: 'AxiosError', code: 'ECONNABORTED', config: {…}, request: XMLHttpRequest, …}
+code
+: 
+"ECONNABORTED"
+config
+: 
+adapter
+: 
+(3) ['xhr', 'http', 'fetch']
+allowAbsoluteUrls
+: 
+true
+baseURL
+: 
+"/external-api"
+data
+: 
+"{\"email\":\"admin@hubbassist.com\",\"password\":\"admin123\"}"
+env
+: 
+{FormData: ƒ, Blob: ƒ}
+headers
+: 
+AxiosHeaders {Accept: 'application/json', Content-Type: 'application/json'}
+maxBodyLength
+: 
+-1
+maxContentLength
+: 
+-1
+method
+: 
+"post"
+timeout
+: 
+15000
+transformRequest
+: 
+[ƒ]
+transformResponse
+: 
+[ƒ]
+transitional
+: 
+{silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false}
+url
+: 
+"/auth/login"
+validateStatus
+: 
+ƒ validateStatus(status)
+withCredentials
+: 
+true
+xsrfCookieName
+: 
+"XSRF-TOKEN"
+xsrfHeaderName
+: 
+"X-XSRF-TOKEN"
+[[Prototype]]
+: 
+Object
+message
+: 
+"timeout of 15000ms exceeded"
+name
+: 
+"AxiosError"
+request
+: 
+XMLHttpRequest {onreadystatechange: null, readyState: 4, timeout: 15000, withCredentials: true, upload: XMLHttpRequestUpload, …}
+stack
+: 
+"AxiosError: timeout of 15000ms exceeded\n    at XMLHttpRequest.handleTimeout (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=a4300399:1600:14)\n    at Axios.request (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/axios.js?v=a4300399:2119:41)\n    at async Object.login (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/api.ts?t=1747086238202:59:24)\n    at async login (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/lib/auth.ts?t=1747086238202:11:20)\n    at async onSubmit (https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/src/pages/login.tsx?t=1747086238202:62:23)\n    at async https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=a4300399:1465:9"
+[[Prototype]]
+: 
+Error
