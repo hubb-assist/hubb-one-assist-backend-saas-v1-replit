@@ -3,15 +3,16 @@ Serviço para operações CRUD de dispositivos Arduino
 """
 
 import uuid
-from typing import Optional, Dict, Any, List, TYPE_CHECKING
+from typing import Optional, Dict, Any, List, TYPE_CHECKING, Union
 from datetime import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
+from sqlalchemy.orm import Session
 
-from app.db.models import ArduinoDevice, Subscriber
+from app.db.models import ArduinoDevice, Subscriber, User, UserRole
 from app.schemas.arduino_device import ArduinoDeviceCreate, ArduinoDeviceUpdate, PaginatedArduinoDeviceResponse
+from app.core.dependencies import apply_subscriber_filter
 
 if TYPE_CHECKING:
     from app.db.models import User
@@ -45,38 +46,47 @@ class ArduinoDeviceService:
             PaginatedArduinoDeviceResponse: Lista paginada de dispositivos
         """
         query = db.query(ArduinoDevice)
+        total_query = db.query(ArduinoDevice)
         
-        # Aplicar filtros se existirem
+        # Aplicar filtros baseados no usuário logado
+        if current_user:
+            query = apply_subscriber_filter(query, current_user, ArduinoDevice)
+            total_query = apply_subscriber_filter(total_query, current_user, ArduinoDevice)
+        
+        # Aplicar filtros adicionais
         if filter_params:
             if "device_id" in filter_params:
                 query = query.filter(ArduinoDevice.device_id.ilike(f"%{filter_params['device_id']}%"))
+                total_query = total_query.filter(ArduinoDevice.device_id.ilike(f"%{filter_params['device_id']}%"))
+                
             if "name" in filter_params:
                 query = query.filter(ArduinoDevice.name.ilike(f"%{filter_params['name']}%"))
+                total_query = total_query.filter(ArduinoDevice.name.ilike(f"%{filter_params['name']}%"))
+                
             if "mac_address" in filter_params:
                 query = query.filter(ArduinoDevice.mac_address.ilike(f"%{filter_params['mac_address']}%"))
-            if "subscriber_id" in filter_params:
-                query = query.filter(ArduinoDevice.subscriber_id == filter_params["subscriber_id"])
-            if "is_active" in filter_params:
-                query = query.filter(ArduinoDevice.is_active == filter_params["is_active"])
-        
-        # Aplicar filtro de segurança por subscriber_id
-        if current_user:
-            from app.core.dependencies import apply_subscriber_filter
-            query = apply_subscriber_filter(query, ArduinoDevice, current_user)
+                total_query = total_query.filter(ArduinoDevice.mac_address.ilike(f"%{filter_params['mac_address']}%"))
                 
-        # Calcular total para paginação
-        total = query.count()
+            if "subscriber_id" in filter_params:
+                query = query.filter(ArduinoDevice.subscriber_id == filter_params['subscriber_id'])
+                total_query = total_query.filter(ArduinoDevice.subscriber_id == filter_params['subscriber_id'])
+                
+            if "is_active" in filter_params:
+                query = query.filter(ArduinoDevice.is_active == filter_params['is_active'])
+                total_query = total_query.filter(ArduinoDevice.is_active == filter_params['is_active'])
         
-        # Aplicar paginação
+        # Contagem total
+        total = total_query.count()
+        
+        # Consulta paginada
+        query = query.order_by(ArduinoDevice.name)
         query = query.offset(skip).limit(limit)
-        
-        # Executar consulta
         devices = query.all()
         
-        # Gerar resposta paginada
+        # Construir resposta paginada
         return PaginatedArduinoDeviceResponse(
             total=total,
-            page=(skip // limit) + 1,
+            page=skip // limit + 1 if limit else 1,
             size=limit,
             items=devices
         )
@@ -96,11 +106,10 @@ class ArduinoDeviceService:
         """
         query = db.query(ArduinoDevice).filter(ArduinoDevice.id == device_id)
         
-        # Aplicar filtro de segurança por subscriber_id
+        # Aplicar filtros baseados no usuário logado
         if current_user:
-            from app.core.dependencies import apply_subscriber_filter
-            query = apply_subscriber_filter(query, ArduinoDevice, current_user)
-            
+            query = apply_subscriber_filter(query, current_user, ArduinoDevice)
+        
         return query.first()
     
     @staticmethod
@@ -146,12 +155,17 @@ class ArduinoDeviceService:
         Raises:
             HTTPException: Se o assinante não for encontrado
         """
-        subscriber = db.query(Subscriber).filter(Subscriber.id == subscriber_id).first()
+        subscriber = db.query(Subscriber).filter(
+            Subscriber.id == subscriber_id,
+            Subscriber.is_active == True
+        ).first()
+        
         if not subscriber:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Assinante com ID {subscriber_id} não encontrado"
+                detail="Assinante não encontrado ou inativo"
             )
+        
         return subscriber
     
     @staticmethod
@@ -169,12 +183,17 @@ class ArduinoDeviceService:
         Raises:
             HTTPException: Se o assinante não for encontrado
         """
-        subscriber = db.query(Subscriber).filter(Subscriber.document == subscriber_code).first()
+        subscriber = db.query(Subscriber).filter(
+            Subscriber.document == subscriber_code,
+            Subscriber.is_active == True
+        ).first()
+        
         if not subscriber:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Assinante com código {subscriber_code} não encontrado"
+                detail="Assinante não encontrado ou inativo. Verifique o código (CPF/CNPJ) informado."
             )
+        
         return subscriber
     
     @staticmethod
@@ -192,20 +211,20 @@ class ArduinoDeviceService:
         Raises:
             HTTPException: Se o device_id ou MAC já estiver em uso ou se o assinante não for encontrado
         """
-        # Verificar se já existe dispositivo com o mesmo device_id
-        existing_device = ArduinoDeviceService.get_device_by_device_id(db, device_data.device_id)
-        if existing_device:
+        # Verificar se o ID do dispositivo já está em uso
+        existing_id = ArduinoDeviceService.get_device_by_device_id(db, device_data.device_id)
+        if existing_id:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Já existe um dispositivo com o ID '{device_data.device_id}'"
+                detail=f"ID de dispositivo '{device_data.device_id}' já está em uso"
             )
         
-        # Verificar se já existe dispositivo com o mesmo MAC
+        # Verificar se o MAC já está em uso
         existing_mac = ArduinoDeviceService.get_device_by_mac(db, device_data.mac_address)
         if existing_mac:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Já existe um dispositivo com o endereço MAC '{device_data.mac_address}'"
+                detail=f"Endereço MAC '{device_data.mac_address}' já está em uso"
             )
         
         # Verificar se o assinante existe
@@ -217,24 +236,16 @@ class ArduinoDeviceService:
             name=device_data.name,
             description=device_data.description,
             mac_address=device_data.mac_address,
-            ip_address=None,  # Será atualizado quando o dispositivo se conectar
             firmware_version=device_data.firmware_version,
             subscriber_id=device_data.subscriber_id,
-            is_active=True,
-            last_connection=None  # Será atualizado quando o dispositivo se conectar
+            is_active=True
         )
         
-        try:
-            db.add(new_device)
-            db.commit()
-            db.refresh(new_device)
-            return new_device
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro ao criar dispositivo: {str(e)}"
-            )
+        db.add(new_device)
+        db.commit()
+        db.refresh(new_device)
+        
+        return new_device
     
     @staticmethod
     def create_device_public(db: Session, device_data: dict) -> ArduinoDevice:
@@ -251,23 +262,23 @@ class ArduinoDeviceService:
         Raises:
             HTTPException: Se o device_id ou MAC já estiver em uso ou se o assinante não for encontrado
         """
-        # Verificar se já existe dispositivo com o mesmo device_id
-        existing_device = ArduinoDeviceService.get_device_by_device_id(db, device_data["device_id"])
-        if existing_device:
+        # Verificar se o ID do dispositivo já está em uso
+        existing_id = ArduinoDeviceService.get_device_by_device_id(db, device_data["device_id"])
+        if existing_id:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Já existe um dispositivo com o ID '{device_data['device_id']}'"
+                detail=f"ID de dispositivo '{device_data['device_id']}' já está em uso"
             )
         
-        # Verificar se já existe dispositivo com o mesmo MAC
+        # Verificar se o MAC já está em uso
         existing_mac = ArduinoDeviceService.get_device_by_mac(db, device_data["mac_address"])
         if existing_mac:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Já existe um dispositivo com o endereço MAC '{device_data['mac_address']}'"
+                detail=f"Endereço MAC '{device_data['mac_address']}' já está em uso"
             )
         
-        # Verificar se o assinante existe pelo código (documento)
+        # Buscar o assinante pelo código
         subscriber = ArduinoDeviceService.validate_subscriber_by_code(db, device_data["subscriber_code"])
         
         # Criar o dispositivo
@@ -276,24 +287,16 @@ class ArduinoDeviceService:
             name=device_data["name"],
             description=device_data.get("description"),
             mac_address=device_data["mac_address"],
-            ip_address=None,  # Será atualizado quando o dispositivo se conectar
             firmware_version=device_data.get("firmware_version"),
             subscriber_id=subscriber.id,
-            is_active=True,
-            last_connection=None  # Será atualizado quando o dispositivo se conectar
+            is_active=True
         )
         
-        try:
-            db.add(new_device)
-            db.commit()
-            db.refresh(new_device)
-            return new_device
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro ao criar dispositivo: {str(e)}"
-            )
+        db.add(new_device)
+        db.commit()
+        db.refresh(new_device)
+        
+        return new_device
     
     @staticmethod
     def update_device(db: Session, device_id: uuid.UUID, device_data: ArduinoDeviceUpdate, current_user: Optional["User"] = None) -> Optional[ArduinoDevice]:
@@ -312,38 +315,45 @@ class ArduinoDeviceService:
         Raises:
             HTTPException: Se o MAC já estiver em uso por outro dispositivo
         """
-        # Buscar o dispositivo
-        device = ArduinoDeviceService.get_device_by_id(db, device_id, current_user)
+        # Buscar o dispositivo pelo ID
+        device = ArduinoDeviceService.get_device_by_id(db, device_id, current_user=current_user)
         if not device:
             return None
         
-        # Verificar MAC se for atualizado
+        # Verificar se o MAC já está em uso por outro dispositivo
         if device_data.mac_address and device_data.mac_address != device.mac_address:
             existing_mac = ArduinoDeviceService.get_device_by_mac(db, device_data.mac_address)
             if existing_mac and existing_mac.id != device_id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
-                    detail=f"Já existe um dispositivo com o endereço MAC '{device_data.mac_address}'"
+                    detail=f"Endereço MAC '{device_data.mac_address}' já está em uso por outro dispositivo"
                 )
         
-        # Atualizar os campos fornecidos
-        update_data = device_data.model_dump(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(device, key, value)
+        # Atualizar os campos
+        if device_data.name is not None:
+            device.name = device_data.name
         
-        # Atualizar timestamp
+        if device_data.description is not None:
+            device.description = device_data.description
+        
+        if device_data.mac_address is not None:
+            device.mac_address = device_data.mac_address
+        
+        if device_data.ip_address is not None:
+            device.ip_address = device_data.ip_address
+        
+        if device_data.firmware_version is not None:
+            device.firmware_version = device_data.firmware_version
+        
+        if device_data.is_active is not None:
+            device.is_active = device_data.is_active
+        
         device.updated_at = datetime.utcnow()
         
-        try:
-            db.commit()
-            db.refresh(device)
-            return device
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro ao atualizar dispositivo: {str(e)}"
-            )
+        db.commit()
+        db.refresh(device)
+        
+        return device
     
     @staticmethod
     def update_device_connection(db: Session, device_id_or_mac: str, ip_address: str) -> Optional[ArduinoDevice]:
@@ -358,12 +368,13 @@ class ArduinoDeviceService:
         Returns:
             Optional[ArduinoDevice]: Dispositivo atualizado ou None se não for encontrado
         """
-        # Buscar dispositivo por ID ou MAC
+        # Buscar o dispositivo pelo ID ou MAC
         device = db.query(ArduinoDevice).filter(
             or_(
                 ArduinoDevice.device_id == device_id_or_mac,
                 ArduinoDevice.mac_address == device_id_or_mac
-            )
+            ),
+            ArduinoDevice.is_active == True
         ).first()
         
         if not device:
@@ -373,13 +384,10 @@ class ArduinoDeviceService:
         device.ip_address = ip_address
         device.last_connection = datetime.utcnow()
         
-        try:
-            db.commit()
-            db.refresh(device)
-            return device
-        except Exception:
-            db.rollback()
-            return None
+        db.commit()
+        db.refresh(device)
+        
+        return device
     
     @staticmethod
     def delete_device(db: Session, device_id: uuid.UUID, current_user: Optional["User"] = None) -> bool:
@@ -394,21 +402,16 @@ class ArduinoDeviceService:
         Returns:
             bool: True se o dispositivo foi excluído, False se não foi encontrado
         """
-        # Buscar o dispositivo com filtro de segurança
-        device = ArduinoDeviceService.get_device_by_id(db, device_id, current_user)
+        # Buscar o dispositivo pelo ID
+        device = ArduinoDeviceService.get_device_by_id(db, device_id, current_user=current_user)
         if not device:
             return False
         
-        try:
-            db.delete(device)
-            db.commit()
-            return True
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro ao excluir dispositivo: {str(e)}"
-            )
+        # Excluir o dispositivo
+        db.delete(device)
+        db.commit()
+        
+        return True
     
     @staticmethod
     def toggle_device_status(db: Session, device_id: uuid.UUID, activate: bool, current_user: Optional["User"] = None) -> Optional[ArduinoDevice]:
@@ -424,22 +427,16 @@ class ArduinoDeviceService:
         Returns:
             Optional[ArduinoDevice]: Dispositivo atualizado ou None se não for encontrado
         """
-        # Buscar o dispositivo com filtro de segurança
-        device = ArduinoDeviceService.get_device_by_id(db, device_id, current_user)
+        # Buscar o dispositivo pelo ID
+        device = ArduinoDeviceService.get_device_by_id(db, device_id, current_user=current_user)
         if not device:
             return None
         
-        # Atualizar status
+        # Atualizar o status
         device.is_active = activate
         device.updated_at = datetime.utcnow()
         
-        try:
-            db.commit()
-            db.refresh(device)
-            return device
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Erro ao {'ativar' if activate else 'desativar'} dispositivo: {str(e)}"
-            )
+        db.commit()
+        db.refresh(device)
+        
+        return device

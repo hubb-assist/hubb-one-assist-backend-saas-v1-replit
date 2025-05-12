@@ -2,27 +2,27 @@
 Rotas públicas da API para criação de dispositivos Arduino sem autenticação
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.schemas.arduino_device import PublicArduinoDeviceCreate
 from app.services.arduino_device_service import ArduinoDeviceService
+from app.schemas.arduino_device import PublicArduinoDeviceCreate, ArduinoDeviceResponse
 
-# Definir o router
+# Criar router para operações públicas
 router = APIRouter(
     prefix="/public/arduino",
-    tags=["public"],
+    tags=["public", "arduino"],
     responses={
         400: {"description": "Requisição inválida"},
-        409: {"description": "Conflito - ID do dispositivo ou MAC já cadastrado"},
-        404: {"description": "Recurso não encontrado"},
-        500: {"description": "Erro interno do servidor"}
-    },
+        404: {"description": "Dispositivo não encontrado"},
+        409: {"description": "Conflito - dispositivo já existe"}
+    }
 )
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=ArduinoDeviceResponse, status_code=status.HTTP_201_CREATED)
 async def register_arduino_device(
     device_data: PublicArduinoDeviceCreate,
     db: Session = Depends(get_db)
@@ -42,8 +42,8 @@ async def register_arduino_device(
         HTTPException: Se houver erros de validação ou conflitos
     """
     try:
-        # Converter para o formato interno
-        internal_device_data = {
+        # Preparar dados para criar o dispositivo
+        device_create_data = {
             "device_id": device_data.device_id,
             "name": device_data.name,
             "description": device_data.description,
@@ -52,26 +52,22 @@ async def register_arduino_device(
             "subscriber_code": device_data.subscriber_code
         }
         
-        # Utilizar o serviço para criar o dispositivo
-        new_device = ArduinoDeviceService.create_device_public(db, internal_device_data)
+        # Criar o dispositivo através do serviço
+        device = ArduinoDeviceService.create_device_public(db, device_create_data)
+        return device
         
-        # Retornar resposta de sucesso
-        return {
-            "message": "Dispositivo Arduino registrado com sucesso",
-            "device": {
-                "id": str(new_device.id),
-                "device_id": new_device.device_id,
-                "name": new_device.name,
-                "subscriber_id": str(new_device.subscriber_id)
-            }
-        }
-        
-    except HTTPException as he:
-        # Repassar exceções HTTP geradas pelo serviço
-        raise he
+    except ValueError as e:
+        # Erro de validação (ex: MAC address inválido)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except HTTPException as e:
+        # Repassar exceções HTTP já formatadas pelo serviço
+        raise e
     except Exception as e:
-        # Log do erro e resposta genérica para outros erros
-        print(f"[ERROR] Erro ao registrar dispositivo Arduino: {str(e)}")
+        # Erro genérico
+        print(f"Erro ao registrar dispositivo Arduino: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar a solicitação. Por favor, tente novamente."
@@ -82,6 +78,7 @@ async def register_arduino_device(
 async def connect_arduino_device(
     device_id: str,
     mac_address: str,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """
@@ -90,6 +87,7 @@ async def connect_arduino_device(
     Args:
         device_id: ID do dispositivo
         mac_address: Endereço MAC do dispositivo
+        request: Objeto de requisição FastAPI
         db: Sessão do banco de dados
         
     Returns:
@@ -99,10 +97,14 @@ async def connect_arduino_device(
         HTTPException: Se houver erros ou o dispositivo não for encontrado
     """
     try:
-        # Obter o endereço IP do dispositivo
-        from fastapi import Request
-        request = Request
-        client_ip = request.client.host
+        # Obter o endereço IP do dispositivo - extrai do X-Forwarded-For ou diretamente do client
+        x_forwarded_for = request.headers.get("X-Forwarded-For")
+        if x_forwarded_for:
+            # Se há múltiplos IPs, pegamos o primeiro (mais próximo do cliente)
+            client_ip = x_forwarded_for.split(",")[0].strip()
+        else:
+            # Caso contrário, usar o IP direto
+            client_ip = request.client.host if hasattr(request, "client") and hasattr(request.client, "host") else "0.0.0.0"
         
         # Atualizar informações de conexão
         updated = ArduinoDeviceService.update_device_connection(db, device_id, client_ip)
@@ -112,19 +114,21 @@ async def connect_arduino_device(
                 detail="Dispositivo não encontrado"
             )
         
-        # Retornar resposta de sucesso
         return {
             "message": "Conexão registrada com sucesso",
             "status": "connected",
             "ip_address": client_ip
         }
         
-    except HTTPException as he:
-        # Repassar exceções HTTP geradas pelo serviço
-        raise he
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except HTTPException as e:
+        raise e
     except Exception as e:
-        # Log do erro e resposta genérica para outros erros
-        print(f"[ERROR] Erro ao registrar conexão de dispositivo Arduino: {str(e)}")
+        print(f"Erro ao registrar conexão do dispositivo: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Erro ao processar a solicitação. Por favor, tente novamente."

@@ -2,11 +2,12 @@
 Esquemas Pydantic para dispositivos Arduino
 """
 
-from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
+from datetime import datetime
+import re
 
-from pydantic import BaseModel, Field, ConfigDict, validator, IPvAnyAddress
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 
 class ArduinoDeviceBase(BaseModel):
@@ -16,23 +17,19 @@ class ArduinoDeviceBase(BaseModel):
     description: Optional[str] = Field(None, max_length=255, description="Descrição do dispositivo")
     mac_address: str = Field(..., description="Endereço MAC do dispositivo")
     firmware_version: Optional[str] = Field(None, description="Versão do firmware")
-    
+
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True
     )
-    
-    @validator('mac_address')
+
+    @field_validator('mac_address')
     def validate_mac_address(cls, v):
         """Valida o formato do endereço MAC"""
-        # Remove caracteres não permitidos
-        v = v.replace('-', ':').replace('.', ':').strip().upper()
-        
-        # Verificar o formato básico (XX:XX:XX:XX:XX:XX)
-        import re
-        if not re.match(r'^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$', v):
-            raise ValueError("Formato de MAC inválido. Use o formato XX:XX:XX:XX:XX:XX")
-            
+        # Formato padrão XX:XX:XX:XX:XX:XX ou XX-XX-XX-XX-XX-XX
+        mac_pattern = r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+        if not re.match(mac_pattern, v):
+            raise ValueError("Endereço MAC inválido. Use o formato XX:XX:XX:XX:XX:XX ou XX-XX-XX-XX-XX-XX")
         return v
 
 
@@ -49,27 +46,22 @@ class ArduinoDeviceUpdate(BaseModel):
     ip_address: Optional[str] = None
     firmware_version: Optional[str] = None
     is_active: Optional[bool] = None
-    
+
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
         extra="forbid"  # impede campos extras
     )
-    
-    @validator('mac_address')
+
+    @field_validator('mac_address')
     def validate_mac_address(cls, v):
         """Valida o formato do endereço MAC"""
         if v is None:
             return v
-            
-        # Remove caracteres não permitidos
-        v = v.replace('-', ':').replace('.', ':').strip().upper()
-        
-        # Verificar o formato básico (XX:XX:XX:XX:XX:XX)
-        import re
-        if not re.match(r'^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$', v):
-            raise ValueError("Formato de MAC inválido. Use o formato XX:XX:XX:XX:XX:XX")
-            
+        # Formato padrão XX:XX:XX:XX:XX:XX ou XX-XX-XX-XX-XX-XX
+        mac_pattern = r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+        if not re.match(mac_pattern, v):
+            raise ValueError("Endereço MAC inválido. Use o formato XX:XX:XX:XX:XX:XX ou XX-XX-XX-XX-XX-XX")
         return v
 
 
@@ -82,7 +74,7 @@ class ArduinoDeviceResponse(ArduinoDeviceBase):
     last_connection: Optional[datetime] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True
@@ -97,7 +89,6 @@ class PaginatedArduinoDeviceResponse(BaseModel):
     items: List[ArduinoDeviceResponse]
 
 
-# Esquema específico para a API pública
 class PublicArduinoDeviceCreate(BaseModel):
     """Esquema para criação pública de dispositivo Arduino durante registro"""
     device_id: str = Field(..., min_length=3, max_length=50, description="ID único do dispositivo")
@@ -106,16 +97,12 @@ class PublicArduinoDeviceCreate(BaseModel):
     mac_address: str = Field(..., description="Endereço MAC do dispositivo")
     firmware_version: Optional[str] = Field(None, description="Versão do firmware")
     subscriber_code: str = Field(..., description="Código do assinante para associação")
-    
-    @validator('mac_address')
+
+    @field_validator('mac_address')
     def validate_mac_address(cls, v):
         """Valida o formato do endereço MAC"""
-        # Remove caracteres não permitidos
-        v = v.replace('-', ':').replace('.', ':').strip().upper()
-        
-        # Verificar o formato básico (XX:XX:XX:XX:XX:XX)
-        import re
-        if not re.match(r'^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$', v):
-            raise ValueError("Formato de MAC inválido. Use o formato XX:XX:XX:XX:XX:XX")
-            
+        # Formato padrão XX:XX:XX:XX:XX:XX ou XX-XX-XX-XX-XX-XX
+        mac_pattern = r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
+        if not re.match(mac_pattern, v):
+            raise ValueError("Endereço MAC inválido. Use o formato XX:XX:XX:XX:XX:XX ou XX-XX-XX-XX-XX-XX")
         return v
