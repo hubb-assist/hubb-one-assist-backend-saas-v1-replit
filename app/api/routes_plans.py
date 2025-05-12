@@ -43,6 +43,9 @@ async def list_plans(
     if is_active is not None:
         filter_params["is_active"] = is_active
         
+    # Para planos, passamos o current_user para manter compatibilidade com a interface,
+    # mas o filtro por subscriber_id não é aplicado no serviço por serem globais
+    # No futuro, se necessário, essa estrutura permitirá fácil adaptação para planos por assinante
     return PlanService.get_plans(db, skip, limit, filter_params, current_user=current_user)
 
 
@@ -55,6 +58,8 @@ async def get_plan(
     """
     Obter um plano pelo ID.
     """
+    # Para planos, passamos o current_user para manter compatibilidade com a interface,
+    # mas o filtro por subscriber_id não é aplicado no serviço por serem globais
     db_plan = PlanService.get_plan_by_id(db, plan_id, current_user=current_user)
     if not db_plan:
         raise HTTPException(
@@ -98,6 +103,8 @@ async def create_plan(
     """
     Criar um novo plano.
     """
+    # Para planos, não aplicamos filtro por subscriber_id na criação, pois são globais
+    # No futuro, se necessário, podemos adaptar para passar o current_user
     db_plan = PlanService.create_plan(db, plan_data)
     
     # Carregar os módulos vinculados ao plano
@@ -183,6 +190,9 @@ async def delete_plan(
     """
     Excluir um plano.
     """
+    # Para planos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # success = PlanService.delete_plan(db, plan_id, current_user=current_user)
     success = PlanService.delete_plan(db, plan_id)
     if not success:
         raise HTTPException(
@@ -201,6 +211,9 @@ async def activate_plan(
     """
     Ativar um plano.
     """
+    # Para planos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_plan = PlanService.toggle_plan_status(db, plan_id, activate=True, current_user=current_user)
     updated_plan = PlanService.toggle_plan_status(db, plan_id, activate=True)
     if not updated_plan:
         raise HTTPException(
@@ -244,6 +257,9 @@ async def deactivate_plan(
     """
     Desativar um plano.
     """
+    # Para planos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_plan = PlanService.toggle_plan_status(db, plan_id, activate=False, current_user=current_user)
     updated_plan = PlanService.toggle_plan_status(db, plan_id, activate=False)
     if not updated_plan:
         raise HTTPException(
