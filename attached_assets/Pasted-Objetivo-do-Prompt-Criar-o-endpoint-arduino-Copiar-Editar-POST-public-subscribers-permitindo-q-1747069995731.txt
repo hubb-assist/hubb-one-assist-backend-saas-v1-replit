@@ -1,0 +1,103 @@
+Objetivo do Prompt
+Criar o endpoint:
+
+arduino
+Copiar
+Editar
+POST /public/subscribers
+...permitindo que qualquer pessoa (via CORS autorizado) crie uma nova assinatura enviando os dados completos de cadastro.
+
+📥 Prompt para o backend (FastAPI)
+python
+Copiar
+Editar
+# src/routes/public_subscriber.py
+
+from fastapi import APIRouter, HTTPException, status, Depends
+from pydantic import BaseModel, EmailStr
+from typing import Optional
+from uuid import UUID
+from app.database import get_db
+from sqlalchemy.orm import Session
+from app.models import Subscriber  # substitua pelo seu model real
+from app.security import hash_password  # função para hashear senha
+from app.schemas import SubscriberCreate as InternalSchema  # schema interno se necessário
+
+router = APIRouter(prefix="/public", tags=["Public"])
+
+class SubscriberCreate(BaseModel):
+    name: str
+    clinic_name: str
+    email: EmailStr
+    phone: str
+    document: str
+    zip_code: str
+    address: str
+    number: str
+    city: str
+    state: str
+    segment_id: UUID
+    plan_id: UUID
+    password: str
+
+@router.post("/subscribers", status_code=status.HTTP_201_CREATED)
+def public_create_subscriber(data: SubscriberCreate, db: Session = Depends(get_db)):
+    # Verifica se o e-mail já está em uso
+    existing = db.query(Subscriber).filter_by(email=data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="E-mail já cadastrado.")
+
+    # Cria o assinante
+    new_subscriber = Subscriber(
+        name=data.name,
+        clinic_name=data.clinic_name,
+        email=data.email,
+        phone=data.phone,
+        document=data.document,
+        zip_code=data.zip_code,
+        address=data.address,
+        number=data.number,
+        city=data.city,
+        state=data.state,
+        segment_id=data.segment_id,
+        plan_id=data.plan_id,
+        password_hash=hash_password(data.password),
+    )
+
+    db.add(new_subscriber)
+    db.commit()
+    db.refresh(new_subscriber)
+
+    return {"message": "Assinante criado com sucesso", "id": str(new_subscriber.id)}
+🛡️ CORS seguro (em main.py)
+python
+Copiar
+Editar
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "https://977761fe-66ad-4e57-b1d5-f3356eb27515-00-1yp0n9cqd8r5p.spock.replit.dev",  # teste
+    "https://hubb-one-assist-front-hubb-one.replit.app",  # produção
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+✅ Último passo: incluir a rota no main.py
+python
+Copiar
+Editar
+from src.routes import public_subscriber
+
+app.include_router(public_subscriber.router)
+🔒 Segurança garantida por:
+CORS restrito aos domínios autorizados
+
+Validação de e-mail duplicado
+
+Hash da senha antes de salvar
+
