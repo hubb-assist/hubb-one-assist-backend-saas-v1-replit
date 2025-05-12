@@ -8,7 +8,7 @@ import markdown
 
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, JSONResponse
 from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, get_db
@@ -26,6 +26,8 @@ from app.api.routes_public_arduino import router as public_arduino_router
 from app.api.routes_public_segments import router as public_segments_router
 from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
+# Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
+from app.api.routes_api_compatibility import router as compatibility_router
 
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
@@ -91,6 +93,10 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
+# Adicionar middleware especial para corrigir problemas de CORS em rotas específicas
+from app.core.cors_fixer import cors_fixer_middleware
+app.add_middleware(cors_fixer_middleware)
+
 # Incluir routers
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -107,6 +113,59 @@ app.include_router(public_plans_router)
 app.include_router(public_subscribers_router)
 # O router público Arduino foi desativado
 # public_arduino_router existe apenas para compatibilidade com código existente
+
+# Incluir router de compatibilidade para URLs mal formadas ou legadas
+app.include_router(compatibility_router)
+
+# Adicionar rotas diretas específicas para /external-api/subscribers
+@app.get("/external-api/subscribers/", include_in_schema=False)
+@app.get("/external-api/subscribers", include_in_schema=False)
+async def external_api_subscribers_direct(request: Request):
+    """
+    Rota direta para interceptar chamadas para /external-api/subscribers/
+    que são tentadas pelo frontend.
+    """
+    origin = request.headers.get("Origin", "*")
+    return JSONResponse(
+        status_code=400,
+        content={
+            "detail": "URL incorreta. Use /subscribers/ em vez de /external-api/subscribers/",
+            "message": "O frontend deve ser atualizado para usar a URL correta."
+        },
+        headers={
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
+        }
+    )
+
+# Tratamento especial para requisições OPTIONS (CORS preflight)
+@app.options("/subscribers", include_in_schema=False)
+@app.options("/subscribers/", include_in_schema=False)
+@app.options("/subscribers/{path:path}", include_in_schema=False)
+@app.options("/api/subscribers", include_in_schema=False)
+@app.options("/api/subscribers/", include_in_schema=False)
+@app.options("/api/subscribers/{path:path}", include_in_schema=False)
+@app.options("/external-api/subscribers", include_in_schema=False)
+@app.options("/external-api/subscribers/", include_in_schema=False)
+@app.options("/external-api/subscribers/{path:path}", include_in_schema=False)
+async def options_subscribers(request: Request):
+    """
+    Tratamento especial para requisições OPTIONS (preflight) 
+    em rotas relacionadas a subscribers.
+    """
+    origin = request.headers.get("Origin", "*")
+    return Response(
+        status_code=200,
+        headers={
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS, PATCH",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
+            "Access-Control-Max-Age": "86400"  # Cache preflight por 24 horas
+        }
+    )
 
 # Página inicial HTML
 @app.get("/", response_class=HTMLResponse)

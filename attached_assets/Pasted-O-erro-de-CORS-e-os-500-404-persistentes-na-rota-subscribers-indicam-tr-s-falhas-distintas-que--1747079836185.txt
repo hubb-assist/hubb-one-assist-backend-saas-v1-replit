@@ -1,0 +1,75 @@
+O erro de CORS e os 500 + 404 persistentes na rota /subscribers/ indicam três falhas distintas, que juntas estão quebrando a listagem de assinantes:
+
+✅ Diagnóstico final
+1. ❌ CORS bloqueado
+Erro claro no console:
+
+pgsql
+Copiar
+Editar
+No 'Access-Control-Allow-Origin' header is present
+✅ Solução:
+No backend FastAPI, certifique-se de que o CORS inclui explicitamente o domínio do frontend atual:
+
+python
+Copiar
+Editar
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://<frontend-domain>.replit.dev"],  # ou "*", apenas para testes locais
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+⚠️ Em produção, evite ["*"]. Use os domínios reais.
+
+2. ❌ Redirect 307 seguido de erro 500
+A linha:
+
+Copiar
+Editar
+subscribers/ → 307 → 500
+Indica que seu frontend está batendo em /subscribers, mas o backend responde com um redirecionamento que quebra o header (token de autenticação não é mantido com redirect automático em fetch/axios).
+
+✅ Solução:
+No frontend, sempre use o caminho completo:
+
+ts
+Copiar
+Editar
+axios.get("https://hubb-one-assist-back-hubb-one.replit.app/api/subscribers", { withCredentials: true });
+E o backend precisa garantir que a rota /api/subscribers existe diretamente, e não apenas via redirecionamento.
+
+3. ❌ Requisições para /subscribers/ sem o /api
+Você tem chamadas para:
+
+http
+Copiar
+Editar
+GET /subscribers/
+que devem ser:
+
+http
+Copiar
+Editar
+GET /api/subscribers
+✅ Solução:
+Corrigir os caminhos no api-subscribers.ts:
+
+ts
+Copiar
+Editar
+export async function getAll() {
+  return api.get("/api/subscribers"); // <- corrige aqui
+}
+🔒 Checklist imediato para resolver
+ No backend (main.py), configure corretamente o CORS para aceitar seu domínio de frontend Replit.
+
+ Confirme que todas as rotas protegidas começam com /api/... — inclusive no frontend.
+
+ No axios/fetch, mantenha withCredentials: true.
+
+ Evite redirecionamento 307 no backend — configure a rota final sem RedirectResponse.
+
