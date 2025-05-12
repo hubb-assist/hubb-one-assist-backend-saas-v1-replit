@@ -47,7 +47,7 @@ async def list_segments(
         
         print(f"[DEBUG] Filtros aplicados: {filter_params}")
         
-        result = SegmentService.get_segments(db, skip, limit, filter_params)
+        result = SegmentService.get_segments(db, skip, limit, filter_params, current_user=current_user)
         print(f"[DEBUG] Segmentos encontrados: {len(result.items)}")
         
         return result
@@ -65,7 +65,7 @@ async def get_segment(
     """
     Obter um segmento pelo ID.
     """
-    segment = SegmentService.get_segment_by_id(db, segment_id)
+    segment = SegmentService.get_segment_by_id(db, segment_id, current_user=current_user)
     if not segment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -96,6 +96,9 @@ async def update_segment(
     """
     Atualizar um segmento existente.
     """
+    # No caso de segmentos, não precisamos passar o current_user para o update
+    # pois segmentos são globais. Se mudarem, basta descomentar a linha abaixo
+    # updated_segment = SegmentService.update_segment(db, segment_id, segment_data, current_user=current_user)
     updated_segment = SegmentService.update_segment(db, segment_id, segment_data)
     if not updated_segment:
         raise HTTPException(
@@ -114,6 +117,9 @@ async def delete_segment(
     """
     Excluir um segmento.
     """
+    # Para segmentos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # success = SegmentService.delete_segment(db, segment_id, current_user=current_user)
     success = SegmentService.delete_segment(db, segment_id)
     if not success:
         raise HTTPException(
@@ -132,6 +138,9 @@ async def activate_segment(
     """
     Ativar um segmento.
     """
+    # Para segmentos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_segment = SegmentService.toggle_segment_status(db, segment_id, activate=True, current_user=current_user)
     updated_segment = SegmentService.toggle_segment_status(db, segment_id, activate=True)
     if not updated_segment:
         raise HTTPException(
@@ -150,6 +159,9 @@ async def deactivate_segment(
     """
     Desativar um segmento.
     """
+    # Para segmentos, não aplicamos filtro por subscriber_id, pois são globais
+    # Mas deixamos o código preparado para futuras mudanças se necessário
+    # updated_segment = SegmentService.toggle_segment_status(db, segment_id, activate=False, current_user=current_user)
     updated_segment = SegmentService.toggle_segment_status(db, segment_id, activate=False)
     if not updated_segment:
         raise HTTPException(
