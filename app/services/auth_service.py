@@ -68,7 +68,9 @@ class AuthService:
         token_data = {
             "sub": str(user.id),
             "email": user.email,
-            "role": user.role.value if user.role else None
+            "role": user.role.value if user.role else None,
+            "subscriber_id": str(user.subscriber_id) if user.subscriber_id else None,
+            "permissions": []  # Implementação futura de permissões granulares
         }
         
         # Criar access token
@@ -155,12 +157,16 @@ class AuthService:
             user_id = int(payload.get("sub"))
             email = payload.get("email")
             role = payload.get("role")
+            subscriber_id = payload.get("subscriber_id")
+            permissions = payload.get("permissions", [])
             exp = payload.get("exp")
             
             return TokenData(
                 user_id=user_id,
                 email=email,
                 role=role,
+                subscriber_id=subscriber_id,
+                permissions=permissions,
                 exp=exp
             )
         except:
