@@ -1,8 +1,9 @@
 """
 Rotas da API para gerenciamento de pacientes no sistema HUBB ONE Assist
 """
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, Query, Path, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -13,11 +14,8 @@ from app.db.models import User
 from app.schemas.patient import PatientCreate, PatientUpdate, PatientResponse, PatientListResponse
 from app.services.patient_service import PatientService
 
-router = APIRouter(
-    prefix="/patients",
-    tags=["patients"],
-    responses={404: {"description": "Não encontrado"}}
-)
+
+router = APIRouter(prefix="/patients", tags=["patients"])
 
 
 @router.post("/", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
