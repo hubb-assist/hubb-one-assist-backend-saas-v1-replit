@@ -1,0 +1,82 @@
+# TAREFA BACK 034 — CRUD de Pacientes (Cadastro Inicial)
+
+### Objetivo
+Implementar o endpoint inicial para criar pacientes, respeitando o isolamento multitenant e as permissões definidas.
+
+---
+
+### 🔹 Modelo (models.py)
+
+```python
+class Patient(Base):
+    __tablename__ = "patients"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    name = Column(String, nullable=False)
+    cpf = Column(String, unique=True, nullable=False)
+    rg = Column(String, nullable=True)
+    birth_date = Column(Date, nullable=False)
+    phone = Column(String, nullable=True)
+
+    zip_code = Column(String, nullable=True)
+    address = Column(String, nullable=True)
+    number = Column(String, nullable=True)
+    complement = Column(String, nullable=True)
+    district = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+```
+
+---
+
+### 📊 Schemas (schemas.py)
+
+```python
+class PatientCreate(BaseModel):
+    name: str
+    cpf: str
+    rg: Optional[str] = None
+    birth_date: date
+    phone: Optional[str] = None
+
+    zip_code: Optional[str] = None
+    address: Optional[str] = None
+    number: Optional[str] = None
+    complement: Optional[str] = None
+    district: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+
+class PatientResponse(PatientCreate):
+    id: UUID
+    class Config:
+        orm_mode = True
+```
+
+---
+
+### 📁 Endpoint - routes_patients.py
+
+```python
+@router.post("/patients", response_model=PatientResponse)
+@has_permission("CAN_CREATE_PATIENT")
+async def create_patient(
+    patient_data: PatientCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user_with_permissions)
+):
+    patient = Patient(**patient_data.dict())
+    patient.subscriber_id = current_user.subscriber_id
+    db.add(patient)
+    db.commit()
+    db.refresh(patient)
+    return patient
+```
+
+---
+
+### 🔒 Proteção por Tenant
+- `subscriber_id` é vinculado automaticamente com base no token JWT
+- Middleware já garante isolamento de tenant em queries e updates futuras

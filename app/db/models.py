@@ -3,11 +3,11 @@ Modelos de banco de dados usando SQLAlchemy
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum as PyEnum
 from typing import Optional, List
 
-from sqlalchemy import Column, String, Boolean, DateTime, Enum, Integer, Text, Float, ForeignKey
+from sqlalchemy import Column, String, Boolean, DateTime, Enum, Integer, Text, Float, ForeignKey, Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -205,3 +205,39 @@ class ArduinoDevice(Base):
     
     def __repr__(self):
         return f"<ArduinoDevice {self.name} ({self.device_id})>"
+
+
+class Patient(Base):
+    """
+    Modelo para pacientes no sistema, vinculados a assinantes.
+    Permite o cadastro de informações básicas e de contato dos pacientes.
+    """
+    __tablename__ = "patients"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name = Column(String(150), nullable=False, index=True)
+    cpf = Column(String(14), nullable=False, index=True)
+    rg = Column(String(20), nullable=True)
+    birth_date = Column(Date, nullable=False)
+    phone = Column(String(20), nullable=True)
+
+    # Endereço
+    zip_code = Column(String(10), nullable=True)
+    address = Column(String(150), nullable=True)
+    number = Column(String(20), nullable=True)
+    complement = Column(String(100), nullable=True)
+    district = Column(String(100), nullable=True)
+    city = Column(String(100), nullable=True)
+    state = Column(String(2), nullable=True)
+
+    # Relacionamento com assinante (multitenant)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    subscriber = relationship("Subscriber", backref="patients")
+    
+    # Campos de auditoria
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    def __repr__(self):
+        return f"<Patient {self.name} ({self.cpf})>"
