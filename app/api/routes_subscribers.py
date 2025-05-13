@@ -11,8 +11,9 @@ from sqlalchemy.orm import Session
 from app.schemas.subscriber import SubscriberCreate, SubscriberUpdate, SubscriberResponse, PaginatedSubscriberResponse
 from app.services.subscriber_service import SubscriberService
 from app.db.session import get_db
-from app.db.models import User
+from app.db.models import User, UserRole
 from app.core.dependencies import get_current_user, get_current_super_admin
+from app.core.security_middleware import check_subscriber_access, create_subscriber_access_dependency, verify_resource_subscriber_access
 
 # Criar router para assinantes
 router = APIRouter(
@@ -86,13 +87,15 @@ async def list_subscribers(
 async def get_subscriber(
     subscriber_id: UUID = Path(..., description="ID do assinante"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user) # Mudado para get_current_user para permitir acesso baseado em subscriber_id
+    current_user: User = Depends(get_current_user), # Mudado para get_current_user para permitir acesso baseado em subscriber_id
+    _: bool = Depends(create_subscriber_access_dependency())
 ):
     """
     Obter um assinante pelo ID.
     Requer autenticação e filtra automaticamente por subscriber_id para roles não administrativas.
+    O middleware check_subscriber_access garante o isolamento entre assinantes.
     """
-    subscriber = SubscriberService.get_subscriber_by_id(db, subscriber_id, current_user=current_user)
+    subscriber = SubscriberService.get_subscriber_by_id(db, subscriber_id)
     if not subscriber:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -127,27 +130,21 @@ async def update_subscriber(
     subscriber_data: SubscriberUpdate,
     subscriber_id: UUID = Path(..., description="ID do assinante"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)  # Alterado para permitir outros papéis além de SUPER_ADMIN
+    current_user: User = Depends(get_current_user),
+    _: bool = Depends(create_subscriber_access_dependency())
 ):
     """
     Atualizar um assinante existente.
     Requer autenticação. Usuários com função DONO_ASSINANTE só podem editar seu próprio assinante.
+    O middleware check_subscriber_access garante o isolamento entre assinantes.
     """
-    # Verificar permissões - apenas SUPER_ADMIN pode editar qualquer assinante
-    if current_user.role != "SUPER_ADMIN":
-        # DONO_ASSINANTE só pode editar seu próprio assinante
-        if current_user.role == "DONO_ASSINANTE":
-            if not current_user.subscriber_id or str(current_user.subscriber_id) != str(subscriber_id):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Permissão negada. Você só pode editar seu próprio assinante."
-                )
-        else:
-            # Outros papéis não podem editar assinantes
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Permissão negada. Apenas SUPER_ADMIN ou DONO_ASSINANTE podem editar assinantes."
-            )
+    # Verificar permissões para papéis específicos
+    # O middleware já garante que DONO_ASSINANTE só acesse seu próprio assinante
+    if current_user.role not in [UserRole.SUPER_ADMIN, UserRole.DIRETOR, UserRole.DONO_ASSINANTE]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permissão negada. Apenas SUPER_ADMIN, DIRETOR ou DONO_ASSINANTE podem editar assinantes."
+        )
     
     updated_subscriber = SubscriberService.update_subscriber(db, subscriber_id, subscriber_data)
     if not updated_subscriber:
