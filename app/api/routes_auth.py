@@ -129,10 +129,12 @@ async def get_dashboard_type(
             ).first()
             
             if segment:
-                # Determinar o tipo de dashboard com base no slug ou nome do segmento
-                if segment.slug == "veterinaria" or (segment.name and "veterinaria" in segment.name.lower()):
+                # Determinar o tipo de dashboard com base no nome do segmento
+                nome_segmento = segment.nome.lower() if segment.nome else ""
+                
+                if "veterinaria" in nome_segmento:
                     dashboard_type = "clinica_veterinaria"
-                elif segment.slug == "odontologia" or (segment.name and ("odontologia" in segment.name.lower() or "dental" in segment.name.lower())):
+                elif "odontologia" in nome_segmento or "dental" in nome_segmento:
                     dashboard_type = "clinica_odontologica"
                 else:
                     dashboard_type = "clinica_padrao"
