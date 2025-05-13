@@ -7,8 +7,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.db.models import User, UserRole, Segment
+from app.core.dependencies import get_current_user
 from app.services.auth_service import AuthService
-from app.schemas.auth import Token, LoginRequest, RefreshTokenRequest
+from app.schemas.auth import Token, LoginRequest, RefreshTokenRequest, DashboardTypeResponse
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
@@ -94,3 +96,48 @@ async def logout(response: Response):
     AuthService.clear_auth_cookies(response)
     
     return {"mensagem": "Logout realizado com sucesso."}
+
+
+@router.get("/dashboard-type", response_model=DashboardTypeResponse)
+async def get_dashboard_type(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Retorna o tipo de dashboard apropriado com base no papel (role) e segmento do usuário.
+    
+    Regras:
+    - SUPER_ADMIN ou DIRETOR: admin_global
+    - DONO_CLINICA com segment_id para veterinária: clinica_veterinaria
+    - DONO_CLINICA com segment_id para odontologia: clinica_odontologica
+    - DONO_CLINICA com outros segmentos: clinica_padrao
+    - Outros papéis (DENTISTA, VETERINARIO, etc.): usuario_clinica
+    """
+    # Variável para armazenar o tipo de dashboard
+    dashboard_type = "clinica_padrao"  # Valor padrão
+    
+    # Verificar o papel do usuário
+    if current_user.role in [UserRole.SUPER_ADMIN, UserRole.DIRETOR]:
+        dashboard_type = "admin_global"
+    elif current_user.role == UserRole.DONO_ASSINANTE:
+        # Buscar informações do segmento, se existir
+        if current_user.subscriber and current_user.subscriber.segment_id:
+            # Obter o segmento do banco de dados
+            segment = db.query(Segment).filter(
+                Segment.id == current_user.subscriber.segment_id,
+                Segment.is_active == True
+            ).first()
+            
+            if segment:
+                # Determinar o tipo de dashboard com base no slug ou nome do segmento
+                if segment.slug == "veterinaria" or (segment.name and "veterinaria" in segment.name.lower()):
+                    dashboard_type = "clinica_veterinaria"
+                elif segment.slug == "odontologia" or (segment.name and ("odontologia" in segment.name.lower() or "dental" in segment.name.lower())):
+                    dashboard_type = "clinica_odontologica"
+                else:
+                    dashboard_type = "clinica_padrao"
+    else:
+        # Para COLABORADOR_NIVEL_2 e outros papéis
+        dashboard_type = "usuario_clinica"
+    
+    return {"dashboard_type": dashboard_type}

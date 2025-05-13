@@ -1,0 +1,54 @@
+// components/layout/sidebar/sidebar-admin.tsx
+import { Sidebar } from "@/components/ui/sidebar";
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
+  BriefcaseMedical,
+  Building2,
+  Stethoscope,
+  Tooth,
+  ClipboardList
+} from "lucide-react";
+
+// Sidebar para SUPER_ADMIN e DIRETOR
+export function SidebarAdmin() {
+  return (
+    <Sidebar>
+      <Sidebar.Item icon={LayoutDashboard} href="/admin" label="Dashboard" />
+      <Sidebar.Item icon={Users} href="/admin/usuarios" label="Usuários" />
+      <Sidebar.Item icon={Building2} href="/admin/assinantes" label="Assinantes" />
+      <Sidebar.Item icon={BriefcaseMedical} href="/admin/segmentos" label="Segmentos" />
+      <Sidebar.Item icon={Settings} href="/admin/configuracoes" label="Configurações" />
+    </Sidebar>
+  );
+}
+
+// Sidebar para DONO_CLINICA (Veterinária, Odontologia etc.)
+export function SidebarClinic() {
+  return (
+    <Sidebar>
+      <Sidebar.Item icon={LayoutDashboard} href="/clinica" label="Dashboard" />
+      <Sidebar.Item icon={ClipboardList} href="/clinica/pacientes" label="Pacientes" />
+      <Sidebar.Item icon={Stethoscope} href="/clinica/atendimentos" label="Atendimentos" />
+      <Sidebar.Item icon={Tooth} href="/clinica/procedimentos" label="Procedimentos" />
+      <Sidebar.Item icon={Settings} href="/clinica/configuracoes" label="Configurações" />
+    </Sidebar>
+  );
+}
+
+// Sidebar para USUÁRIO COMUM da clínica
+export function SidebarUser() {
+  return (
+    <Sidebar>
+      <Sidebar.Item icon={LayoutDashboard} href="/app" label="Início" />
+      <Sidebar.Item icon={ClipboardList} href="/app/minha-ficha" label="Minha Ficha" />
+      <Sidebar.Item icon={Tooth} href="/app/meus-procedimentos" label="Meus Procedimentos" />
+      <Sidebar.Item icon={Settings} href="/app/conta" label="Conta" />
+    </Sidebar>
+  );
+}
+
+// BACKEND TASK 032 — Endpoint to return dashboard type
+// GET /auth/dashboard-type
+// Returns: { "dashboard_type": "admin_global" | "clinica_veterinaria" | "clinica_odontologica" | "clinica_padrao" | "usuario_clinica" }

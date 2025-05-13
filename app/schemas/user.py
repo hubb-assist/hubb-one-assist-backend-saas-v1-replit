@@ -49,6 +49,7 @@ class UserResponse(UserBase):
     """Schema para resposta de usuário - inclui campos somente leitura"""
     id: int
     role: UserRole
+    subscriber_id: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
     

@@ -43,3 +43,8 @@ class TokenData(BaseModel):
 class RefreshTokenRequest(BaseModel):
     """Schema para requisição de refresh token"""
     refresh_token: str
+
+
+class DashboardTypeResponse(BaseModel):
+    """Schema para resposta do tipo de dashboard"""
+    dashboard_type: str
