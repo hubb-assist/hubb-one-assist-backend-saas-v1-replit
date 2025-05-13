@@ -20,6 +20,7 @@ from app.core.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_DAYS
 )
+from app.core.role_hierarchy import get_permissions_for_role
 
 
 class AuthService:
@@ -69,6 +70,15 @@ class AuthService:
         if user.subscriber_id and user.subscriber:
             segment_id = str(user.subscriber.segment_id) if user.subscriber.segment_id else None
         
+        # Obter as permissões com base na role do usuário
+        role_permissions = get_permissions_for_role(user.role) if user.role else []
+        
+        # Combinar com as permissões personalizadas do usuário, se existirem
+        all_permissions = role_permissions
+        if hasattr(user, 'permissions') and user.permissions:
+            custom_permissions = user.permissions
+            all_permissions = list(set(role_permissions + custom_permissions))
+        
         # Dados para incluir no token
         token_data = {
             "sub": str(user.id),
@@ -76,7 +86,7 @@ class AuthService:
             "role": user.role.value if user.role else None,
             "subscriber_id": str(user.subscriber_id) if user.subscriber_id else None,
             "segment_id": segment_id,
-            "permissions": []  # Implementação futura de permissões granulares
+            "permissions": all_permissions
         }
         
         # Criar access token

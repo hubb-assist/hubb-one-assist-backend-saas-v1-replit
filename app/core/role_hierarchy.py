@@ -48,7 +48,7 @@ ROLE_PERMISSIONS = {
     ]
 }
 
-def get_permissions_for_role(role: str) -> list:
+def get_permissions_for_role(role: UserRole) -> list:
     """
     Obtém a lista de permissões para um determinado papel (role).
     
@@ -58,6 +58,8 @@ def get_permissions_for_role(role: str) -> list:
     Returns:
         list: Lista de strings com as permissões associadas ao papel
     """
+    if role is None:
+        return []
     return ROLE_PERMISSIONS.get(role, [])
 
 def has_permission(user: dict, permission: str) -> bool:

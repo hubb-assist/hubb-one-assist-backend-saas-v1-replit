@@ -35,8 +35,30 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    # Permissões personalizadas - armazenadas como Array de strings
+    custom_permissions = Column(Text, nullable=True)  # Armazenado como JSON
     # Relacionamento com Subscriber para usuários do tipo DONO_ASSINANTE
     subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=True)
+    
+    @property
+    def permissions(self):
+        """Obtém a lista de permissões personalizadas do usuário"""
+        import json
+        if not self.custom_permissions:
+            return []
+        try:
+            return json.loads(self.custom_permissions)
+        except:
+            return []
+    
+    @permissions.setter
+    def permissions(self, permissions_list):
+        """Define as permissões personalizadas do usuário"""
+        import json
+        if permissions_list is None:
+            self.custom_permissions = None
+        else:
+            self.custom_permissions = json.dumps(list(set(permissions_list)))
 
     def __repr__(self):
         return f"<User {self.email}>"
