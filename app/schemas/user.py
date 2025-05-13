@@ -26,6 +26,7 @@ class UserCreate(UserBase):
     """Schema para criação de novo usuário"""
     password: str = Field(..., min_length=8, description="Senha deve ter pelo menos 8 caracteres")
     role: Optional[UserRole] = UserRole.COLABORADOR_NIVEL_2
+    subscriber_id: Optional[str] = None  # ID do assinante associado, opcional para administradores
 
 # Schema para atualização de usuário
 class UserUpdate(BaseModel):
@@ -35,6 +36,7 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=8)
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
+    subscriber_id: Optional[str] = None  # ID do assinante associado, opcional para administradores
     
     model_config = ConfigDict(
         from_attributes=True,
