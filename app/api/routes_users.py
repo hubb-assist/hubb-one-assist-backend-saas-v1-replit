@@ -23,7 +23,7 @@ router = APIRouter(
 @router.get("/", response_model=PaginatedUserResponse, status_code=status.HTTP_200_OK)
 async def list_users(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_admin_or_director),
+    current_user: User = Depends(get_current_user),  # Alterado para permitir que todos os usuários vejam a lista, mas filtrada
     skip: int = Query(0, ge=0, description="Quantos usuários pular"),
     limit: int = Query(10, ge=1, le=100, description="Limite de usuários retornados"),
     name: Optional[str] = Query(None, description="Filtrar por nome"),
@@ -33,6 +33,7 @@ async def list_users(
 ):
     """
     Listar todos os usuários com opções de paginação e filtros.
+    Usuários com papéis diferentes de SUPER_ADMIN e DIRETOR só podem ver usuários do seu próprio assinante.
     """
     # Montar filtros
     filters = {}
@@ -45,7 +46,7 @@ async def list_users(
     if is_active is not None:
         filters["is_active"] = is_active
     
-    return UserService.get_users(db, skip=skip, limit=limit, filter_params=filters)
+    return UserService.get_users(db, skip=skip, limit=limit, filter_params=filters, current_user=current_user)
 
 @router.get("/me", response_model=None, status_code=status.HTTP_200_OK)
 async def get_current_user_info(

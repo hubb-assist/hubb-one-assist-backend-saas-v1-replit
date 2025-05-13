@@ -57,7 +57,8 @@ class UserService:
         db: Session, 
         skip: int = 0, 
         limit: int = 100,
-        filter_params: Optional[Dict[str, Any]] = None
+        filter_params: Optional[Dict[str, Any]] = None,
+        current_user: Optional[User] = None
     ) -> PaginatedUserResponse:
         """
         Retorna uma lista paginada de usuários com opção de filtros
@@ -67,11 +68,20 @@ class UserService:
             skip: Número de registros para pular (paginação)
             limit: Número máximo de registros para retornar (paginação)
             filter_params: Parâmetros para filtragem (opcional)
+            current_user: Usuário atual para filtragem por subscriber_id
             
         Returns:
             PaginatedUserResponse: Lista paginada de usuários
         """
         query = db.query(User)
+        
+        # Aplicar filtro de subscriber_id para usuários que não são administradores
+        if current_user and current_user.role not in [UserRole.SUPER_ADMIN, UserRole.DIRETOR]:
+            if current_user.subscriber_id:
+                query = query.filter(User.subscriber_id == current_user.subscriber_id)
+            else:
+                # Se o usuário não tiver subscriber_id, só poderá ver a si mesmo
+                query = query.filter(User.id == current_user.id)
         
         # Aplicar filtros se fornecidos
         if filter_params:
@@ -104,18 +114,30 @@ class UserService:
         )
     
     @staticmethod
-    def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
+    def get_user_by_id(db: Session, user_id: int, current_user: Optional[User] = None) -> Optional[User]:
         """
         Busca um usuário pelo ID
         
         Args:
             db: Sessão do banco de dados
             user_id: ID do usuário
+            current_user: Usuário atual para filtragem por subscriber_id
             
         Returns:
             Optional[User]: Usuário encontrado ou None
         """
-        return db.query(User).filter(User.id == user_id).first()
+        query = db.query(User).filter(User.id == user_id)
+        
+        # Aplicar filtro de subscriber_id para usuários que não são administradores
+        if current_user and current_user.role not in [UserRole.SUPER_ADMIN, UserRole.DIRETOR]:
+            # Se o usuário não for SUPER_ADMIN ou DIRETOR, só pode ver usuários do mesmo assinante
+            if current_user.subscriber_id:
+                query = query.filter(User.subscriber_id == current_user.subscriber_id)
+            else:
+                # Se o usuário não tiver subscriber_id, só pode ver a si mesmo
+                query = query.filter(User.id == current_user.id)
+                
+        return query.first()
     
     @staticmethod
     def get_user_by_email(db: Session, email: str) -> Optional[User]:

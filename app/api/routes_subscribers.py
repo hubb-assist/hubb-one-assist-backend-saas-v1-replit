@@ -165,6 +165,8 @@ async def delete_subscriber(
     Desativar ou excluir um assinante.
     Requer autenticação como SUPER_ADMIN.
     """
+    # O middleware não é necessário aqui porque get_current_super_admin já garante que apenas
+    # usuários SUPER_ADMIN podem acessar este endpoint, e eles têm acesso a todos os assinantes
     success = SubscriberService.delete_subscriber(db, subscriber_id)
     if not success:
         raise HTTPException(
@@ -184,6 +186,8 @@ async def activate_subscriber(
     Ativar um assinante.
     Requer autenticação como SUPER_ADMIN.
     """
+    # O middleware não é necessário aqui porque get_current_super_admin já garante que apenas
+    # usuários SUPER_ADMIN podem acessar este endpoint, e eles têm acesso a todos os assinantes
     updated_subscriber = SubscriberService.toggle_subscriber_status(db, subscriber_id, activate=True)
     if not updated_subscriber:
         raise HTTPException(
@@ -203,6 +207,8 @@ async def deactivate_subscriber(
     Desativar um assinante.
     Requer autenticação como SUPER_ADMIN.
     """
+    # O middleware não é necessário aqui porque get_current_super_admin já garante que apenas
+    # usuários SUPER_ADMIN podem acessar este endpoint, e eles têm acesso a todos os assinantes
     updated_subscriber = SubscriberService.toggle_subscriber_status(db, subscriber_id, activate=False)
     if not updated_subscriber:
         raise HTTPException(
