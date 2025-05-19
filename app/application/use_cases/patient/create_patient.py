@@ -10,7 +10,7 @@ from app.schemas.patient import PatientCreate
 
 class CreatePatientUseCase:
     """
-    Caso de uso para criação de novos pacientes no sistema.
+    Caso de uso para criar um novo paciente.
     Orquestra o processo de criação usando o repositório.
     """
     
@@ -25,7 +25,7 @@ class CreatePatientUseCase:
     
     def execute(self, patient_data: PatientCreate, subscriber_id: UUID) -> PatientEntity:
         """
-        Executa o caso de uso para criar um novo paciente.
+        Executa o caso de uso para criar um paciente.
         
         Args:
             patient_data: Dados do paciente a ser criado
@@ -33,8 +33,9 @@ class CreatePatientUseCase:
             
         Returns:
             PatientEntity: Entidade de paciente criada
+            
+        Raises:
+            HTTPException: Se já existir um paciente com o mesmo CPF
         """
-        # Aqui poderia ter validações adicionais de negócio
-        # antes de delegar ao repositório
-        
+        # Delegar a criação para o repositório
         return self.repository.create(patient_data, subscriber_id)

@@ -45,7 +45,7 @@ async def create_patient(
         )
         
     # Verificação de segurança - usuário deve ter um subscriber_id
-    if not current_user.subscriber_id:
+    if current_user.subscriber_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Apenas usuários vinculados a um assinante podem criar pacientes"
@@ -82,7 +82,7 @@ async def get_patient(
         )
         
     # Verificação de segurança - usuário deve ter um subscriber_id
-    if not current_user.subscriber_id:
+    if current_user.subscriber_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Apenas usuários vinculados a um assinante podem visualizar pacientes"
@@ -127,7 +127,7 @@ async def update_patient(
         )
         
     # Verificação de segurança - usuário deve ter um subscriber_id
-    if not current_user.subscriber_id:
+    if current_user.subscriber_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Apenas usuários vinculados a um assinante podem editar pacientes"
@@ -135,7 +135,8 @@ async def update_patient(
         
     # Criar e executar o caso de uso
     use_case = UpdatePatientUseCase(repository)
-    patient = use_case.execute(patient_id, patient_data, current_user.subscriber_id)
+    subscriber_id = UUID(str(current_user.subscriber_id))
+    patient = use_case.execute(patient_id, patient_data, subscriber_id)
     
     # Retornar resposta
     return patient
@@ -163,7 +164,7 @@ async def delete_patient(
         )
         
     # Verificação de segurança - usuário deve ter um subscriber_id
-    if not current_user.subscriber_id:
+    if current_user.subscriber_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Apenas usuários vinculados a um assinante podem excluir pacientes"
@@ -171,7 +172,8 @@ async def delete_patient(
         
     # Criar e executar o caso de uso
     use_case = DeletePatientUseCase(repository)
-    use_case.execute(patient_id, current_user.subscriber_id)
+    subscriber_id = UUID(str(current_user.subscriber_id))
+    use_case.execute(patient_id, subscriber_id)
 
 
 @router.get("/", response_model=PatientListResponse)
@@ -199,7 +201,7 @@ async def list_patients(
         )
         
     # Verificação de segurança - usuário deve ter um subscriber_id
-    if not current_user.subscriber_id:
+    if current_user.subscriber_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Apenas usuários vinculados a um assinante podem listar pacientes"
@@ -207,8 +209,9 @@ async def list_patients(
         
     # Criar e executar o caso de uso
     use_case = ListPatientsUseCase(repository)
+    subscriber_id = UUID(str(current_user.subscriber_id))
     return use_case.execute(
-        subscriber_id=current_user.subscriber_id,
+        subscriber_id=subscriber_id,
         skip=skip,
         limit=limit,
         name=name,
