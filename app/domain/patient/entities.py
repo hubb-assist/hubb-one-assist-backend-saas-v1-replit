@@ -33,8 +33,8 @@ class PatientEntity:
         updated_at: Optional[datetime] = None
     ):
         self.id = id or uuid4()
-        self.name = name.strip() if name else None
-        self.cpf = cpf.strip() if cpf else None
+        self.name = name.strip()
+        self.cpf = cpf.strip()
         self.rg = rg.strip() if rg else None
         self.birth_date = birth_date
         self.phone = phone.strip() if phone else None
