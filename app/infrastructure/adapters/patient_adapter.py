@@ -1,7 +1,7 @@
 """
 Adaptador para converter entre entidades de domínio e modelos ORM para pacientes.
 """
-from typing import Optional
+from typing import Optional, Any, get_type_hints
 from app.domain.patient.entities import PatientEntity
 from app.db.models import Patient
 
@@ -9,6 +9,8 @@ from app.db.models import Patient
 class PatientAdapter:
     """
     Classe adaptadora que converte entre PatientEntity (domínio) e Patient (ORM).
+    Lida com a conversão entre modelos de dados simples (ORM) e entidades ricas
+    com Value Objects.
     """
     
     @staticmethod
@@ -52,6 +54,7 @@ class PatientAdapter:
         """
         Converte uma entidade de domínio para um modelo ORM.
         Se um modelo ORM for fornecido, apenas atualiza seus atributos.
+        Extrai informações de Value Objects para campos simples do ORM.
         
         Args:
             entity: Entidade de domínio de paciente
@@ -63,42 +66,71 @@ class PatientAdapter:
         if not entity:
             return None
             
+        # Extrair valores dos Value Objects para formato simples
+        # adequado ao modelo ORM
+        patient_data = {
+            'id': entity.id,
+            'name': entity.name,
+            'cpf': entity.cpf,  # Já formatado pela property
+            'rg': entity.rg,
+            'birth_date': entity.birth_date,
+            'phone': entity.phone,  # Já formatado pela property
+            'zip_code': entity.zip_code,
+            'address': entity.address,
+            'number': entity.number,
+            'complement': entity.complement,
+            'district': entity.district,
+            'city': entity.city,
+            'state': entity.state,
+            'subscriber_id': entity.subscriber_id,
+            'is_active': entity.is_active,
+            'created_at': entity.created_at,
+            'updated_at': entity.updated_at
+        }
+            
         if not orm_model:
             # Criar novo modelo ORM
-            orm_model = Patient(
-                id=entity.id,
-                name=entity.name,
-                cpf=entity.cpf,
-                rg=entity.rg,
-                birth_date=entity.birth_date,
-                phone=entity.phone,
-                zip_code=entity.zip_code,
-                address=entity.address,
-                number=entity.number,
-                complement=entity.complement,
-                district=entity.district,
-                city=entity.city,
-                state=entity.state,
-                subscriber_id=entity.subscriber_id,
-                is_active=entity.is_active,
-                created_at=entity.created_at,
-                updated_at=entity.updated_at
-            )
+            orm_model = Patient(**patient_data)
         else:
             # Atualizar modelo existente
-            orm_model.name = entity.name
-            orm_model.cpf = entity.cpf
-            orm_model.rg = entity.rg
-            orm_model.birth_date = entity.birth_date
-            orm_model.phone = entity.phone
-            orm_model.zip_code = entity.zip_code
-            orm_model.address = entity.address
-            orm_model.number = entity.number
-            orm_model.complement = entity.complement
-            orm_model.district = entity.district
-            orm_model.city = entity.city
-            orm_model.state = entity.state
-            orm_model.is_active = entity.is_active
-            orm_model.updated_at = entity.updated_at
+            for key, value in patient_data.items():
+                # Não atualizar o ID ou campos de auditoria de criação
+                if key != 'id' and key != 'created_at':
+                    setattr(orm_model, key, value)
         
         return orm_model
+    
+    @staticmethod
+    def extract_simple_data(entity: PatientEntity) -> dict:
+        """
+        Extrai dados simples de uma entidade rica com Value Objects.
+        Útil para serialização e APIs.
+        
+        Args:
+            entity: Entidade de domínio de paciente
+            
+        Returns:
+            dict: Dados em formato simples adequado para JSON
+        """
+        return {
+            'id': str(entity.id),
+            'name': entity.name,
+            'cpf': entity.cpf,
+            'cpf_unformatted': entity.cpf_unformatted,
+            'rg': entity.rg,
+            'birth_date': entity.birth_date.isoformat() if entity.birth_date else None,
+            'phone': entity.phone,
+            'phone_unformatted': entity.phone_unformatted,
+            'zip_code': entity.zip_code,
+            'address': entity.address,
+            'number': entity.number,
+            'complement': entity.complement,
+            'district': entity.district,
+            'city': entity.city,
+            'state': entity.state,
+            'full_address': entity.full_address,
+            'subscriber_id': str(entity.subscriber_id) if entity.subscriber_id else None,
+            'is_active': entity.is_active,
+            'created_at': entity.created_at.isoformat() if entity.created_at else None,
+            'updated_at': entity.updated_at.isoformat() if entity.updated_at else None
+        }
