@@ -1,0 +1,56 @@
+📌 Etapas da FASE 2
+Etapa	Tarefa	Descrição
+2.1	Padronizar PatientRepository como dependência	Injetar a interface no lugar da implementação concreta
+2.2	Criar provedor get_patient_repository()	Fornece PatientSQLAlchemyRepository(db) via Depends
+2.3	Remover chamadas diretas ao Session dos UseCases	Repositórios lidam com o SQLAlchemy, não os casos de uso
+2.4	Permitir troca por FakeRepository em testes	Desacoplamento permite mock/fake fácil nos testes
+2.5	Opcional: aplicar mesmo padrão a UserRepository, TenantRepository, etc	
+
+📁 /app/api/dependencies/patient_repository.py
+python
+Copiar
+Editar
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from app.db.session import get_db
+from app.infrastructure.repositories.patient_sqlalchemy import PatientSQLAlchemyRepository
+from app.domain.patient.interfaces import PatientRepository
+
+
+def get_patient_repository(
+    db: Session = Depends(get_db)
+) -> PatientRepository:
+    return PatientSQLAlchemyRepository(db)
+📁 EXEMPLO de uso atualizado no router /app/api/routes/patient_router.py
+🔄 ANTES
+python
+Copiar
+Editar
+repo = PatientSQLAlchemyRepository(db)
+use_case = CreatePatientUseCase(repo)
+✅ DEPOIS
+python
+Copiar
+Editar
+from app.api.dependencies.patient_repository import get_patient_repository
+
+@router.post("/", response_model=PatientResponse)
+def create_patient(
+    data: PatientCreate,
+    repo: PatientRepository = Depends(get_patient_repository),
+    current_user=Depends(require_permission("CAN_CREATE_PATIENT"))
+):
+    use_case = CreatePatientUseCase(repo)
+    patient = use_case.execute(data, subscriber_id=current_user.subscriber_id)
+    return patient.__dict__
+Esse padrão é aplicado a todas as rotas: get, put, delete, list.
+
+✅ Benefícios Imediatos
+🔁 Você pode trocar o repositório em tempo de execução (ex: usar fake em testes).
+
+🧪 Fica muito mais fácil testar os UseCases sem banco de dados real.
+
+🔓 O sistema não depende mais diretamente de SQLAlchemy.
+
+🔧 No futuro, pode usar outro banco (ex: MongoDB) com nova implementação da interface.
+

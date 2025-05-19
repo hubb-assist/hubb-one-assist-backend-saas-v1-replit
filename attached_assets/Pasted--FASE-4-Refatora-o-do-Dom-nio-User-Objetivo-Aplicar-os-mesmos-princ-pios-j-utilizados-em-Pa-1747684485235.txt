@@ -1,0 +1,176 @@
+✅ FASE 4 — Refatoração do Domínio User
+🎯 Objetivo:
+Aplicar os mesmos princípios já utilizados em Patient no domínio User, garantindo:
+
+Entidade rica
+
+Repositório abstrato e fake
+
+Casos de uso isolados
+
+Inversão de dependência
+
+Pronto para testes unitários
+
+📌 Etapas da FASE 4
+Etapa	Tarefa	Descrição
+4.1	Criar UserEntity com regras internas (ex: ativar, trocar senha)	
+4.2	Criar UserRepository (interface)	
+4.3	Implementar UserSQLAlchemyRepository	
+4.4	Criar CreateUserUseCase e GetUserUseCase	
+4.5	Criar FakeUserRepository	
+4.6	Criar testes reais com pytest	
+
+📁 /app/domain/user/entities.py
+python
+Copiar
+Editar
+from uuid import UUID, uuid4
+from typing import Optional
+from datetime import datetime
+
+
+class UserEntity:
+    def __init__(
+        self,
+        id: Optional[UUID],
+        name: str,
+        email: str,
+        password_hash: str,
+        role: str,
+        is_active: bool = True,
+        created_at: Optional[datetime] = None,
+    ):
+        self.id = id or uuid4()
+        self.name = name.strip()
+        self.email = email.strip().lower()
+        self.password_hash = password_hash
+        self.role = role
+        self.is_active = is_active
+        self.created_at = created_at or datetime.utcnow()
+
+    def deactivate(self):
+        self.is_active = False
+
+    def activate(self):
+        self.is_active = True
+
+    def change_password(self, new_hash: str):
+        self.password_hash = new_hash
+📁 /app/domain/user/interfaces.py
+python
+Copiar
+Editar
+from abc import ABC, abstractmethod
+from uuid import UUID
+from typing import Optional, List
+
+from app.domain.user.entities import UserEntity
+from app.schemas.user_schema import UserCreate, UserUpdate
+
+
+class UserRepository(ABC):
+    @abstractmethod
+    def create(self, data: UserCreate) -> UserEntity: pass
+
+    @abstractmethod
+    def get_by_id(self, user_id: UUID) -> Optional[UserEntity]: pass
+
+    @abstractmethod
+    def get_by_email(self, email: str) -> Optional[UserEntity]: pass
+
+    @abstractmethod
+    def update(self, user_id: UUID, data: UserUpdate) -> UserEntity: pass
+
+    @abstractmethod
+    def list_all(self) -> List[UserEntity]: pass
+📁 /app/application/use_cases/create_user.py
+python
+Copiar
+Editar
+from app.domain.user.interfaces import UserRepository
+from app.domain.user.entities import UserEntity
+from app.schemas.user_schema import UserCreate
+
+
+class CreateUserUseCase:
+    def __init__(self, repo: UserRepository):
+        self.repo = repo
+
+    def execute(self, data: UserCreate) -> UserEntity:
+        return self.repo.create(data)
+📁 /tests/fakes/fake_user_repository.py
+python
+Copiar
+Editar
+from uuid import UUID, uuid4
+from typing import List, Dict, Optional
+
+from app.domain.user.interfaces import UserRepository
+from app.domain.user.entities import UserEntity
+from app.schemas.user_schema import UserCreate, UserUpdate
+
+
+class FakeUserRepository(UserRepository):
+    def __init__(self):
+        self.users: Dict[UUID, UserEntity] = {}
+
+    def create(self, data: UserCreate) -> UserEntity:
+        user = UserEntity(id=None, **data.dict(), password_hash="hashed")
+        self.users[user.id] = user
+        return user
+
+    def get_by_id(self, user_id: UUID) -> Optional[UserEntity]:
+        return self.users.get(user_id)
+
+    def get_by_email(self, email: str) -> Optional[UserEntity]:
+        return next((u for u in self.users.values() if u.email == email), None)
+
+    def update(self, user_id: UUID, data: UserUpdate) -> UserEntity:
+        user = self.users.get(user_id)
+        if not user:
+            return None
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(user, field, value)
+        return user
+
+    def list_all(self) -> List[UserEntity]:
+        return list(self.users.values())
+📁 /tests/use_cases/test_create_user.py
+python
+Copiar
+Editar
+from app.schemas.user_schema import UserCreate
+from app.application.use_cases.create_user import CreateUserUseCase
+from tests.fakes.fake_user_repository import FakeUserRepository
+
+
+def test_create_user_success():
+    repo = FakeUserRepository()
+    use_case = CreateUserUseCase(repo)
+
+    data = UserCreate(
+        name="Maria Oliveira",
+        email="maria@teste.com",
+        password="senha123",
+        role="ADMIN"
+    )
+
+    user = use_case.execute(data)
+
+    assert user.name == "Maria Oliveira"
+    assert user.email == "maria@teste.com"
+    assert user.is_active
+    assert user.id is not None
+✅ Final da FASE 4
+Agora o domínio User:
+
+Possui entidade rica com comportamento (activate, change_password, etc)
+
+Usa repositório abstrato (interface)
+
+Está testável com repositório fake
+
+Tem UseCase isolado
+
+📌 Quer que eu:

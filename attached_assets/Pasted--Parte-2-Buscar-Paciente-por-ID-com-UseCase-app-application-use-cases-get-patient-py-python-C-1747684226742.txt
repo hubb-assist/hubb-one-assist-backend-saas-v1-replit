@@ -1,0 +1,123 @@
+✅ Parte 2 — Buscar Paciente por ID com UseCase
+📁 /app/application/use_cases/get_patient.py
+python
+Copiar
+Editar
+from uuid import UUID
+from app.domain.patient.interfaces import PatientRepository
+from app.domain.patient.entities import PatientEntity
+
+
+class GetPatientUseCase:
+    def __init__(self, repo: PatientRepository):
+        self.repo = repo
+
+    def execute(self, patient_id: UUID, subscriber_id: UUID) -> PatientEntity:
+        patient = self.repo.get_by_id(patient_id, subscriber_id)
+        if not patient:
+            raise ValueError("Paciente não encontrado.")
+        return patient
+📁 /app/api/routes/patient_router.py (adicione ou modifique)
+python
+Copiar
+Editar
+from fastapi import HTTPException
+from app.application.use_cases.get_patient import GetPatientUseCase
+
+@router.get("/{patient_id}", response_model=PatientResponse)
+def get_patient(
+    patient_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    repo = PatientSQLAlchemyRepository(db)
+    use_case = GetPatientUseCase(repo)
+    try:
+        patient = use_case.execute(patient_id, subscriber_id=current_user.subscriber_id)
+        return patient.__dict__
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
+✅ Parte 3 — UpdatePatientUseCase
+📁 /app/application/use_cases/update_patient.py
+python
+Copiar
+Editar
+from uuid import UUID
+from app.domain.patient.interfaces import PatientRepository
+from app.domain.patient.entities import PatientEntity
+from app.schemas.patient_schema import PatientUpdate
+
+
+class UpdatePatientUseCase:
+    def __init__(self, repo: PatientRepository):
+        self.repo = repo
+
+    def execute(self, patient_id: UUID, data: PatientUpdate, subscriber_id: UUID) -> PatientEntity:
+        updated = self.repo.update(patient_id, data, subscriber_id)
+        if not updated:
+            raise ValueError("Paciente não encontrado para atualizar.")
+        return updated
+📁 /app/api/routes/patient_router.py (continue adicionando)
+python
+Copiar
+Editar
+from app.application.use_cases.update_patient import UpdatePatientUseCase
+
+@router.put("/{patient_id}", response_model=PatientResponse)
+def update_patient(
+    patient_id: UUID,
+    data: PatientUpdate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    repo = PatientSQLAlchemyRepository(db)
+    use_case = UpdatePatientUseCase(repo)
+    try:
+        updated = use_case.execute(patient_id, data, subscriber_id=current_user.subscriber_id)
+        return updated.__dict__
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
+✅ Parte 4 — PermissionChecker centralizado (opcional, mas recomendado)
+📁 /app/core/security/permission_checker.py
+python
+Copiar
+Editar
+from fastapi import Depends, HTTPException, status
+from app.core.dependencies import get_current_user
+from app.models.user_model import User  # ou caminho real do seu modelo
+
+
+def require_permission(permission: str):
+    def checker(current_user: User = Depends(get_current_user)):
+        if permission not in current_user.permissions:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permissão '{permission}' necessária."
+            )
+        return current_user
+    return checker
+📁 Exemplo de uso no router
+python
+Copiar
+Editar
+from app.core.security.permission_checker import require_permission
+
+@router.post("/", response_model=PatientResponse)
+def create_patient(
+    data: PatientCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("CAN_CREATE_PATIENT"))
+):
+    # lógica segue igual
+✅ Conclusão desta etapa
+Com isso, agora você tem:
+
+CreatePatientUseCase
+
+GetPatientUseCase
+
+UpdatePatientUseCase
+
+Repository abstrato implementado por SQLAlchemyRepository
+
+PermissionChecker reutilizável

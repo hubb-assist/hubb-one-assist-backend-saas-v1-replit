@@ -1,0 +1,74 @@
+Lista de Tarefas para Refatoração DDD e SOLID
+Baseado em tudo que você me enviou, aqui está a lista de tarefas que planejo implementar:
+
+FASE 1: Criação da Base DDD
+Criar estrutura de pastas:
+
+Criar diretórios: domain, application, infrastructure, interfaces
+Configurar subdiretórios por domínio (patient, user)
+Implementar entidade de domínio Patient:
+
+Criar PatientEntity desacoplada do SQLAlchemy
+Adicionar métodos como update_contact_info()
+Implementar validações internas
+Criar interface de repositório:
+
+Implementar PatientRepository como interface abstrata
+Definir métodos: create, get_by_id, update, delete, list_all
+Implementar repositório com SQLAlchemy:
+
+Criar PatientSQLAlchemyRepository
+Implementar conversão entre modelo ORM e entidade de domínio
+Criar casos de uso (UseCases):
+
+CreatePatientUseCase
+GetPatientUseCase
+UpdatePatientUseCase
+DeletePatientUseCase
+ListPatientsUseCase
+Refatorar endpoints FastAPI:
+
+Adaptar rotas para usar os casos de uso
+Manter API compatível para usuários atuais
+FASE 2: Implementação do DIP (Dependency Inversion)
+Configurar injeção de dependência:
+
+Criar provider get_patient_repository()
+Atualizar endpoints para usar Depends(get_patient_repository)
+Eliminar acoplamento direto ao SQLAlchemy:
+
+Remover Session do SQLAlchemy dos casos de uso
+Garantir que só o repositório lide com banco de dados
+FASE 3: Entidades Ricas e Testes
+Adicionar comportamentos à entidade Patient:
+
+Implementar validações para dados de paciente
+Adicionar métodos de negócio na própria entidade
+Implementar repositório fake para testes:
+
+Criar FakePatientRepository usando dicionário em memória
+Garantir interface idêntica ao SQLAlchemyRepository
+Criar testes unitários:
+
+Testes para casos de uso usando repositório fake
+Testes para validações da entidade
+FASE 4: Expandir para Outros Domínios
+Aplicar mesma estrutura no domínio User:
+
+Criar UserEntity com comportamentos
+Implementar UserRepository e UserSQLAlchemyRepository
+Criar casos de uso para User (Create, Get, Update)
+Implementar FakeUserRepository para testes
+Implementar permissão centralizada:
+
+Criar PermissionChecker reutilizável
+Refatorar endpoints para usar o checker centralizado
+Tarefas Adicionais (Opcional)
+Documentação da arquitetura:
+
+Documentar a nova arquitetura e seus princípios
+Criar exemplos de extensão para novos domínios
+Implementar value objects:
+
+Criar objetos de valor como CPF, Telefone, Endereço
+Aguardo sua aprovação ou ajustes para esta lista de tarefas.

@@ -1,0 +1,168 @@
+✅ FASE 3 — Entidades Ricas e Testes Unitários com FakeRepository
+🎯 Objetivos:
+Transformar as entidades do domínio em "entidades ricas", ou seja, com comportamentos próprios (não apenas dados).
+
+Criar um FakeRepository para testar os UseCases sem banco de dados real.
+
+Escrever testes unitários reais usando pytest.
+
+📌 Etapas da FASE 3
+Etapa	Tarefa	Descrição
+3.1	Adicionar comportamentos à PatientEntity	Ex: update_contact_info() com validações
+3.2	Criar FakePatientRepository	Implementa PatientRepository com dicionário em memória
+3.3	Escrever teste real para CreatePatientUseCase	
+3.4	Repetir para Update, Get, etc (opcional)	
+
+🔹 3.1 — Entidade Rica com Validação
+📁 /app/domain/patient/entities.py (atualizado)
+python
+Copiar
+Editar
+from uuid import UUID, uuid4
+from datetime import date
+from typing import Optional
+
+
+class PatientEntity:
+    def __init__(
+        self,
+        id: Optional[UUID],
+        name: str,
+        cpf: str,
+        birth_date: date,
+        cep: str,
+        address: str,
+        number: str,
+        district: str,
+        city: str,
+        state: str,
+        rg: Optional[str] = None,
+        complement: Optional[str] = None,
+        phone: Optional[str] = None,
+    ):
+        self.id = id or uuid4()
+        self.name = name.strip()
+        self.cpf = cpf.strip()
+        self.birth_date = birth_date
+        self.cep = cep.strip()
+        self.address = address.strip()
+        self.number = number.strip()
+        self.district = district.strip()
+        self.city = city.strip()
+        self.state = state.strip()
+        self.rg = rg.strip() if rg else None
+        self.complement = complement
+        self.phone = phone
+
+        self._validate()
+
+    def update_contact_info(self, phone: Optional[str], cep: str, address: str, number: str, district: str, city: str, state: str):
+        self.phone = phone
+        self.cep = cep
+        self.address = address
+        self.number = number
+        self.district = district
+        self.city = city
+        self.state = state
+
+        self._validate_address()
+
+    def _validate(self):
+        if not self.name or len(self.name) < 3:
+            raise ValueError("Nome do paciente é inválido.")
+        if not self.cpf or len(self.cpf) != 11:
+            raise ValueError("CPF inválido.")
+
+    def _validate_address(self):
+        if not self.cep or not self.address or not self.city:
+            raise ValueError("Endereço incompleto.")
+🔹 3.2 — FakePatientRepository (sem banco)
+📁 /tests/fakes/fake_patient_repository.py
+python
+Copiar
+Editar
+from typing import Dict, List
+from uuid import UUID, uuid4
+
+from app.domain.patient.interfaces import PatientRepository
+from app.domain.patient.entities import PatientEntity
+from app.schemas.patient_schema import PatientCreate, PatientUpdate
+
+
+class FakePatientRepository(PatientRepository):
+    def __init__(self):
+        self.patients: Dict[UUID, PatientEntity] = {}
+
+    def create(self, data: PatientCreate, subscriber_id: UUID) -> PatientEntity:
+        patient = PatientEntity(id=None, **data.dict())
+        self.patients[patient.id] = patient
+        return patient
+
+    def get_by_id(self, patient_id: UUID, subscriber_id: UUID) -> PatientEntity:
+        return self.patients.get(patient_id)
+
+    def update(self, patient_id: UUID, data: PatientUpdate, subscriber_id: UUID) -> PatientEntity:
+        patient = self.patients.get(patient_id)
+        if not patient:
+            return None
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(patient, field, value)
+        return patient
+
+    def delete(self, patient_id: UUID, subscriber_id: UUID) -> bool:
+        return self.patients.pop(patient_id, None) is not None
+
+    def list_all(self, subscriber_id: UUID, skip: int = 0, limit: int = 100) -> List[PatientEntity]:
+        return list(self.patients.values())[skip:skip + limit]
+🔹 3.3 — Teste Real com Pytest
+📁 /tests/use_cases/test_create_patient.py
+python
+Copiar
+Editar
+import pytest
+from uuid import uuid4
+from datetime import date
+
+from app.schemas.patient_schema import PatientCreate
+from app.application.use_cases.create_patient import CreatePatientUseCase
+from tests.fakes.fake_patient_repository import FakePatientRepository
+
+
+def test_create_patient_success():
+    repo = FakePatientRepository()
+    use_case = CreatePatientUseCase(repo)
+
+    data = PatientCreate(
+        name="João Silva",
+        cpf="12345678901",
+        rg="MG123456",
+        birth_date=date(1990, 5, 20),
+        phone="44999999999",
+        cep="87083323",
+        address="Rua Teste",
+        number="123",
+        complement="Apto 4",
+        district="Centro",
+        city="Maringá",
+        state="PR"
+    )
+
+    subscriber_id = uuid4()
+
+    patient = use_case.execute(data, subscriber_id)
+
+    assert patient.name == "João Silva"
+    assert patient.cpf == "12345678901"
+    assert patient.city == "Maringá"
+    assert patient.id is not None
+✅ Final da Fase 3
+Com isso, você agora possui:
+
+✅ Entidades ricas com validações embutidas
+
+✅ Repositório fake para rodar testes unitários
+
+✅ Testes reais para casos de uso (pytest)
+
+✅ Desacoplamento 100% do banco (ideal para CI/CD)
+

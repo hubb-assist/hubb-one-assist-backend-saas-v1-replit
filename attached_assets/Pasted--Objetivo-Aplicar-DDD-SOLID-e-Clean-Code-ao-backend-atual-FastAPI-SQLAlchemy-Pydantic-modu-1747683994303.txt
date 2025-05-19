@@ -1,0 +1,70 @@
+🎯 Objetivo
+Aplicar DDD, SOLID e Clean Code ao backend atual (FastAPI + SQLAlchemy + Pydantic), modularizando o sistema, reduzindo acoplamentos e separando corretamente responsabilidades.
+
+🧱 Fase 1 — Criação da Base DDD
+📂 Nova Estrutura de Pastas (padrão DDD)
+bash
+Copiar
+Editar
+/app
+  ├── domain/                # Entidades puras (sem ORM)
+  │   └── patient/
+  │       ├── entities.py    # PatientEntity (sem herança SQLAlchemy)
+  │       └── value_objects.py
+  ├── infrastructure/        # ORM, banco, adapters
+  │   └── repositories/
+  │       └── patient_sqlalchemy.py
+  ├── application/           # Use cases + interfaces
+  │   └── use_cases/
+  │       └── create_patient.py
+  ├── interfaces/            # FastAPI routers/controllers
+  │   └── api/
+  └── core/                  # Base classes, erros, utils
+📌 Tarefas da Fase 1
+Etapa	Tarefa	Descrição
+1.1	Criar PatientEntity	Entidade de domínio pura (sem Base) com métodos como update_contact_info()
+1.2	Criar repositório abstrato PatientRepository	Interface que define create, get_by_id, etc.
+1.3	Implementar PatientSQLAlchemyRepository	Implementação concreta da interface com SQLAlchemy
+1.4	Criar caso de uso CreatePatientUseCase	Classe que executa a lógica de criação com injeção do repositório
+1.5	Refatorar router para usar o caso de uso	create_patient do FastAPI chamará CreatePatientUseCase.handle()
+
+🧱 Fase 2 — Inversão de Dependência (DIP)
+Etapa	Tarefa	Descrição
+2.1	Criar interfaces de todos os repositórios	Comece por PatientRepository, UserRepository, etc.
+2.2	Refatorar serviços para depender da interface	PatientService não deve usar diretamente SQLAlchemy
+2.3	Usar Depends() com implementação injetada	Ex: get_patient_repo() retorna a implementação concreta
+
+🧱 Fase 3 — Entidades Ricas (Comportamento no Domínio)
+Etapa	Tarefa	Descrição
+3.1	Mover validações para dentro da entidade	Ex: validar CPF dentro de PatientEntity.__init__()
+3.2	Criar métodos de negócio	Ex: deactivate(), update_address(), change_status()
+3.3	Evitar lógica no serviço que pertence à entidade	Deixe os use cases mais limpos
+
+🧱 Fase 4 — Camada de Aplicação e Casos de Uso
+Etapa	Tarefa	Descrição
+4.1	Criar um caso de uso por operação importante	Ex: CreatePatient, UpdatePatient, DeletePatient
+4.2	Casos de uso devem orquestrar: entidades + repositórios	
+4.3	Services devem virar orquestradores ou ser extintos	
+
+🧱 Fase 5 — Clean Code e Reutilização
+Etapa	Tarefa	Descrição
+5.1	Criar PermissionChecker centralizado	Evitar duplicação de checagem de permissões
+5.2	Criar ErrorFactory ou ExceptionUtils	Mensagens de erro padronizadas
+5.3	Garantir nomes claros, funções pequenas e poucos efeitos colaterais	
+
+✅ Resultado Esperado
+Cada camada com responsabilidade única (SRP)
+
+Casos de uso isolados para regras de negócio (DDD)
+
+Baixo acoplamento e alta testabilidade (DIP, ISP)
+
+Código limpo, autoexplicativo e expansível (Clean Code)
+
+📌 Extras (opcional, mas recomendado)
+✅ Cobertura de testes por camada (testar UseCases e Repositories separadamente)
+
+✅ Introdução de Value Objects (ex: CPF, Telefone, Endereço)
+
+✅ Suporte a múltiplos bancos (ex: SQLite para testes, PostgreSQL na produção)
+

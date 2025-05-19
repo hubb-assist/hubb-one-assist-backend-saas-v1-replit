@@ -1,0 +1,101 @@
+✅ Parte 5 — DeletePatientUseCase (remoção lógica)
+📁 /app/application/use_cases/delete_patient.py
+python
+Copiar
+Editar
+from uuid import UUID
+from app.domain.patient.interfaces import PatientRepository
+
+
+class DeletePatientUseCase:
+    def __init__(self, repo: PatientRepository):
+        self.repo = repo
+
+    def execute(self, patient_id: UUID, subscriber_id: UUID) -> None:
+        deleted = self.repo.delete(patient_id, subscriber_id)
+        if not deleted:
+            raise ValueError("Paciente não encontrado ou já inativo.")
+📁 Ajuste no método delete() do repositório /infrastructure/repositories/patient_sqlalchemy.py
+Altere o método atual:
+
+python
+Copiar
+Editar
+def delete(self, patient_id: UUID, subscriber_id: UUID) -> bool:
+    patient = self.db.query(Patient).filter_by(id=patient_id, subscriber_id=subscriber_id, is_active=True).first()
+    if not patient:
+        return False
+    patient.is_active = False
+    self.db.commit()
+    return True
+📁 /app/api/routes/patient_router.py (rota DELETE)
+python
+Copiar
+Editar
+from app.application.use_cases.delete_patient import DeletePatientUseCase
+
+@router.delete("/{patient_id}", status_code=204)
+def delete_patient(
+    patient_id: UUID,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("CAN_DELETE_PATIENT"))
+):
+    repo = PatientSQLAlchemyRepository(db)
+    use_case = DeletePatientUseCase(repo)
+    try:
+        use_case.execute(patient_id, subscriber_id=current_user.subscriber_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Paciente não encontrado")
+✅ Parte 6 — ListPatientsUseCase (com paginação opcional)
+📁 /app/application/use_cases/list_patients.py
+python
+Copiar
+Editar
+from uuid import UUID
+from typing import List
+
+from app.domain.patient.interfaces import PatientRepository
+from app.domain.patient.entities import PatientEntity
+
+
+class ListPatientsUseCase:
+    def __init__(self, repo: PatientRepository):
+        self.repo = repo
+
+    def execute(self, subscriber_id: UUID, skip: int = 0, limit: int = 100) -> List[PatientEntity]:
+        return self.repo.list_all(subscriber_id=subscriber_id, skip=skip, limit=limit)
+📁 Atualize o método list_all() no repositório /infrastructure/repositories/patient_sqlalchemy.py
+python
+Copiar
+Editar
+def list_all(self, subscriber_id: UUID, skip: int = 0, limit: int = 100):
+    patients = self.db.query(Patient).filter_by(subscriber_id=subscriber_id, is_active=True)\
+        .offset(skip).limit(limit).all()
+    return [self._to_entity(p) for p in patients]
+📁 /app/api/routes/patient_router.py (rota GET com listagem)
+python
+Copiar
+Editar
+from typing import List
+from fastapi import Query
+from app.application.use_cases.list_patients import ListPatientsUseCase
+
+@router.get("/", response_model=List[PatientResponse])
+def list_patients(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, le=100),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_permission("CAN_VIEW_PATIENT"))
+):
+    repo = PatientSQLAlchemyRepository(db)
+    use_case = ListPatientsUseCase(repo)
+    return [p.__dict__ for p in use_case.execute(current_user.subscriber_id, skip=skip, limit=limit)]
+✅ Finalização da FASE 1
+Com isso, agora você tem:
+
+UseCase	Status
+CreatePatientUseCase	✅ Implementado
+GetPatientUseCase	✅ Implementado
+UpdatePatientUseCase	✅ Implementado
+DeletePatientUseCase	✅ Implementado
+ListPatientsUseCase	✅ Implementado

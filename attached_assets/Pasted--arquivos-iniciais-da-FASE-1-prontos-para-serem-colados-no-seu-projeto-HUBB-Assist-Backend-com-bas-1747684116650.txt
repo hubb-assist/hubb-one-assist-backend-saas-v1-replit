@@ -1,0 +1,190 @@
+ arquivos iniciais da FASE 1, prontos para serem colados no seu projeto HUBB Assist Backend, com base em FastAPI, SQLAlchemy e Pydantic, já adaptados para uma arquitetura DDD + SOLID + Clean Code.
+
+📁 /app/domain/patient/entities.py
+python
+Copiar
+Editar
+from uuid import UUID
+from typing import Optional
+from datetime import date
+
+
+class PatientEntity:
+    def __init__(
+        self,
+        id: UUID,
+        name: str,
+        cpf: str,
+        rg: Optional[str],
+        birth_date: date,
+        cep: str,
+        address: str,
+        number: str,
+        complement: Optional[str],
+        district: str,
+        city: str,
+        state: str,
+        phone: Optional[str] = None,
+    ):
+        self.id = id
+        self.name = name
+        self.cpf = cpf
+        self.rg = rg
+        self.birth_date = birth_date
+        self.cep = cep
+        self.address = address
+        self.number = number
+        self.complement = complement
+        self.district = district
+        self.city = city
+        self.state = state
+        self.phone = phone
+
+    def update_contact_info(self, phone: Optional[str], cep: str, address: str, number: str, complement: Optional[str], district: str, city: str, state: str):
+        self.phone = phone
+        self.cep = cep
+        self.address = address
+        self.number = number
+        self.complement = complement
+        self.district = district
+        self.city = city
+        self.state = state
+📁 /app/domain/patient/interfaces.py
+python
+Copiar
+Editar
+from abc import ABC, abstractmethod
+from uuid import UUID
+from typing import List, Optional
+
+from app.domain.patient.entities import PatientEntity
+from app.schemas.patient_schema import PatientCreate, PatientUpdate
+
+
+class PatientRepository(ABC):
+    @abstractmethod
+    def create(self, data: PatientCreate, subscriber_id: UUID) -> PatientEntity:
+        pass
+
+    @abstractmethod
+    def get_by_id(self, patient_id: UUID, subscriber_id: UUID) -> Optional[PatientEntity]:
+        pass
+
+    @abstractmethod
+    def update(self, patient_id: UUID, data: PatientUpdate, subscriber_id: UUID) -> PatientEntity:
+        pass
+
+    @abstractmethod
+    def delete(self, patient_id: UUID, subscriber_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def list_all(self, subscriber_id: UUID) -> List[PatientEntity]:
+        pass
+📁 /app/infrastructure/repositories/patient_sqlalchemy.py
+python
+Copiar
+Editar
+from sqlalchemy.orm import Session
+from uuid import UUID
+
+from app.db.models import Patient
+from app.schemas.patient_schema import PatientCreate, PatientUpdate
+from app.domain.patient.entities import PatientEntity
+from app.domain.patient.interfaces import PatientRepository
+
+
+class PatientSQLAlchemyRepository(PatientRepository):
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, data: PatientCreate, subscriber_id: UUID) -> PatientEntity:
+        db_patient = Patient(**data.dict(), subscriber_id=subscriber_id)
+        self.db.add(db_patient)
+        self.db.commit()
+        self.db.refresh(db_patient)
+        return self._to_entity(db_patient)
+
+    def get_by_id(self, patient_id: UUID, subscriber_id: UUID) -> PatientEntity:
+        patient = self.db.query(Patient).filter_by(id=patient_id, subscriber_id=subscriber_id, is_active=True).first()
+        return self._to_entity(patient) if patient else None
+
+    def update(self, patient_id: UUID, data: PatientUpdate, subscriber_id: UUID) -> PatientEntity:
+        patient = self.db.query(Patient).filter_by(id=patient_id, subscriber_id=subscriber_id, is_active=True).first()
+        if not patient:
+            return None
+        for key, value in data.dict(exclude_unset=True).items():
+            setattr(patient, key, value)
+        self.db.commit()
+        self.db.refresh(patient)
+        return self._to_entity(patient)
+
+    def delete(self, patient_id: UUID, subscriber_id: UUID) -> None:
+        patient = self.db.query(Patient).filter_by(id=patient_id, subscriber_id=subscriber_id).first()
+        if patient:
+            patient.is_active = False
+            self.db.commit()
+
+    def list_all(self, subscriber_id: UUID):
+        patients = self.db.query(Patient).filter_by(subscriber_id=subscriber_id, is_active=True).all()
+        return [self._to_entity(p) for p in patients]
+
+    def _to_entity(self, db_patient: Patient) -> PatientEntity:
+        return PatientEntity(
+            id=db_patient.id,
+            name=db_patient.name,
+            cpf=db_patient.cpf,
+            rg=db_patient.rg,
+            birth_date=db_patient.birth_date,
+            cep=db_patient.cep,
+            address=db_patient.address,
+            number=db_patient.number,
+            complement=db_patient.complement,
+            district=db_patient.district,
+            city=db_patient.city,
+            state=db_patient.state,
+            phone=db_patient.phone,
+        )
+📁 /app/application/use_cases/create_patient.py
+python
+Copiar
+Editar
+from uuid import UUID
+from app.schemas.patient_schema import PatientCreate
+from app.domain.patient.interfaces import PatientRepository
+from app.domain.patient.entities import PatientEntity
+
+
+class CreatePatientUseCase:
+    def __init__(self, repo: PatientRepository):
+        self.repo = repo
+
+    def execute(self, data: PatientCreate, subscriber_id: UUID) -> PatientEntity:
+        return self.repo.create(data, subscriber_id=subscriber_id)
+📁 /app/api/routes/patient_router.py (trecho refatorado)
+python
+Copiar
+Editar
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from uuid import UUID
+
+from app.schemas.patient_schema import PatientCreate, PatientResponse
+from app.db.session import get_db
+from app.infrastructure.repositories.patient_sqlalchemy import PatientSQLAlchemyRepository
+from app.application.use_cases.create_patient import CreatePatientUseCase
+from app.core.dependencies import get_current_user
+
+router = APIRouter()
+
+@router.post("/", response_model=PatientResponse)
+def create_patient(
+    data: PatientCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    repo = PatientSQLAlchemyRepository(db)
+    use_case = CreatePatientUseCase(repo)
+    patient = use_case.execute(data, subscriber_id=current_user.subscriber_id)
+    return patient.__dict__
+✅ Próximo passo:
