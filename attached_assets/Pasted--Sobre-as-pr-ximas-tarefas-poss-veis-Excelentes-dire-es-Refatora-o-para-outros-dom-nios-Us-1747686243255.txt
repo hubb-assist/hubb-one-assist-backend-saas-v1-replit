@@ -1,0 +1,90 @@
+🟢 Sobre as próximas tarefas possíveis — Excelentes direções
+🔹 Refatoração para outros domínios (User, Segment, etc.)
+✅ Altamente recomendado. Domínio User já foi iniciado e pode servir de modelo para os demais. Cada domínio deve conter:
+
+Entidade
+
+Repositório
+
+UseCases
+
+Testes unitários
+
+➡️ Sugestão: priorizar Subscriber e Plan para sustentar a estrutura SaaS do sistema.
+
+🔹 Melhorias no Domínio de Pacientes
+✅ Os Value Objects como CPF, Endereço e Telefone tornam a entidade ainda mais rica e com validações embutidas.
+
+➡️ Complemento: utilizar Domain Events para notificar outras partes do sistema (ex: envio de e-mail ou log de auditoria após PatientCreated).
+
+🔹 Infraestrutura (Logging, Exceptions, UnitOfWork)
+✅ Crítico para produção real. Especialmente:
+
+UnitOfWork: importante para garantir rollback atômico em múltiplas operações
+
+Custom Exceptions: melhora a clareza dos erros (ex: PatientNotFoundError)
+
+Structured Logging: fundamental para rastrear ações críticas
+
+🔹 Aplicação (Relatórios, Cache, Paginação)
+✅ Importante para escalabilidade e experiência do usuário:
+
+Paginação com cursor é melhor que offset/limit em larga escala
+
+Cache em leitura (ex: Redis para get_by_id) acelera a API
+
+Queries otimizadas reduzem carga no banco
+
+🔹 Testes (Integração, e2e)
+✅ Fundamental. O sistema já tem testabilidade estrutural — agora é hora de:
+
+Integrar FastAPI ↔ UseCase ↔ Banco (Postgres)
+
+Fazer testes end-to-end com ferramentas como pytest + HTTPX
+
+Cobrir casos de borda (dados incompletos, inválidos, duplicados, etc.)
+
+🔹 CI/CD (Testes automáticos, lint, deploy)
+✅ Para um SaaS, isso é indispensável. Sugiro:
+
+Github Actions com pytest, ruff e black
+
+Deploy automático (Replit, Vultr, Vercel ou Docker + CI)
+
+Badge de cobertura de testes e qualidade de código
+
+🔹 Documentação (Arquitetura, Fluxos, API)
+✅ Isso garante escalabilidade de time e onboarding rápido:
+
+Markdown técnico dos domínios e suas dependências
+
+Diagrama UML com Entities ↔ UseCases ↔ Interfaces
+
+Swagger já é gerado via FastAPI — ótimo para devs externos
+
+🔹 Performance e Segurança
+✅ Perfeitas como etapas finais de hardening:
+
+Análise de queries com EXPLAIN + índice
+
+Validação rigorosa (evitar injeções, XSS, CSRF, etc.)
+
+Auditoria e log de ações administrativas (com Domain Events)
+
+✅ Conclusão e Direção Recomendada
+A lista está cirurgicamente precisa.
+
+Se eu pudesse sugerir uma trilha de continuidade, seria:
+
+Refatorar o domínio Subscriber
+
+Criar Value Objects (CPF, Endereço, etc.) no domínio Patient
+
+Adicionar Domain Events (como PatientCreated)
+
+Implementar UnitOfWork básico
+
+Integrar CI/CD com GitHub Actions e testes
+
+Documentar tudo com Markdown + Swagger
+
