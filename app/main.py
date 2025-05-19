@@ -30,6 +30,8 @@ from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
 # CRUD de pacientes
 from app.api.routes_patients import router as patients_router
+# Rotas DDD para pacientes
+from app.api.routes_patients_ddd import router as patients_ddd_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
 from app.api.routes_api_compatibility import router as compatibility_router, external_api_router
 # Rota especial para tratar problemas de CORS com subscribers
@@ -102,7 +104,8 @@ app.include_router(segments_router)
 app.include_router(modules_router)
 app.include_router(plans_router)
 app.include_router(subscribers_router)
-app.include_router(patients_router) # Novo router de pacientes
+app.include_router(patients_router) # Router original de pacientes
+app.include_router(patients_ddd_router) # Novo router de pacientes com arquitetura DDD
 # Módulo Arduino foi desativado como parte da refatoração do domínio
 # O router existe apenas para compatibilidade com código existente, mas não é exposto na API
 
