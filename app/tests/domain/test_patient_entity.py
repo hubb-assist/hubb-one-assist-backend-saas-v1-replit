@@ -115,7 +115,7 @@ class TestPatientEntity(unittest.TestCase):
             state="RJ"
         )
         
-        self.assertEqual(patient.zip_code, "12345-678")
+        self.assertEqual(patient.zip_code, "12345678")
         self.assertEqual(patient.address, "Rua Nova")
         self.assertEqual(patient.number, "456")
         self.assertEqual(patient.city, "Rio de Janeiro")
