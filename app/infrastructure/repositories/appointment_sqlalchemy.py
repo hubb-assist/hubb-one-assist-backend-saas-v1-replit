@@ -2,7 +2,7 @@
 Implementação SQLAlchemy do repositório de agendamentos
 """
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 
 from sqlalchemy import and_, or_
@@ -27,37 +27,12 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
         """
         self.db = db
     
-    def _entity_to_model(self, appointment: Appointment) -> AppointmentModel:
+    def _to_entity(self, model: AppointmentModel) -> Appointment:
         """
-        Converte uma entidade de domínio para um modelo SQLAlchemy
+        Converte o modelo SQLAlchemy para a entidade de domínio
         
         Args:
-            appointment: Entidade de domínio
-            
-        Returns:
-            AppointmentModel: Modelo SQLAlchemy
-        """
-        return AppointmentModel(
-            id=appointment.id,
-            subscriber_id=appointment.subscriber_id,
-            patient_id=appointment.patient_id,
-            provider_id=appointment.provider_id,
-            service_name=appointment.service_name,
-            start_time=appointment.start_time,
-            end_time=appointment.end_time,
-            status=appointment.status,
-            notes=appointment.notes,
-            is_active=appointment.is_active,
-            created_at=appointment.created_at,
-            updated_at=appointment.updated_at
-        )
-    
-    def _model_to_entity(self, model: AppointmentModel) -> Appointment:
-        """
-        Converte um modelo SQLAlchemy para uma entidade de domínio
-        
-        Args:
-            model: Modelo SQLAlchemy
+            model: Modelo do SQLAlchemy
             
         Returns:
             Appointment: Entidade de domínio
@@ -77,6 +52,31 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
             updated_at=model.updated_at
         )
     
+    def _to_model(self, entity: Appointment) -> Dict[str, Any]:
+        """
+        Converte a entidade de domínio para um dicionário de atributos do modelo
+        
+        Args:
+            entity: Entidade de domínio
+            
+        Returns:
+            Dict[str, Any]: Dicionário com os atributos para o modelo SQLAlchemy
+        """
+        return {
+            "id": entity.id,
+            "subscriber_id": entity.subscriber_id,
+            "patient_id": entity.patient_id,
+            "provider_id": entity.provider_id,
+            "service_name": entity.service_name,
+            "start_time": entity.start_time,
+            "end_time": entity.end_time,
+            "status": entity.status,
+            "notes": entity.notes,
+            "is_active": entity.is_active,
+            "created_at": entity.created_at,
+            "updated_at": entity.updated_at
+        }
+    
     def create(self, appointment: Appointment) -> Appointment:
         """
         Cria um novo agendamento no banco de dados
@@ -85,17 +85,20 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
             appointment: Entidade Appointment a ser criada
             
         Returns:
-            Appointment: Entidade criada com ID gerado
+            Appointment: Entidade Appointment com ID gerado
             
         Raises:
             ValueError: Se houver erro na validação ou criação
         """
         try:
-            model = self._entity_to_model(appointment)
-            self.db.add(model)
+            model_data = self._to_model(appointment)
+            appointment_model = AppointmentModel(**model_data)
+            
+            self.db.add(appointment_model)
             self.db.commit()
-            self.db.refresh(model)
-            return self._model_to_entity(model)
+            self.db.refresh(appointment_model)
+            
+            return self._to_entity(appointment_model)
         except Exception as e:
             self.db.rollback()
             raise ValueError(f"Erro ao criar agendamento: {str(e)}")
@@ -109,27 +112,21 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
             subscriber_id: ID do assinante para segurança multi-tenant
             
         Returns:
-            Appointment: Entidade encontrada
+            Appointment: Entidade Appointment encontrada
             
         Raises:
             ValueError: Se o agendamento não for encontrado
         """
-        model = (
-            self.db.query(AppointmentModel)
-            .filter(
-                and_(
-                    AppointmentModel.id == appointment_id,
-                    AppointmentModel.subscriber_id == subscriber_id,
-                    AppointmentModel.is_active == True
-                )
-            )
-            .first()
-        )
+        appointment_model = self.db.query(AppointmentModel).filter(
+            AppointmentModel.id == appointment_id,
+            AppointmentModel.subscriber_id == subscriber_id,
+            AppointmentModel.is_active == True
+        ).first()
         
-        if not model:
+        if not appointment_model:
             raise ValueError(f"Agendamento com ID {appointment_id} não encontrado")
         
-        return self._model_to_entity(model)
+        return self._to_entity(appointment_model)
     
     def update(self, appointment: Appointment) -> Appointment:
         """
@@ -139,40 +136,30 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
             appointment: Entidade Appointment com as atualizações
             
         Returns:
-            Appointment: Entidade atualizada
+            Appointment: Entidade Appointment atualizada
             
         Raises:
             ValueError: Se o agendamento não for encontrado ou houver erro na validação
         """
-        model = (
-            self.db.query(AppointmentModel)
-            .filter(
-                and_(
-                    AppointmentModel.id == appointment.id,
-                    AppointmentModel.subscriber_id == appointment.subscriber_id,
-                    AppointmentModel.is_active == True
-                )
-            )
-            .first()
-        )
-        
-        if not model:
-            raise ValueError(f"Agendamento com ID {appointment.id} não encontrado")
-        
         try:
-            # Atualizar os atributos do modelo
-            model.patient_id = appointment.patient_id
-            model.provider_id = appointment.provider_id
-            model.service_name = appointment.service_name
-            model.start_time = appointment.start_time
-            model.end_time = appointment.end_time
-            model.status = appointment.status
-            model.notes = appointment.notes
-            model.updated_at = appointment.updated_at or datetime.utcnow()
+            appointment_model = self.db.query(AppointmentModel).filter(
+                AppointmentModel.id == appointment.id,
+                AppointmentModel.subscriber_id == appointment.subscriber_id,
+                AppointmentModel.is_active == True
+            ).first()
+            
+            if not appointment_model:
+                raise ValueError(f"Agendamento com ID {appointment.id} não encontrado")
+            
+            model_data = self._to_model(appointment)
+            
+            for key, value in model_data.items():
+                setattr(appointment_model, key, value)
             
             self.db.commit()
-            self.db.refresh(model)
-            return self._model_to_entity(model)
+            self.db.refresh(appointment_model)
+            
+            return self._to_entity(appointment_model)
         except Exception as e:
             self.db.rollback()
             raise ValueError(f"Erro ao atualizar agendamento: {str(e)}")
@@ -191,25 +178,21 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
         Raises:
             ValueError: Se o agendamento não for encontrado
         """
-        model = (
-            self.db.query(AppointmentModel)
-            .filter(
-                and_(
-                    AppointmentModel.id == appointment_id,
-                    AppointmentModel.subscriber_id == subscriber_id,
-                    AppointmentModel.is_active == True
-                )
-            )
-            .first()
-        )
-        
-        if not model:
-            raise ValueError(f"Agendamento com ID {appointment_id} não encontrado")
-        
         try:
-            model.is_active = False
-            model.updated_at = datetime.utcnow()
+            appointment_model = self.db.query(AppointmentModel).filter(
+                AppointmentModel.id == appointment_id,
+                AppointmentModel.subscriber_id == subscriber_id,
+                AppointmentModel.is_active == True
+            ).first()
+            
+            if not appointment_model:
+                raise ValueError(f"Agendamento com ID {appointment_id} não encontrado")
+            
+            appointment_model.is_active = False
+            appointment_model.updated_at = datetime.utcnow()
+            
             self.db.commit()
+            
             return True
         except Exception as e:
             self.db.rollback()
@@ -223,7 +206,7 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         patient_id: Optional[UUID] = None,
-        provider_id: Optional[int] = None,
+        provider_id: Optional[UUID] = None,
         status: Optional[str] = None
     ) -> List[Appointment]:
         """
@@ -242,18 +225,12 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
         Returns:
             List[Appointment]: Lista de entidades Appointment
         """
-        # Construir a consulta base
-        query = (
-            self.db.query(AppointmentModel)
-            .filter(
-                and_(
-                    AppointmentModel.subscriber_id == subscriber_id,
-                    AppointmentModel.is_active == True
-                )
-            )
+        query = self.db.query(AppointmentModel).filter(
+            AppointmentModel.subscriber_id == subscriber_id,
+            AppointmentModel.is_active == True
         )
         
-        # Aplicar filtros opcionais
+        # Aplicar filtros adicionais se fornecidos
         if date_from:
             query = query.filter(AppointmentModel.start_time >= date_from)
         
@@ -269,13 +246,11 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
         if status:
             query = query.filter(AppointmentModel.status == status)
         
-        # Ordenar, paginar e executar a consulta
-        models = (
-            query.order_by(AppointmentModel.start_time.desc())
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
+        # Ordenar por data/hora de início
+        query = query.order_by(AppointmentModel.start_time)
         
-        # Converter os modelos para entidades
-        return [self._model_to_entity(model) for model in models]
+        # Aplicar paginação
+        appointments_models = query.offset(skip).limit(limit).all()
+        
+        # Converter para entidades de domínio
+        return [self._to_entity(model) for model in appointments_models]
