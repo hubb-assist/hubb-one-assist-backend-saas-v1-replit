@@ -130,6 +130,7 @@ app.include_router(custos_clinicos_router) # Router para gerenciamento de custos
 app.include_router(relatorios_custos_router) # Router para relatórios de custos
 app.include_router(appointment_router) # Router para agendamentos (DDD)
 app.include_router(finance_router) # Router para o módulo Financeiro (Contas a Pagar/Receber, Fluxo de Caixa, Lucro)
+app.include_router(anamnesis_router) # Router para o módulo de Anamnese (Fichas de Anamnese)
 # Módulo Arduino foi desativado como parte da refatoração do domínio
 # O router existe apenas para compatibilidade com código existente, mas não é exposto na API
 

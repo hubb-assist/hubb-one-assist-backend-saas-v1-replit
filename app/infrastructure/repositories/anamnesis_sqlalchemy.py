@@ -159,8 +159,8 @@ class AnamnesisSQLAlchemyRepository(IAnamnesisRepository):
         if not anamnesis_model:
             return False
             
-        # Exclusão lógica
-        anamnesis_model.is_active = False
+        # Exclusão lógica - usando setattr para evitar erros de tipagem com SQLAlchemy
+        setattr(anamnesis_model, "is_active", False)
         self.db.commit()
         
         return True
@@ -196,16 +196,29 @@ class AnamnesisSQLAlchemyRepository(IAnamnesisRepository):
         Returns:
             AnamnesisEntity: Entidade de domínio
         """
+        # Extrair valores do modelo SQLAlchemy para evitar erros de tipagem
+        id_value = model.id 
+        subscriber_id_value = model.subscriber_id
+        patient_id_value = model.patient_id
+        chief_complaint_value = model.chief_complaint
+        medical_history_value = model.medical_history
+        allergies_value = model.allergies
+        medications_value = model.medications
+        notes_value = model.notes
+        is_active_value = model.is_active
+        created_at_value = model.created_at
+        updated_at_value = model.updated_at
+        
         return AnamnesisEntity(
-            id=model.id,
-            subscriber_id=model.subscriber_id,
-            patient_id=model.patient_id,
-            chief_complaint=model.chief_complaint,
-            medical_history=model.medical_history,
-            allergies=model.allergies,
-            medications=model.medications,
-            notes=model.notes,
-            is_active=model.is_active,
-            created_at=model.created_at,
-            updated_at=model.updated_at
+            id=id_value,
+            subscriber_id=subscriber_id_value,
+            patient_id=patient_id_value,
+            chief_complaint=str(chief_complaint_value) if chief_complaint_value is not None else "",
+            medical_history=str(medical_history_value) if medical_history_value is not None else None,
+            allergies=str(allergies_value) if allergies_value is not None else None,
+            medications=str(medications_value) if medications_value is not None else None,
+            notes=str(notes_value) if notes_value is not None else None,
+            is_active=bool(is_active_value),
+            created_at=created_at_value,
+            updated_at=updated_at_value
         )

@@ -11,9 +11,9 @@ class AnamnesisEntity:
     def __init__(
         self,
         id: Optional[UUID] = None,
-        subscriber_id: UUID = None,
-        patient_id: UUID = None,
-        chief_complaint: str = None,
+        subscriber_id: Optional[UUID] = None,
+        patient_id: Optional[UUID] = None,
+        chief_complaint: Optional[str] = None,
         medical_history: Optional[str] = None,
         allergies: Optional[str] = None,
         medications: Optional[str] = None,

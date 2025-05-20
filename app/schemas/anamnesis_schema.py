@@ -1,42 +1,85 @@
-from pydantic import BaseModel, Field
-from uuid import UUID
+from typing import List, Optional
 from datetime import datetime
-from typing import Optional, List
+from uuid import UUID
+from pydantic import BaseModel, Field, ConfigDict
 
-# Esquema base para anamnese
+
 class AnamnesisBase(BaseModel):
-    chief_complaint: str = Field(..., min_length=3, description="Queixa principal do paciente")
-    medical_history: Optional[str] = Field(None, description="Histórico médico do paciente")
-    allergies: Optional[str] = Field(None, description="Alergias do paciente")
-    medications: Optional[str] = Field(None, description="Medicamentos em uso pelo paciente")
-    notes: Optional[str] = Field(None, description="Observações adicionais")
+    """Esquema base para anamnese"""
+    chief_complaint: str = Field(
+        ..., 
+        description="Queixa principal do paciente",
+        min_length=3
+    )
+    medical_history: Optional[str] = Field(
+        None, 
+        description="Histórico médico do paciente"
+    )
+    allergies: Optional[str] = Field(
+        None, 
+        description="Lista de alergias do paciente"
+    )
+    medications: Optional[str] = Field(
+        None, 
+        description="Medicamentos que o paciente está tomando atualmente"
+    )
+    notes: Optional[str] = Field(
+        None, 
+        description="Observações adicionais"
+    )
 
-# Esquema para criação de anamnese
+
 class AnamnesisCreate(AnamnesisBase):
+    """Esquema para criação de anamnese"""
     pass
 
-# Esquema para atualização de anamnese (todos campos opcionais)
-class AnamnesisUpdate(BaseModel):
-    chief_complaint: Optional[str] = Field(None, min_length=3, description="Queixa principal do paciente")
-    medical_history: Optional[str] = Field(None, description="Histórico médico do paciente")
-    allergies: Optional[str] = Field(None, description="Alergias do paciente")
-    medications: Optional[str] = Field(None, description="Medicamentos em uso pelo paciente")
-    notes: Optional[str] = Field(None, description="Observações adicionais")
-    is_active: Optional[bool] = Field(None, description="Estado de ativação do registro")
 
-# Esquema de resposta para anamnese
+class AnamnesisUpdate(BaseModel):
+    """Esquema para atualização de anamnese"""
+    chief_complaint: Optional[str] = Field(
+        None, 
+        description="Queixa principal do paciente",
+        min_length=3
+    )
+    medical_history: Optional[str] = Field(
+        None, 
+        description="Histórico médico do paciente"
+    )
+    allergies: Optional[str] = Field(
+        None, 
+        description="Lista de alergias do paciente"
+    )
+    medications: Optional[str] = Field(
+        None, 
+        description="Medicamentos que o paciente está tomando atualmente"
+    )
+    notes: Optional[str] = Field(
+        None, 
+        description="Observações adicionais"
+    )
+    
+    model_config = ConfigDict(extra="forbid")
+
+
 class AnamnesisResponse(AnamnesisBase):
+    """Esquema para resposta de anamnese"""
     id: UUID
-    subscriber_id: UUID
     patient_id: UUID
+    subscriber_id: UUID
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            datetime: lambda v: v.isoformat(),
+            UUID: lambda v: str(v)
+        }
+    )
 
-    class Config:
-        from_attributes = True
 
-# Esquema para listagem paginada de anamneses
 class AnamnesisListResponse(BaseModel):
+    """Esquema para resposta de lista de anamneses"""
     items: List[AnamnesisResponse]
     total: int
