@@ -12,6 +12,7 @@ import jwt
 SECRET_KEY = os.environ.get("API_SECRET_KEY", "development_secret_key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # Contexto de criptografia para senhas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -110,3 +111,19 @@ def create_refresh_token(
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     
     return encoded_jwt
+
+
+def decode_token(token: str) -> Dict[str, Any]:
+    """
+    Decodifica o token JWT.
+    
+    Args:
+        token: Token JWT
+        
+    Returns:
+        Dict[str, Any]: Payload do token decodificado
+        
+    Raises:
+        JWTError: Se o token for inválido
+    """
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
