@@ -1,51 +1,31 @@
 """
-Funções e utilitários de segurança
+Utilitários de segurança.
 """
-import os
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, Union
-
-import jwt
+from typing import Optional, Dict, Any
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+import os
+import jwt
 
 # Configurações de segurança
-SECRET_KEY = os.environ.get("SECRET_KEY", "insecure_key_for_dev")
+SECRET_KEY = os.environ.get("API_SECRET_KEY", "development_secret_key")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 semana
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# Contexto do passlib para hash de senhas
+# Contexto de criptografia para senhas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def create_access_token(
-    subject: Union[str, Any], expires_delta: Optional[timedelta] = None, data: Dict = None
-) -> str:
-    """
-    Cria um token JWT
-    
-    Args:
-        subject: Subject do token (normalmente user_id)
-        expires_delta: Tempo de expiração opcional
-        data: Dados adicionais a serem incluídos no token
-        
-    Returns:
-        str: Token JWT codificado
-    """
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode = {"exp": expire, "sub": str(subject)}
-    
-    if data:
-        to_encode.update(data)
-        
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+# Esquema OAuth2 para autenticação
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="auth/login",
+    auto_error=True
+)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Verifica se a senha em texto puro corresponde ao hash
+    Verifica se a senha em texto puro corresponde ao hash.
     
     Args:
         plain_password: Senha em texto puro
@@ -56,9 +36,10 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     return pwd_context.verify(plain_password, hashed_password)
 
+
 def get_password_hash(password: str) -> str:
     """
-    Gera hash da senha usando bcrypt
+    Gera o hash da senha.
     
     Args:
         password: Senha em texto puro
@@ -67,3 +48,34 @@ def get_password_hash(password: str) -> str:
         str: Hash da senha
     """
     return pwd_context.hash(password)
+
+
+def create_access_token(
+    data: Dict[str, Any],
+    expires_delta: Optional[timedelta] = None
+) -> str:
+    """
+    Cria um token JWT de acesso.
+    
+    Args:
+        data: Dados a serem codificados no token
+        expires_delta: Tempo de expiração do token
+        
+    Returns:
+        str: Token JWT codificado
+    """
+    to_encode = data.copy()
+    
+    # Definir expiração
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    # Adicionar expiração aos dados
+    to_encode.update({"exp": expire})
+    
+    # Criar token JWT
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    
+    return encoded_jwt

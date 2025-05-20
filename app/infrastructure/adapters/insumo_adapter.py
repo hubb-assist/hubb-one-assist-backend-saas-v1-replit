@@ -1,96 +1,89 @@
 """
-Adaptador para converter entre entidades de domínio e modelos ORM para Insumos.
+Adaptador para converter entre modelos de banco de dados e entidades de domínio para insumos.
 """
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from uuid import UUID
-from datetime import datetime
 
-from app.domain.insumo.entities import InsumoEntity
 from app.db.models.insumo import Insumo
+from app.domain.insumo.entities import InsumoEntity
 
 
 class InsumoAdapter:
     """
-    Adaptador para converter entre entidades de domínio e modelos ORM para Insumos.
+    Adaptador para converter entre modelos de banco de dados e entidades de domínio para insumos.
     """
     
     @staticmethod
-    def to_entity(orm_model: Optional[Insumo]) -> Optional[InsumoEntity]:
+    def to_entity(model: Insumo) -> InsumoEntity:
         """
-        Converte um modelo ORM para uma entidade de domínio.
+        Converte um modelo de banco de dados em uma entidade de domínio.
         
         Args:
-            orm_model: Modelo ORM a ser convertido
+            model: Modelo de banco de dados do insumo
             
         Returns:
-            Optional[InsumoEntity]: Entidade de domínio resultante, None se o modelo for None
+            InsumoEntity: Entidade de domínio equivalente
         """
-        if orm_model is None:
+        if not model:
             return None
-        
+            
         return InsumoEntity(
-            id=orm_model.id,
-            subscriber_id=orm_model.subscriber_id,
-            nome=orm_model.nome,
-            tipo=orm_model.tipo,
-            unidade=orm_model.unidade,
-            quantidade=orm_model.quantidade,
-            observacoes=orm_model.observacoes,
-            categoria=orm_model.categoria,
-            modulo_id=orm_model.modulo_id,
-            is_active=orm_model.is_active,
-            created_at=orm_model.created_at,
-            updated_at=orm_model.updated_at
+            id=model.id,
+            subscriber_id=model.subscriber_id,
+            nome=model.nome,
+            tipo=model.tipo,
+            unidade=model.unidade,
+            quantidade=model.quantidade,
+            categoria=model.categoria,
+            observacoes=model.observacoes,
+            modulo_id=model.modulo_id,
+            is_active=model.is_active,
+            created_at=model.created_at,
+            updated_at=model.updated_at
         )
     
     @staticmethod
-    def to_orm_model(entity: InsumoEntity) -> Insumo:
+    def to_model(entity: InsumoEntity) -> Insumo:
         """
-        Converte uma entidade de domínio para um modelo ORM.
+        Converte uma entidade de domínio em um modelo de banco de dados.
         
         Args:
-            entity: Entidade de domínio a ser convertida
+            entity: Entidade de domínio do insumo
             
         Returns:
-            Insumo: Modelo ORM resultante
+            Insumo: Modelo de banco de dados equivalente
         """
-        orm_model = Insumo(
-            id=entity.id,
-            subscriber_id=entity.subscriber_id,
-            nome=entity.nome,
-            tipo=entity.tipo,
-            unidade=entity.unidade,
-            quantidade=entity.quantidade,
-            observacoes=entity.observacoes,
-            categoria=entity.categoria,
-            modulo_id=entity.modulo_id,
-            is_active=entity.is_active,
-            created_at=entity.created_at,
-            updated_at=entity.updated_at
-        )
+        if not entity:
+            return None
+            
+        # Se já existe no banco, atualiza o modelo
+        model = Insumo()
         
-        return orm_model
+        if entity.id:
+            model.id = entity.id
+        
+        model.subscriber_id = entity.subscriber_id
+        model.nome = entity.nome
+        model.tipo = entity.tipo
+        model.unidade = entity.unidade
+        model.quantidade = entity.quantidade
+        model.categoria = entity.categoria
+        model.modulo_id = entity.modulo_id
+        model.observacoes = entity.observacoes
+        model.is_active = entity.is_active
+        model.updated_at = entity.updated_at
+        
+        return model
     
     @staticmethod
-    def update_orm_model(orm_model: Insumo, entity: InsumoEntity) -> Insumo:
+    def to_entity_list(models: List[Insumo]) -> List[InsumoEntity]:
         """
-        Atualiza um modelo ORM com os dados de uma entidade de domínio.
+        Converte uma lista de modelos em uma lista de entidades.
         
         Args:
-            orm_model: Modelo ORM a ser atualizado
-            entity: Entidade de domínio com os novos dados
+            models: Lista de modelos de banco de dados
             
         Returns:
-            Insumo: Modelo ORM atualizado
+            List[InsumoEntity]: Lista de entidades de domínio
         """
-        orm_model.nome = entity.nome
-        orm_model.tipo = entity.tipo
-        orm_model.unidade = entity.unidade
-        orm_model.quantidade = entity.quantidade
-        orm_model.categoria = entity.categoria
-        orm_model.modulo_id = entity.modulo_id
-        orm_model.observacoes = entity.observacoes
-        orm_model.is_active = entity.is_active
-        orm_model.updated_at = datetime.utcnow()
-        
-        return orm_model
+        return [InsumoAdapter.to_entity(model) for model in models if model]

@@ -26,7 +26,7 @@ class GetInsumoUseCase:
         
         Args:
             insumo_id: ID do insumo a ser obtido
-            subscriber_id: ID do assinante proprietário
+            subscriber_id: ID do assinante proprietário para validação
             
         Returns:
             dict: Dados do insumo encontrado

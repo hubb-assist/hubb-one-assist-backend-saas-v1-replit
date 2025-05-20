@@ -1,15 +1,16 @@
 """
-Caso de uso para listar insumos com filtros e paginação.
+Caso de uso para listar insumos com filtros opcionais.
 """
-from typing import Dict, Any, Optional, List
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 
+from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
 class ListInsumosUseCase:
     """
-    Caso de uso para listar insumos com filtros e paginação.
+    Caso de uso para listar insumos com filtros opcionais.
     """
     
     def __init__(self, repository: InsumoRepositoryInterface):
@@ -26,51 +27,57 @@ class ListInsumosUseCase:
         subscriber_id: UUID,
         skip: int = 0,
         limit: int = 100,
-        nome: Optional[str] = None,
-        tipo: Optional[str] = None,
         categoria: Optional[str] = None,
+        tipo: Optional[str] = None,
         modulo_id: Optional[UUID] = None,
-        is_active: Optional[bool] = True
+        is_active: bool = True
     ) -> Dict[str, Any]:
         """
-        Executa o caso de uso para listar insumos com filtros e paginação.
+        Executa o caso de uso para listar insumos com filtros opcionais.
         
         Args:
             subscriber_id: ID do assinante proprietário
-            skip: Número de registros a pular (para paginação)
-            limit: Número máximo de registros a retornar
-            nome: Filtro pelo nome (opcional)
-            tipo: Filtro pelo tipo (opcional)
-            categoria: Filtro pela categoria (opcional)
-            modulo_id: Filtro pelo ID do módulo (opcional)
-            is_active: Filtro pelo status de ativação (opcional)
+            skip: Quantidade de registros para pular (para paginação)
+            limit: Limite de registros retornados (para paginação)
+            categoria: Filtro opcional por categoria
+            tipo: Filtro opcional por tipo
+            modulo_id: Filtro opcional por módulo
+            is_active: Filtro por status de ativação (padrão: True)
             
         Returns:
-            Dict[str, Any]: Dados dos insumos encontrados com paginação
+            Dict[str, Any]: Dicionário com a lista de insumos e metadados
         """
-        # Preparar filtros
-        filters = {}
-        if nome:
-            filters["nome"] = nome
-        if tipo:
-            filters["tipo"] = tipo
-        if categoria:
-            filters["categoria"] = categoria
-        if modulo_id:
-            filters["modulo_id"] = modulo_id
-        if is_active is not None:
-            filters["is_active"] = is_active
+        # Validar parâmetros
+        if skip < 0:
+            raise ValueError("O parâmetro 'skip' não pode ser negativo")
         
-        # Buscar no repositório
-        insumos = self.repository.list(
+        if limit < 1:
+            raise ValueError("O parâmetro 'limit' deve ser maior que zero")
+        
+        # Buscar insumos no repositório
+        insumos = self.repository.list_by_subscriber(
             subscriber_id=subscriber_id,
             skip=skip,
             limit=limit,
-            filters=filters
+            categoria=categoria,
+            tipo=tipo,
+            modulo_id=modulo_id,
+            is_active=is_active
         )
         
-        # Preparar resposta
+        # Converter entidades para dicionários
+        insumos_dict = [insumo.to_dict() for insumo in insumos]
+        
+        # Construir resposta com metadados
         return {
-            "total": len(insumos),
-            "items": [insumo.to_dict() for insumo in insumos]
+            "items": insumos_dict,
+            "total": len(insumos_dict),
+            "skip": skip,
+            "limit": limit,
+            "filters": {
+                "categoria": categoria,
+                "tipo": tipo,
+                "modulo_id": str(modulo_id) if modulo_id else None,
+                "is_active": is_active
+            }
         }

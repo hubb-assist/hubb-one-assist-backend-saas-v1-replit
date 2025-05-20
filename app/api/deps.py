@@ -1,85 +1,68 @@
 """
 Dependências para as rotas da API.
 """
-from typing import Optional
-from uuid import UUID
+from typing import Generator, Optional, List
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-from pydantic import ValidationError
+import os
 
 from app.db.session import get_db
 from app.db.models.user import User
-from app.core.security import ALGORITHM, SECRET_KEY
-from app.schemas.token import TokenPayload
+from app.core.security import ALGORITHM, oauth2_scheme
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="auth/login",
-    auto_error=False  # Não lança exceção automaticamente
-)
+API_SECRET_KEY = os.environ.get("API_SECRET_KEY", "development_secret_key")
+
 
 def get_current_user(
     db: Session = Depends(get_db),
-    token: Optional[str] = Depends(oauth2_scheme)
-) -> Optional[User]:
+    token: str = Depends(oauth2_scheme)
+) -> User:
     """
-    Valida o token JWT e retorna o usuário correspondente.
+    Obtém o usuário atualmente autenticado.
     
     Args:
         db: Sessão do banco de dados
-        token: Token JWT
+        token: Token JWT de autenticação
         
     Returns:
-        Optional[User]: Usuário autenticado, None se o token for inválido
+        User: Usuário autenticado
         
     Raises:
-        HTTPException: Se o token for inválido ou expirado
+        HTTPException: Se o token for inválido ou o usuário não for encontrado
     """
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Não autenticado",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-        
-    try:
-        payload = jwt.decode(
-            token, SECRET_KEY, algorithms=[ALGORITHM]
-        )
-        token_data = TokenPayload(**payload)
-        
-        if token_data.sub is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido",
-                headers={"WWW-Authenticate": "Bearer"}
-            )
-            
-    except (JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Não foi possível validar as credenciais",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-        
-    user = db.query(User).filter(User.id == token_data.sub).first()
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Credenciais inválidas",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuário não encontrado",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-        
+    try:
+        # Decodificar token
+        payload = jwt.decode(token, API_SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    # Buscar usuário no banco de dados
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise credentials_exception
+    
     return user
 
-def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+
+def get_current_active_user(
+    current_user: User = Depends(get_current_user),
+) -> User:
     """
     Verifica se o usuário está ativo.
     
     Args:
-        current_user: Usuário atual
+        current_user: Usuário autenticado
         
     Returns:
         User: Usuário ativo
@@ -89,51 +72,30 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     """
     if not current_user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Usuário inativo"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuário inativo",
         )
-        
     return current_user
+
 
 def check_permission(user: User, permission_name: str) -> bool:
     """
-    Verifica se o usuário tem a permissão especificada.
+    Verifica se o usuário tem uma permissão específica.
     
     Args:
-        user: Usuário a verificar
-        permission_name: Nome da permissão
+        user: Usuário para verificar a permissão
+        permission_name: Nome da permissão a ser verificada
         
     Returns:
-        bool: True se o usuário tem a permissão
-        
-    Raises:
-        HTTPException: Se o usuário não tiver a permissão
+        bool: True se o usuário tem a permissão, False caso contrário
     """
-    # Super admins têm todas as permissões
+    # Super admin tem todas as permissões
     if user.role == "SUPER_ADMIN":
         return True
-        
-    # Verificar permissões personalizadas do usuário
-    if user.permissions and permission_name in user.permissions:
-        return user.permissions[permission_name]
-        
-    # Permissões padrão baseadas em função (considerar uma implementação real com base no seu sistema)
-    role_permissions = {
-        "DIRETOR": [
-            "CAN_VIEW_INSUMO", "CAN_CREATE_INSUMO", "CAN_UPDATE_INSUMO", "CAN_DELETE_INSUMO"
-        ],
-        "COLABORADOR_NIVEL_2": [
-            "CAN_VIEW_INSUMO", "CAN_CREATE_INSUMO", "CAN_UPDATE_INSUMO"
-        ],
-        "DONO_ASSINANTE": [
-            "CAN_VIEW_INSUMO", "CAN_CREATE_INSUMO", "CAN_UPDATE_INSUMO", "CAN_DELETE_INSUMO"
-        ]
-    }
     
-    if user.role in role_permissions and permission_name in role_permissions[user.role]:
-        return True
-        
-    raise HTTPException(
-        status_code=status.HTTP_403_FORBIDDEN,
-        detail=f"Permissão negada: {permission_name}"
-    )
+    # Verificar nas permissões do usuário
+    for permission in user.permissions:
+        if permission.name == permission_name and permission.active:
+            return True
+    
+    return False
