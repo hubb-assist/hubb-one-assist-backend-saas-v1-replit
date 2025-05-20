@@ -8,7 +8,8 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.core.dependencies import get_current_user
+from app.db.session import get_db
 from app.application.use_cases.insumo.create_insumo import CreateInsumoUseCase
 from app.application.use_cases.insumo.get_insumo import GetInsumoUseCase
 from app.application.use_cases.insumo.list_insumos import ListInsumosUseCase, ListInsumosBySubscriberUseCase
@@ -18,14 +19,14 @@ from app.application.use_cases.insumo.atualizar_estoque import AtualizarEstoqueI
 from app.infrastructure.repositories.insumo_repository import SQLAlchemyInsumoRepository
 from app.schemas.insumo import (
     InsumoCreate,
-    InsumoRead,
+    InsumoResponse,
     InsumoUpdate,
-    EstoqueUpdate,
+    InsumoEstoqueMovimento,
     InsumoFilter
 )
 
 
-router = APIRouter()
+router = APIRouter(prefix="/insumos", tags=["insumos"])
 
 
 @router.post("/", response_model=InsumoRead)
