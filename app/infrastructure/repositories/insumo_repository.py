@@ -14,7 +14,7 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 from app.infrastructure.adapters.insumo_adapter import InsumoAdapter
 
 
-class InsumoRepositoryImpl(InsumoRepositoryInterface):
+class InsumoRepository(InsumoRepositoryInterface):
     """
     Implementação do repositório de insumos utilizando SQLAlchemy.
     """
@@ -85,12 +85,14 @@ class InsumoRepositoryImpl(InsumoRepositoryInterface):
         # Converter para entidade
         return InsumoAdapter.to_entity(model)
     
-    def update(self, entity: InsumoEntity) -> InsumoEntity:
+    def update(self, insumo_id: UUID, subscriber_id: UUID, update_data: dict) -> InsumoEntity:
         """
         Atualiza um insumo existente.
         
         Args:
-            entity: Entidade de insumo atualizada
+            insumo_id: ID do insumo a ser atualizado
+            subscriber_id: ID do assinante proprietário para validação
+            update_data: Dados a serem atualizados no insumo
             
         Returns:
             InsumoEntity: Entidade de insumo atualizada

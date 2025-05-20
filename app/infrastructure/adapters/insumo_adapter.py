@@ -24,22 +24,40 @@ class InsumoAdapter:
         Returns:
             InsumoEntity: Entidade de domínio equivalente
         """
-        if not model:
-            return None
-            
+        if model is None:
+            raise ValueError("Modelo não pode ser None")
+        
+        # Extrair valores do modelo para variáveis regulares para evitar problemas de tipagem
+        id_val = model.id
+        subscriber_id_val = model.subscriber_id
+        nome_val = model.nome
+        tipo_val = model.tipo
+        unidade_val = model.unidade
+        quantidade_val = model.quantidade
+        categoria_val = model.categoria
+        observacoes_val = model.observacoes
+        modulo_id_val = model.modulo_id
+        is_active_val = model.is_active
+        created_at_val = model.created_at
+        updated_at_val = model.updated_at
+        
+        # Converter para os tipos esperados pela entidade
+        subscriber_id_converted = UUID(str(subscriber_id_val)) if subscriber_id_val else None
+        modulo_id_converted = UUID(str(modulo_id_val)) if modulo_id_val else None
+        
         return InsumoEntity(
-            id=model.id,
-            subscriber_id=model.subscriber_id,
-            nome=model.nome,
-            tipo=model.tipo,
-            unidade=model.unidade,
-            quantidade=model.quantidade,
-            categoria=model.categoria,
-            observacoes=model.observacoes,
-            modulo_id=model.modulo_id,
-            is_active=model.is_active,
-            created_at=model.created_at,
-            updated_at=model.updated_at
+            id=id_val,
+            subscriber_id=subscriber_id_converted,
+            nome=str(nome_val),
+            tipo=str(tipo_val),
+            unidade=str(unidade_val),
+            quantidade=float(quantidade_val) if quantidade_val is not None else 0.0,
+            categoria=str(categoria_val),
+            observacoes=str(observacoes_val) if observacoes_val else None,
+            modulo_id=modulo_id_converted,
+            is_active=bool(is_active_val),
+            created_at=created_at_val,
+            updated_at=updated_at_val
         )
     
     @staticmethod
@@ -54,7 +72,7 @@ class InsumoAdapter:
             Insumo: Modelo de banco de dados equivalente
         """
         if not entity:
-            return None
+            raise ValueError("Entidade não pode ser None")
             
         # Se já existe no banco, atualiza o modelo
         model = Insumo()
@@ -62,16 +80,17 @@ class InsumoAdapter:
         if entity.id:
             model.id = entity.id
         
-        model.subscriber_id = entity.subscriber_id
-        model.nome = entity.nome
-        model.tipo = entity.tipo
-        model.unidade = entity.unidade
-        model.quantidade = entity.quantidade
-        model.categoria = entity.categoria
-        model.modulo_id = entity.modulo_id
-        model.observacoes = entity.observacoes
-        model.is_active = entity.is_active
-        model.updated_at = entity.updated_at
+        # Atribuir valores com setattr para evitar problemas de tipagem
+        setattr(model, 'subscriber_id', entity.subscriber_id)
+        setattr(model, 'nome', entity.nome)
+        setattr(model, 'tipo', entity.tipo)
+        setattr(model, 'unidade', entity.unidade)
+        setattr(model, 'quantidade', entity.quantidade)
+        setattr(model, 'categoria', entity.categoria)
+        setattr(model, 'modulo_id', entity.modulo_id)
+        setattr(model, 'observacoes', entity.observacoes)
+        setattr(model, 'is_active', entity.is_active)
+        setattr(model, 'updated_at', entity.updated_at)
         
         return model
     

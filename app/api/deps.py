@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from uuid import UUID
 import os
 
 from app.db.session import get_db
@@ -99,3 +100,48 @@ def check_permission(user: User, permission_name: str) -> bool:
             return True
     
     return False
+
+
+def has_permission(permission_name: str):
+    """
+    Dependência para verificar se o usuário tem uma permissão específica.
+    
+    Args:
+        permission_name: Nome da permissão a ser verificada
+        
+    Returns:
+        Callable: Função que verifica a permissão
+        
+    Raises:
+        HTTPException: Se o usuário não tiver a permissão necessária
+    """
+    def _has_permission(current_user: User = Depends(get_current_active_user)) -> bool:
+        if not check_permission(current_user, permission_name):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permissão insuficiente: {permission_name}",
+            )
+        return True
+    
+    return _has_permission
+
+
+def get_current_subscriber_id(current_user: User = Depends(get_current_active_user)) -> UUID:
+    """
+    Obtém o ID do assinante do usuário autenticado.
+    
+    Args:
+        current_user: Usuário autenticado
+        
+    Returns:
+        UUID: ID do assinante do usuário
+        
+    Raises:
+        HTTPException: Se o usuário não estiver associado a um assinante
+    """
+    if not current_user.subscriber_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuário não está associado a um assinante",
+        )
+    return current_user.subscriber_id
