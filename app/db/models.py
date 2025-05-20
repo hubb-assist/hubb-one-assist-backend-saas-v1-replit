@@ -93,6 +93,9 @@ class Module(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relacionamento com insumos (muitos para muitos)
+    insumos_used = relationship("InsumoModuleAssociation", back_populates="module", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Module {self.nome}>"
@@ -241,3 +244,66 @@ class Patient(Base):
     
     def __repr__(self):
         return f"<Patient {self.name} ({self.cpf})>"
+
+
+class InsumoModuleAssociation(Base):
+    """
+    Tabela de associação entre Insumos e Módulos.
+    Permite relacionar quais insumos são utilizados em quais módulos do sistema.
+    """
+    __tablename__ = "insumos_modules"
+    
+    insumo_id = Column(UUID(as_uuid=True), ForeignKey("insumos.id"), primary_key=True)
+    module_id = Column(UUID(as_uuid=True), ForeignKey("modules.id"), primary_key=True)
+    
+    # Dados adicionais da associação
+    quantidade_padrao = Column(Integer, default=1, nullable=False)
+    observacao = Column(String(255), nullable=True)
+    
+    # Relacionamentos
+    insumo = relationship("Insumo", back_populates="modules_used")
+    module = relationship("Module", back_populates="insumos_used")
+    
+    # Campos de auditoria
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+
+class Insumo(Base):
+    """
+    Modelo para insumos (materiais e suprimentos) no sistema, 
+    vinculados a assinantes como parte do módulo de Custos.
+    Permite o cadastro de informações de estoque, preços, e associação com módulos.
+    """
+    __tablename__ = "insumos"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    nome = Column(String(150), nullable=False, index=True)
+    descricao = Column(Text, nullable=True)
+    categoria = Column(String(100), nullable=False, index=True)
+    valor_unitario = Column(Float, nullable=False)
+    unidade_medida = Column(String(50), nullable=False)
+    estoque_minimo = Column(Integer, nullable=False, default=1)
+    estoque_atual = Column(Integer, nullable=False, default=0)
+    
+    # Informações adicionais do insumo
+    fornecedor = Column(String(150), nullable=True)
+    codigo_referencia = Column(String(100), nullable=True)
+    data_validade = Column(DateTime, nullable=True)
+    data_compra = Column(DateTime, nullable=True)
+    observacoes = Column(Text, nullable=True)
+    
+    # Relacionamento com assinante (multitenant)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    subscriber = relationship("Subscriber", backref="insumos")
+    
+    # Relacionamento com módulos (muitos para muitos)
+    modules_used = relationship("InsumoModuleAssociation", back_populates="insumo", cascade="all, delete-orphan")
+    
+    # Campos de auditoria
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    def __repr__(self):
+        return f"<Insumo {self.nome} ({self.categoria})>"
