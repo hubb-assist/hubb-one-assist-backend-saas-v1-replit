@@ -9,7 +9,7 @@ from uuid import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from app.db.models.insumo import Insumo, InsumoModuleAssociation
+from app.db.models_insumo import Insumo, InsumoModuleAssociation
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
 from app.infrastructure.adapters.insumo_adapter import InsumoAdapter

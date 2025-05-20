@@ -8,7 +8,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.db.models.insumo import Insumo, InsumoModuleAssociation
+from app.db.models_insumo import Insumo, InsumoModuleAssociation
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.value_objects.modulo_association import ModuloAssociation
 
