@@ -13,8 +13,8 @@ class GetInsumoUseCase:
     """
     Caso de uso para obter um insumo específico pelo ID.
     
-    Permite acessar os detalhes de um insumo existente
-    utilizando seu identificador único.
+    Responsável por buscar um insumo pelo ID através do repositório
+    e retornar a entidade correspondente.
     """
     
     def __init__(self, repository: InsumoRepositoryInterface):
@@ -34,6 +34,9 @@ class GetInsumoUseCase:
             insumo_id: ID do insumo a buscar
             
         Returns:
-            Optional[InsumoEntity]: A entidade encontrada ou None se não existir
+            Optional[InsumoEntity]: Entidade encontrada ou None se não existir
+            
+        Raises:
+            ValueError: Se ocorrer um erro durante a busca
         """
         return self.repository.get_by_id(insumo_id)

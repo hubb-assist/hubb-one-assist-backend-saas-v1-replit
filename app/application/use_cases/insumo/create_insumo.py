@@ -1,9 +1,10 @@
 """
-Caso de uso para criação de insumos.
+Caso de uso para criar um novo insumo.
 """
 
-from typing import Dict, Any, List, Optional
-from uuid import UUID
+from datetime import datetime
+from typing import Dict, Any, Optional, List
+from uuid import UUID, uuid4
 
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
@@ -14,8 +15,8 @@ class CreateInsumoUseCase:
     """
     Caso de uso para criar um novo insumo.
     
-    Orquestra a validação, criação e persistência de um novo insumo
-    seguindo as regras de negócio definidas na entidade de domínio.
+    Responsável por validar dados de entrada, criar uma nova entidade de insumo
+    e persistir através do repositório.
     """
     
     def __init__(self, repository: InsumoRepositoryInterface):
@@ -50,39 +51,60 @@ class CreateInsumoUseCase:
         Args:
             nome: Nome do insumo
             descricao: Descrição detalhada
-            categoria: Categoria do insumo
-            valor_unitario: Valor unitário (deve ser positivo)
-            unidade_medida: Unidade de medida (ex: kg, unid)
-            estoque_minimo: Quantidade mínima desejada em estoque
+            categoria: Categoria do insumo (ex: medicamento, material, etc)
+            valor_unitario: Valor por unidade
+            unidade_medida: Unidade de medida (ex: unidade, caixa, kg)
+            estoque_minimo: Quantidade mínima recomendada
             estoque_atual: Quantidade atual em estoque
-            subscriber_id: ID do assinante a que pertence o insumo
-            fornecedor: Nome do fornecedor (opcional)
-            codigo_referencia: Código interno ou do fornecedor (opcional)
-            data_validade: Data de validade (opcional)
-            data_compra: Data da última compra (opcional)
-            observacoes: Anotações gerais (opcional)
-            modules_used: Lista de associações com módulos (opcional)
+            subscriber_id: ID do assinante proprietário
+            fornecedor: Nome do fornecedor
+            codigo_referencia: Código de referência interno ou do fornecedor
+            data_validade: Data de validade, se aplicável
+            data_compra: Data da última compra
+            observacoes: Observações adicionais
+            modules_used: Lista de módulos associados com suas quantidades padrão
             
         Returns:
             InsumoEntity: Entidade de insumo criada
             
         Raises:
-            ValueError: Se algum dado for inválido
+            ValueError: Se os dados fornecidos forem inválidos
         """
-        # Converter associações de módulos para objetos de valor, se fornecidos
-        modulos = []
+        # Validação básica
+        if valor_unitario < 0:
+            raise ValueError("Valor unitário não pode ser negativo")
+            
+        if estoque_minimo < 0:
+            raise ValueError("Estoque mínimo não pode ser negativo")
+            
+        if estoque_atual < 0:
+            raise ValueError("Estoque atual não pode ser negativo")
+            
+        # Processar associações de módulos
+        module_associations = []
         if modules_used:
             for module_data in modules_used:
-                module = ModuloAssociation(
-                    module_id=module_data["module_id"],
-                    quantidade_padrao=module_data.get("quantidade_padrao", 1),
-                    observacao=module_data.get("observacao"),
-                    module_nome=module_data.get("module_nome")
-                )
-                modulos.append(module)
+                module_id = module_data.get("module_id")
+                if not module_id:
+                    continue
+                    
+                try:
+                    if isinstance(module_id, str):
+                        module_id = UUID(module_id)
+                        
+                    module_associations.append(ModuloAssociation(
+                        module_id=module_id,
+                        quantidade_padrao=module_data.get("quantidade_padrao", 1),
+                        observacao=module_data.get("observacao"),
+                        module_nome=module_data.get("module_nome")
+                    ))
+                except (ValueError, TypeError):
+                    # Ignorar associação inválida
+                    continue
         
-        # Criar a entidade de domínio, que validará os dados de acordo com regras de negócio
+        # Criar entidade
         insumo = InsumoEntity(
+            id=uuid4(),
             nome=nome,
             descricao=descricao,
             categoria=categoria,
@@ -96,10 +118,10 @@ class CreateInsumoUseCase:
             data_validade=data_validade,
             data_compra=data_compra,
             observacoes=observacoes,
-            modules_used=modulos
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow(),
+            modules_used=module_associations
         )
         
         # Persistir no repositório
-        created_insumo = self.repository.create(insumo)
-        
-        return created_insumo
+        return self.repository.create(insumo)

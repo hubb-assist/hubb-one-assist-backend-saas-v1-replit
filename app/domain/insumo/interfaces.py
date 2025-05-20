@@ -1,9 +1,9 @@
 """
-Interfaces para o domínio de insumos.
+Interfaces para o módulo de Insumos.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, Optional, List
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
@@ -13,14 +13,14 @@ class InsumoRepositoryInterface(ABC):
     """
     Interface para o repositório de insumos.
     
-    Define os contratos que qualquer implementação de repositório de insumos
-    deve seguir, garantindo a inversão de dependência (SOLID).
+    Define contratos para todas as operações de persistência relacionadas a insumos,
+    permitindo diferentes implementações (SQLAlchemy, MongoDB, etc.) conforme necessário.
     """
     
     @abstractmethod
     def create(self, insumo: InsumoEntity) -> InsumoEntity:
         """
-        Cria um novo insumo no repositório.
+        Cria um novo insumo.
         
         Args:
             insumo: Entidade de insumo a ser criada
@@ -82,7 +82,7 @@ class InsumoRepositoryInterface(ABC):
     @abstractmethod
     def delete(self, insumo_id: UUID) -> bool:
         """
-        Exclui logicamente um insumo (soft delete).
+        Exclui um insumo (pode ser soft delete).
         
         Args:
             insumo_id: ID do insumo a excluir
