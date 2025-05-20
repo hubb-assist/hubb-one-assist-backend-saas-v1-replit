@@ -1,0 +1,264 @@
+from typing import List, Optional
+from uuid import UUID
+from datetime import date
+from decimal import Decimal
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+
+from app.domain.finance.interfaces import IFinanceRepository
+from app.domain.finance.entities import (
+    PayableEntity, ReceivableEntity, CashFlowSummary, ProfitCalculation
+)
+from app.schemas.finance_schema import (
+    PayableCreate, PayableUpdate, ReceivableCreate, ReceivableUpdate
+)
+from app.db.models_payable import Payable
+from app.db.models_receivable import Receivable
+# Importar modelos de custos para cálculo de lucro
+from app.db.models_cost_fixed import CostFixed
+from app.db.models_cost_variable import CostVariable
+from app.db.models_cost_clinical import CostClinical
+
+class FinanceSQLAlchemyRepository(IFinanceRepository):
+    def __init__(self, db: Session):
+        self.db = db
+
+    # --- Payables ---
+    def create_payable(self, data: PayableCreate, subscriber_id: UUID) -> PayableEntity:
+        inst = Payable(
+            subscriber_id=subscriber_id,
+            description=data.description,
+            amount=data.amount,
+            due_date=data.due_date,
+            notes=data.notes
+        )
+        self.db.add(inst)
+        self.db.commit()
+        self.db.refresh(inst)
+        return self._to_payable_entity(inst)
+
+    def get_payable(self, id: UUID, subscriber_id: UUID) -> Optional[PayableEntity]:
+        inst = (
+            self.db.query(Payable)
+            .filter_by(id=id, subscriber_id=subscriber_id, is_active=True)
+            .first()
+        )
+        return self._to_payable_entity(inst) if inst else None
+
+    def update_payable(self, id: UUID, data: PayableUpdate, subscriber_id: UUID) -> PayableEntity:
+        inst = self.db.query(Payable).filter_by(id=id, subscriber_id=subscriber_id).first()
+        if not inst:
+            return None
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(inst, field, value)
+        self.db.commit()
+        self.db.refresh(inst)
+        return self._to_payable_entity(inst)
+
+    def delete_payable(self, id: UUID, subscriber_id: UUID) -> None:
+        inst = self.db.query(Payable).filter_by(id=id, subscriber_id=subscriber_id).first()
+        if inst:
+            inst.is_active = False
+            self.db.commit()
+
+    def list_payables(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        paid: Optional[bool] = None,
+        due_from: Optional[date] = None,
+        due_to: Optional[date] = None,
+    ) -> List[PayableEntity]:
+        query = (
+            self.db.query(Payable)
+            .filter_by(subscriber_id=subscriber_id, is_active=True)
+        )
+        if paid is not None:
+            query = query.filter(Payable.paid == paid)
+        if due_from:
+            query = query.filter(Payable.due_date >= due_from)
+        if due_to:
+            query = query.filter(Payable.due_date <= due_to)
+        results = query.order_by(Payable.due_date).offset(skip).limit(limit).all()
+        return [self._to_payable_entity(r) for r in results]
+
+    # --- Receivables ---
+    def create_receivable(self, data: ReceivableCreate, subscriber_id: UUID) -> ReceivableEntity:
+        inst = Receivable(
+            subscriber_id=subscriber_id,
+            patient_id=data.patient_id,
+            description=data.description,
+            amount=data.amount,
+            due_date=data.due_date,
+            notes=data.notes
+        )
+        self.db.add(inst)
+        self.db.commit()
+        self.db.refresh(inst)
+        return self._to_receivable_entity(inst)
+
+    def get_receivable(self, id: UUID, subscriber_id: UUID) -> Optional[ReceivableEntity]:
+        inst = (
+            self.db.query(Receivable)
+            .filter_by(id=id, subscriber_id=subscriber_id, is_active=True)
+            .first()
+        )
+        return self._to_receivable_entity(inst) if inst else None
+
+    def update_receivable(
+        self, id: UUID, data: ReceivableUpdate, subscriber_id: UUID
+    ) -> ReceivableEntity:
+        inst = self.db.query(Receivable).filter_by(id=id, subscriber_id=subscriber_id).first()
+        if not inst:
+            return None
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(inst, field, value)
+        self.db.commit()
+        self.db.refresh(inst)
+        return self._to_receivable_entity(inst)
+
+    def delete_receivable(self, id: UUID, subscriber_id: UUID) -> None:
+        inst = self.db.query(Receivable).filter_by(id=id, subscriber_id=subscriber_id).first()
+        if inst:
+            inst.is_active = False
+            self.db.commit()
+
+    def list_receivables(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        received: Optional[bool] = None,
+        due_from: Optional[date] = None,
+        due_to: Optional[date] = None,
+    ) -> List[ReceivableEntity]:
+        query = (
+            self.db.query(Receivable)
+            .filter_by(subscriber_id=subscriber_id, is_active=True)
+        )
+        if received is not None:
+            query = query.filter(Receivable.received == received)
+        if due_from:
+            query = query.filter(Receivable.due_date >= due_from)
+        if due_to:
+            query = query.filter(Receivable.due_date <= due_to)
+        results = query.order_by(Receivable.due_date).offset(skip).limit(limit).all()
+        return [self._to_receivable_entity(r) for r in results]
+
+    # --- Cashflow & Profit ---
+    def get_cashflow(
+        self,
+        subscriber_id: UUID,
+        from_date: date,
+        to_date: date,
+    ) -> CashFlowSummary:
+        inflow = self.db.query(func.coalesce(func.sum(Receivable.amount), 0))
+        inflow = inflow.filter(
+            Receivable.subscriber_id == subscriber_id,
+            Receivable.is_active == True,
+            Receivable.received == True,
+            Receivable.receive_date >= from_date,
+            Receivable.receive_date <= to_date,
+        ).scalar()
+
+        outflow = self.db.query(func.coalesce(func.sum(Payable.amount), 0))
+        outflow = outflow.filter(
+            Payable.subscriber_id == subscriber_id,
+            Payable.is_active == True,
+            Payable.paid == True,
+            Payable.payment_date >= from_date,
+            Payable.payment_date <= to_date,
+        ).scalar()
+
+        return CashFlowSummary(
+            total_inflows=inflow,
+            total_outflows=outflow,
+            net_flow=inflow - outflow,
+        )
+
+    def calculate_profit(
+        self,
+        subscriber_id: UUID,
+        period_from: date,
+        period_to: date,
+    ) -> ProfitCalculation:
+        # Receita total baseada em recebíveis efetivos
+        total_revenue = self.db.query(func.coalesce(func.sum(Receivable.amount), 0))
+        total_revenue = total_revenue.filter(
+            Receivable.subscriber_id == subscriber_id,
+            Receivable.is_active == True,
+            Receivable.received == True,
+            Receivable.receive_date >= period_from,
+            Receivable.receive_date <= period_to,
+        ).scalar()
+
+        # Custos fixos
+        fixed = self.db.query(func.coalesce(func.sum(CostFixed.valor), 0))
+        fixed = fixed.filter(
+            CostFixed.subscriber_id == subscriber_id,
+            CostFixed.is_active == True,
+            CostFixed.data >= period_from,
+            CostFixed.data <= period_to,
+        ).scalar()
+
+        # Custos variáveis
+        variable = self.db.query(func.coalesce(func.sum(CostVariable.valor_unitario * CostVariable.quantidade), 0))
+        variable = variable.filter(
+            CostVariable.subscriber_id == subscriber_id,
+            CostVariable.is_active == True,
+            CostVariable.data >= period_from,
+            CostVariable.data <= period_to,
+        ).scalar()
+
+        # Custos clínicos
+        clinical = self.db.query(func.coalesce(func.sum(CostClinical.total_cost), 0))
+        clinical = clinical.filter(
+            CostClinical.subscriber_id == subscriber_id,
+            CostClinical.is_active == True,
+            CostClinical.date >= period_from,
+            CostClinical.date <= period_to,
+        ).scalar()
+
+        total_costs = fixed + variable + clinical
+        gross_profit = total_revenue - total_costs
+        net_profit = gross_profit  # pode incluir ajustes adicionais se necessário
+
+        return ProfitCalculation(
+            total_revenue=total_revenue,
+            total_costs=total_costs,
+            gross_profit=gross_profit,
+            net_profit=net_profit,
+        )
+
+    # --- Conversores ---
+    def _to_payable_entity(self, model: Payable) -> PayableEntity:
+        return PayableEntity(
+            id=model.id,
+            subscriber_id=model.subscriber_id,
+            description=model.description,
+            amount=model.amount,
+            due_date=model.due_date,
+            paid=model.paid,
+            payment_date=model.payment_date,
+            notes=model.notes,
+            is_active=model.is_active,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
+        )
+
+    def _to_receivable_entity(self, model: Receivable) -> ReceivableEntity:
+        return ReceivableEntity(
+            id=model.id,
+            subscriber_id=model.subscriber_id,
+            patient_id=model.patient_id,
+            description=model.description,
+            amount=model.amount,
+            due_date=model.due_date,
+            received=model.received,
+            receive_date=model.receive_date,
+            notes=model.notes,
+            is_active=model.is_active,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
+        )
