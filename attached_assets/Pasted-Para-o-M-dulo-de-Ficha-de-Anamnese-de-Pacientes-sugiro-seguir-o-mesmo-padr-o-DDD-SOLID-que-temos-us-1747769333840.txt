@@ -1,0 +1,92 @@
+Para o Módulo de Ficha de Anamnese de Pacientes, sugiro seguir o mesmo padrão DDD/SOLID que temos usado, isolando bem cada camada:
+
+1. Endpoints Propostos
+Sob a rota raiz dos pacientes, dentro do mesmo contexto multi‐tenant:
+
+bash
+Copiar
+Editar
+POST   /patients/{patient_id}/anamneses/         Criar ficha de anamnese
+GET    /patients/{patient_id}/anamneses/         Listar anamnese(s) do paciente
+GET    /patients/{patient_id}/anamneses/{id}     Obter ficha específica
+PUT    /patients/{patient_id}/anamneses/{id}     Atualizar ficha
+DELETE /patients/{patient_id}/anamneses/{id}     Excluir (desativação lógica)
+Caso prefira um endpoint global, usar /anamneses/ com query ?patient_id=.
+
+2. Estrutura em Pastas
+bash
+Copiar
+Editar
+app/
+ ├── db/
+ │    └── models_anamnesis.py      # modelo SQLAlchemy
+ ├── schemas/
+ │    └── anamnesis_schema.py      # Pydantic DTOs
+ ├── domain/
+ │    └── anamnesis/
+ │         ├ entities.py          # AnamnesisEntity
+ │         └ interfaces.py        # IAnamnesisRepository
+ ├── infrastructure/
+ │    └── repositories/
+ │         └── anamnesis_sqlalchemy.py
+ ├── application/
+ │    └── use_cases/
+ │         └── anamnesis_use_cases.py
+ ├── api/
+ │    └── routes/
+ │         └── anamnesis_router.py
+3. Passos de Implementação
+Migration Alembic
+
+Tabela anamneses (ou patient_anamnesis) com colunas:
+
+id: UUID (PK)
+
+subscriber_id: UUID (FK)
+
+patient_id: UUID (FK)
+
+Campos da ficha (ex: chief_complaint: Text, medical_history: Text, allergies: Text, etc.)
+
+is_active, created_at, updated_at
+
+Modelo SQLAlchemy
+
+Em app/db/models_anamnesis.py, classe Anamnesis mapeando a tabela.
+
+Schemas Pydantic
+
+Em app/schemas/anamnesis_schema.py:
+
+AnamnesisBase (campos da ficha)
+
+AnamnesisCreate, AnamnesisUpdate
+
+AnamnesisResponse (incluindo id, subscriber_id, timestamps)
+
+Domain Layer
+
+app/domain/anamnesis/entities.py: AnamnesisEntity com comportamento (ex: validações de campos obrigatórios).
+
+app/domain/anamnesis/interfaces.py: IAnamnesisRepository definindo create, get_by_id, update, delete, list_all.
+
+Repository SQLAlchemy
+
+Em app/infrastructure/repositories/anamnesis_sqlalchemy.py, implementar o repositório conforme a interface, com filtros por patient_id.
+
+Use Cases
+
+Em app/application/use_cases/anamnesis_use_cases.py:
+
+CreateAnamnesisUseCase, GetAnamnesisUseCase, ListAnamnesisUseCase, UpdateAnamnesisUseCase, DeleteAnamnesisUseCase.
+
+Router FastAPI
+
+Em app/api/routes/anamnesis_router.py, expor os endpoints acima, protegidos por get_current_user().
+
+Testes
+
+Unitários para regras de validação
+
+Integration tests cobrindo o CRUD completo
+

@@ -1,0 +1,79 @@
+PROMPT PARA O AGENTE (Replit/Cursor): MÓDULO DE ANAMNESE – REGRAS AGRESSIVAS
+
+ATENÇÃO, AGENTE: QUALQUER VIOLAÇÃO É INACEITÁVEL!
+
+ESCOPO ATÔMICO NO SANGUE!
+– SÓ altere/exiba/crie estes arquivos:
+
+bash
+Copiar
+Editar
+alembic/versions/<rev>_create_anamneses_table.py  
+app/db/models_anamnesis.py  
+app/schemas/anamnesis_schema.py  
+app/domain/anamnesis/entities.py  
+app/domain/anamnesis/interfaces.py  
+app/infrastructure/repositories/anamnesis_sqlalchemy.py  
+app/application/use_cases/anamnesis_use_cases.py  
+app/api/routes/anamnesis_router.py  
+NÃO toque em MAIS NADA!
+
+NOMES MILIMETRICAMENTE ÚNICOS
+– Arquivos de modelo: models_anamnesis.py
+– Esquemas: anamnesis_schema.py
+– NUNCA crie pastas ou módulos que se chocam com nomes já existentes.
+
+MIGRAÇÕES CONTROLADAS
+– UMA migration Alembic por vez.
+– Corrija o down_revision.
+– Execute alembic upgrade head e CONFIRA no banco.
+
+SEM FLASK, ESSE PROJETO É FASTAPI PURO!
+– Proibido main_flask.py ou libs WSGI.
+– Apenas ASGI com Uvicorn/Gunicorn+UvicornWorker.
+
+HEALTH-CHECK OBRIGATÓRIO
+– Em app/main.py (ANTES de tudo):
+
+python
+Copiar
+Editar
+@app.get("/", tags=["health"])
+async def health_check():
+    return {"status":"ok"}
+– VALIDAR com curl -i http://localhost:5000/ → 200 OK.
+
+TESTE LOCAL ANTES DE AVANÇAR
+– Após cada etapa, abra /docs e teste manualmente.
+– CONFIRME o endpoint de anamnese aparece e funciona.
+
+VERSÃO, VERSIONAMENTO, VERSIONAMENTO
+– COMMIT & PUSH de cada etapa.
+– Se falhar, REVERTA ao último commit estável.
+– Sem exceções!
+
+SEM INSTALAÇÕES AUTOMÁTICAS
+– NÃO instale ou remova pacotes sem atualizar manualmente requirements.txt.
+
+LOGS E TRATAMENTO DE ERROS
+– Registre logs em cada camada.
+– Responda 400/401/403/404/500 com JSON claro e mensagem útil.
+
+REVISÃO MANUAL DE DIFS
+– NENHUM PR será aprovado sem checagem completa contra estas regras.
+
+TAREFA IMEDIATA:
+Passo 1: Criar migration Alembic + modelo SQLAlchemy (models_anamnesis.py).
+
+Execute: alembic upgrade head e COMPROVE tabelas no banco.
+
+Commit & Push.
+
+Se qualquer regra for violada, RECUSE a tarefa IMEDIATAMENTE e notifique o responsável.
+
+
+
+
+
+
+
