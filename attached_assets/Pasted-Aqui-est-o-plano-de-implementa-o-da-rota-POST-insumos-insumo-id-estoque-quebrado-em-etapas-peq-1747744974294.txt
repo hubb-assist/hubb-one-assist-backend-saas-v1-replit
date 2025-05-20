@@ -1,0 +1,107 @@
+Aqui está o plano de implementação da rota POST /insumos/{insumo_id}/estoque, quebrado em etapas pequenas e isoladas. Assim você pode aplicar uma a uma, testar e só então avançar:
+
+1. Ajustar o modelo de dados
+a) Migrar a tabela insumos para incluir o campo quantidade
+Crie uma migration Alembic que adicione a coluna quantidade INTEGER NOT NULL DEFAULT 0 em insumos.
+
+Execute alembic upgrade head para aplicar.
+
+b) Atualizar o modelo SQLAlchemy
+Em app/db/models/insumo.py, adicione:
+
+python
+Copiar
+Editar
+quantidade = Column(Integer, nullable=False, default=0)
+2. Atualizar os schemas Pydantic
+Em app/schemas/insumo_schema.py, logo abaixo de InsumoUpdate, crie:
+
+python
+Copiar
+Editar
+class InsumoStockUpdate(BaseModel):
+    quantidade: int
+
+    @validator("quantidade")
+    def must_be_non_negative(cls, v):
+        if v < 0:
+            raise ValueError("Quantidade não pode ser negativa")
+        return v
+E no InsumoResponse, inclua quantidade: int.
+
+3. Interface de repositório
+Em app/domain/insumo/interfaces.py, adicione ao IInsumoRepository:
+
+python
+Copiar
+Editar
+    @abstractmethod
+    def update_stock(self, id: UUID, subscriber_id: UUID, quantidade: int) -> InsumoEntity: ...
+4. Entidade de domínio
+Em app/domain/insumo/entities.py, estenda InsumoEntity para ter:
+
+python
+Copiar
+Editar
+    self.quantidade = quantidade
+e inclua o parâmetro quantidade: int no construtor.
+
+5. Repositório SQLAlchemy
+Em app/infrastructure/repositories/insumo_sqlalchemy.py, implemente:
+
+python
+Copiar
+Editar
+    def update_stock(self, id: UUID, subscriber_id: UUID, quantidade: int) -> InsumoEntity:
+        insumo = (
+            self.db.query(Insumo)
+            .filter_by(id=id, subscriber_id=subscriber_id, is_active=True)
+            .first()
+        )
+        if not insumo:
+            return None
+        insumo.quantidade = quantidade
+        self.db.commit()
+        self.db.refresh(insumo)
+        return self._to_entity(insumo)
+6. Caso de uso
+Em app/application/use_cases/insumo_use_cases.py, adicione:
+
+python
+Copiar
+Editar
+class UpdateInsumoStockUseCase:
+    def __init__(self, repo: IInsumoRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID, quantidade: int) -> InsumoEntity:
+        updated = self.repo.update_stock(id, subscriber_id, quantidade)
+        if not updated:
+            raise ValueError("Insumo não encontrado ou inativo")
+        return updated
+7. Router FastAPI
+Em app/api/routes/insumo_router.py, adicione abaixo dos outros endpoints:
+
+python
+Copiar
+Editar
+@router.post("/{insumo_id}/estoque", response_model=InsumoResponse)
+def update_estoque_insumo(
+    insumo_id: UUID,
+    data: InsumoStockUpdate,
+    current_user=Depends(get_current_user),
+    repo=Depends(get_insumo_repo),
+):
+    uc = UpdateInsumoStockUseCase(repo)
+    try:
+        return uc.execute(insumo_id, current_user.subscriber_id, data.quantidade)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+Testes de verificação
+Unit test para UpdateInsumoStockUseCase
+
+Integration test via TestClient do FastAPI chamando /insumos/{id}/estoque
+
+Confirme no banco se o campo quantidade foi atualizado corretamente
+
+Dessa forma, você implementa exatamente o endpoint de atualização de estoque, sem tocar em nada fora do módulo Insumos, validando e testando cada passo antes de seguir adiante.
