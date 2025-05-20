@@ -65,24 +65,26 @@ async def create_appointment(
     Raises:
         HTTPException: Se houver um erro na criação
     """
-    if not current_user.subscriber_id:
+    # Verificação de segurança multi-tenant - usuário deve ter um subscriber_id
+    if not hasattr(current_user, 'subscriber_id') or not current_user.subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="O usuário não está associado a um assinante"
         )
     
     try:
         use_case = CreateAppointmentUseCase(repository)
-        result = use_case.execute(appointment.dict(), current_user.subscriber_id)
+        subscriber_id = str(current_user.subscriber_id)
+        result = use_case.execute(appointment.dict(), UUID(subscriber_id))
         return result
     except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=400,
             detail=str(e)
         )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail=f"Erro ao criar agendamento: {str(e)}"
         )
 
@@ -107,24 +109,26 @@ async def get_appointment(
     Raises:
         HTTPException: Se o agendamento não for encontrado
     """
-    if not current_user.subscriber_id:
+    # Verificação de segurança multi-tenant - usuário deve ter um subscriber_id
+    if not hasattr(current_user, 'subscriber_id') or not current_user.subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="O usuário não está associado a um assinante"
         )
     
     try:
         use_case = GetAppointmentUseCase(repository)
-        result = use_case.execute(appointment_id, current_user.subscriber_id)
+        subscriber_id = str(current_user.subscriber_id)
+        result = use_case.execute(appointment_id, UUID(subscriber_id))
         return result
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=404,
             detail="Agendamento não encontrado"
         )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail=f"Erro ao buscar agendamento: {str(e)}"
         )
 
@@ -141,7 +145,7 @@ async def update_appointment(
     
     Args:
         appointment_id: ID do agendamento
-        appointment: Dados do agendamento para atualizar
+        appointment: Dados do agendamento a serem atualizados
         current_user: Usuário autenticado
         repository: Repositório de agendamentos
         
@@ -149,35 +153,33 @@ async def update_appointment(
         AppointmentResponse: Agendamento atualizado
         
     Raises:
-        HTTPException: Se o agendamento não for encontrado ou houver um erro na atualização
+        HTTPException: Se o agendamento não for encontrado ou houver erro na atualização
     """
-    if not current_user.subscriber_id:
+    # Verificação de segurança multi-tenant - usuário deve ter um subscriber_id
+    if not hasattr(current_user, 'subscriber_id') or not current_user.subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="O usuário não está associado a um assinante"
         )
     
-    # Remover campos vazios (None) para não limpar campos no banco de dados
-    update_data = {k: v for k, v in appointment.dict().items() if v is not None}
-    
     try:
         use_case = UpdateAppointmentUseCase(repository)
-        result = use_case.execute(appointment_id, update_data, current_user.subscriber_id)
+        subscriber_id = str(current_user.subscriber_id)
+        result = use_case.execute(appointment_id, appointment.dict(exclude_unset=True), UUID(subscriber_id))
         return result
     except ValueError as e:
-        if "não encontrado" in str(e).lower():
+        if "não encontrado" in str(e):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=404,
                 detail="Agendamento não encontrado"
             )
-        else:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=str(e)
-            )
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail=f"Erro ao atualizar agendamento: {str(e)}"
         )
 
@@ -189,7 +191,7 @@ async def delete_appointment(
     repository: IAppointmentRepository = Depends(get_repository)
 ):
     """
-    Cancela/remove um agendamento
+    Exclui logicamente um agendamento (is_active=False)
     
     Args:
         appointment_id: ID do agendamento
@@ -197,34 +199,34 @@ async def delete_appointment(
         repository: Repositório de agendamentos
         
     Raises:
-        HTTPException: Se o agendamento não for encontrado ou houver um erro no cancelamento
+        HTTPException: Se o agendamento não for encontrado ou houver erro na exclusão
     """
-    if not current_user.subscriber_id:
+    # Verificação de segurança multi-tenant - usuário deve ter um subscriber_id
+    if not hasattr(current_user, 'subscriber_id') or not current_user.subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="O usuário não está associado a um assinante"
         )
     
     try:
+        # Como é uma exclusão lógica, estamos usando o caso de uso de "cancelar" aqui
         use_case = CancelAppointmentUseCase(repository)
-        result = use_case.execute(appointment_id, current_user.subscriber_id)
-        
-        if not result:
+        subscriber_id = str(current_user.subscriber_id)
+        use_case.execute(appointment_id, UUID(subscriber_id))
+    except ValueError as e:
+        if "não encontrado" in str(e):
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=404,
                 detail="Agendamento não encontrado"
             )
-            
-        return None  # 204 No Content
-    except ValueError as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=400,
             detail=str(e)
         )
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Erro ao cancelar agendamento: {str(e)}"
+            status_code=500,
+            detail=f"Erro ao excluir agendamento: {str(e)}"
         )
 
 
@@ -233,7 +235,7 @@ async def list_appointments(
     date_from: Optional[datetime] = None,
     date_to: Optional[datetime] = None,
     patient_id: Optional[UUID] = None,
-    provider_id: Optional[int] = None,
+    provider_id: Optional[UUID] = None,
     status: Optional[str] = None,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
@@ -260,16 +262,18 @@ async def list_appointments(
     Raises:
         HTTPException: Se houver um erro na listagem
     """
-    if not current_user.subscriber_id:
+    # Verificação de segurança multi-tenant - usuário deve ter um subscriber_id
+    if not hasattr(current_user, 'subscriber_id') or not current_user.subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=403,
             detail="O usuário não está associado a um assinante"
         )
     
     try:
         use_case = ListAppointmentsUseCase(repository)
+        subscriber_id = str(current_user.subscriber_id)
         result = use_case.execute(
-            subscriber_id=current_user.subscriber_id,
+            subscriber_id=UUID(subscriber_id),
             skip=skip,
             limit=limit,
             date_from=date_from,
@@ -281,6 +285,6 @@ async def list_appointments(
         return result
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=500,
             detail=f"Erro ao listar agendamentos: {str(e)}"
         )

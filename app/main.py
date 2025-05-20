@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.db.session import engine, Base, get_db
 from app.db.models import User, Segment, Module, Plan, PlanModule, Subscriber
+from app.db.models_appointment import Appointment
 from app.services.user_service import UserService
 from app.core.dependencies import get_current_user
 from app.api.routes_users import router as users_router
