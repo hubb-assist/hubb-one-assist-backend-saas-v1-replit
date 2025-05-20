@@ -1,0 +1,80 @@
+1. Migration Alembic: criar a tabela appointments
+Crie um arquivo em
+alembic/versions/<revision>_create_appointments_table.py:
+
+python
+Copiar
+Editar
+"""create appointments table
+
+Revision ID: <revision_id>
+Revises: <down_revision>
+Create Date: 2025-05-20 15:00:00.000000
+
+"""
+from alembic import op
+import sqlalchemy as sa
+import uuid
+
+# substitua pelos seus hashes de revisão
+revision = "<revision_id>"
+down_revision = "<down_revision>"
+branch_labels = None
+depends_on = None
+
+def upgrade():
+    op.create_table(
+        "appointments",
+        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
+        sa.Column("subscriber_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("subscribers.id"), nullable=False),
+        sa.Column("patient_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("patients.id"), nullable=False),
+        sa.Column("provider_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column("service_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("services.id"), nullable=False),
+        sa.Column("start_time", sa.DateTime(), nullable=False),
+        sa.Column("end_time", sa.DateTime(), nullable=False),
+        sa.Column("status", sa.String(length=20), nullable=False, server_default="scheduled"),
+        sa.Column("notes", sa.Text(), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
+        sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now()),
+    )
+    # índice para busca rápida por provider e intervalo
+    op.create_index("ix_appointments_provider_time", "appointments", ["provider_id", "start_time", "end_time"])
+
+def downgrade():
+    op.drop_index("ix_appointments_provider_time", table_name="appointments")
+    op.drop_table("appointments")
+Depois de criar, execute:
+
+bash
+Copiar
+Editar
+alembic upgrade head
+2. Modelo SQLAlchemy: Appointment
+Crie o arquivo app/db/models_appointment.py:
+
+python
+Copiar
+Editar
+from uuid import uuid4
+from datetime import datetime
+from sqlalchemy import Column, String, DateTime, Text, Boolean, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.session import Base
+
+class Appointment(Base):
+    __tablename__ = "appointments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    patient_id    = Column(UUID(as_uuid=True), ForeignKey("patients.id"), nullable=False)
+    provider_id   = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    service_id    = Column(UUID(as_uuid=True), ForeignKey("services.id"), nullable=False)
+    start_time    = Column(DateTime, nullable=False)
+    end_time      = Column(DateTime, nullable=False)
+    status        = Column(String(20), nullable=False, default="scheduled")
+    notes         = Column(Text, nullable=True)
+    is_active     = Column(Boolean, default=True, nullable=False)
+    created_at    = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at    = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+Com isso a tabela e o modelo de Agendamento estão prontos. Podemos agora avançar para os schemas
