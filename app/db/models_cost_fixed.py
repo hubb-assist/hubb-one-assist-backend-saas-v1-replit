@@ -2,7 +2,7 @@ from uuid import uuid4
 from sqlalchemy import Column, String, Numeric, Date, Text, Boolean, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from app.db.base import Base
+from app.db.session import Base
 from datetime import datetime
 
 class CostFixed(Base):
