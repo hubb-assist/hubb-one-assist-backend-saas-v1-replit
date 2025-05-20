@@ -338,6 +338,189 @@ O cálculo de lucro (`CalculateProfitUseCase`) integra-se com os módulos de Cus
 
 Esta integração permite um cálculo preciso de lucro com base em todas as despesas registradas no sistema.
 
+## Implementação de Módulo de Anamnese
+
+O módulo de Anamnese foi implementado seguindo a arquitetura DDD para gerenciar o histórico médico dos pacientes, incluindo queixas principais, histórico médico, alergias, medicações e observações clínicas.
+
+### 1. Estrutura de Arquivos - Módulo de Anamnese
+
+```
+app/
+├── api/
+│   └── routes/
+│       └── anamnesis_router.py          # Rotas da API para Anamnese (aninhado em /patients/{id}/anamneses)
+├── application/
+│   └── use_cases/
+│       └── anamnesis_use_cases.py       # Casos de uso para operações de anamnese
+├── domain/
+│   └── anamnesis/
+│       ├── entities.py                  # Entidade de domínio AnamnesisEntity
+│       └── interfaces.py                # Interface IAnamnesisRepository
+├── infrastructure/
+│   └── repositories/
+│       └── anamnesis_sqlalchemy.py      # Implementação do repositório
+├── db/
+│   └── models_anamnesis.py              # Modelo SQLAlchemy para anamnese
+└── schemas/
+    └── anamnesis_schema.py              # Esquemas Pydantic para validação
+```
+
+### 2. Entidade de Domínio
+
+A entidade `AnamnesisEntity` implementa a lógica de negócio para anamneses:
+
+```python
+class AnamnesisEntity:
+    def __init__(
+        self,
+        id: Optional[UUID] = None,
+        subscriber_id: Optional[UUID] = None,
+        patient_id: Optional[UUID] = None,
+        chief_complaint: Optional[str] = None,
+        medical_history: Optional[str] = None,
+        allergies: Optional[str] = None,
+        medications: Optional[str] = None,
+        notes: Optional[str] = None,
+        is_active: bool = True,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None,
+    ):
+        # Atributos inicializados
+        self.id = id
+        self.subscriber_id = subscriber_id
+        self.patient_id = patient_id
+        self.chief_complaint = chief_complaint
+        self.medical_history = medical_history
+        self.allergies = allergies
+        self.medications = medications
+        self.notes = notes
+        self.is_active = is_active
+        self.created_at = created_at
+        self.updated_at = updated_at
+        
+        # Validação das regras de negócio na criação
+        self._validate()
+    
+    def _validate(self) -> None:
+        """Validações de regras de negócio"""
+        if self.chief_complaint is None or len(self.chief_complaint.strip()) < 3:
+            raise ValueError("A queixa principal é obrigatória e deve ter pelo menos 3 caracteres")
+        
+        if self.subscriber_id is None:
+            raise ValueError("O ID do assinante é obrigatório")
+            
+        if self.patient_id is None:
+            raise ValueError("O ID do paciente é obrigatório")
+```
+
+### 3. Interface do Repositório
+
+A interface `IAnamnesisRepository` define os métodos necessários para manipular anamneses:
+
+```python
+class IAnamnesisRepository(ABC):
+    @abstractmethod
+    def create(self, data: AnamnesisCreate, patient_id: UUID, subscriber_id: UUID) -> AnamnesisEntity:
+        pass
+    
+    @abstractmethod
+    def get_by_id(self, id: UUID, subscriber_id: UUID) -> Optional[AnamnesisEntity]:
+        pass
+    
+    @abstractmethod
+    def list_by_patient(
+        self, patient_id: UUID, subscriber_id: UUID, skip: int = 0, limit: int = 100
+    ) -> List[AnamnesisEntity]:
+        pass
+    
+    @abstractmethod
+    def update(self, id: UUID, data: AnamnesisUpdate, subscriber_id: UUID) -> Optional[AnamnesisEntity]:
+        pass
+    
+    @abstractmethod
+    def delete(self, id: UUID, subscriber_id: UUID) -> bool:
+        pass
+    
+    @abstractmethod
+    def count_by_patient(self, patient_id: UUID, subscriber_id: UUID) -> int:
+        pass
+```
+
+### 4. Casos de Uso
+
+O módulo implementa os seguintes casos de uso:
+
+- **CreateAnamnesisUseCase**: Cria uma nova ficha de anamnese para um paciente
+- **GetAnamnesisUseCase**: Busca uma anamnese específica pelo ID
+- **ListAnamnesisUseCase**: Lista as anamneses de um paciente com paginação
+- **UpdateAnamnesisUseCase**: Atualiza uma anamnese existente
+- **DeleteAnamnesisUseCase**: Exclui (logicamente) uma anamnese
+
+Exemplo de implementação:
+
+```python
+class CreateAnamnesisUseCase:
+    def __init__(self, repository: IAnamnesisRepository):
+        self.repository = repository
+    
+    def execute(self, data: AnamnesisCreate, patient_id: UUID, subscriber_id: UUID) -> Dict[str, Any]:
+        try:
+            anamnesis_entity = self.repository.create(data, patient_id, subscriber_id)
+            return anamnesis_entity.to_dict()
+        except Exception as e:
+            raise ValueError(f"Erro ao criar anamnese: {str(e)}")
+```
+
+### 5. Schemas Pydantic
+
+Os schemas Pydantic usados para validação:
+
+- **AnamnesisBase**: Schema base com campos comuns
+- **AnamnesisCreate**: Schema para criação
+- **AnamnesisUpdate**: Schema para atualização (campos opcionais)
+- **AnamnesisResponse**: Schema para resposta
+- **AnamnesisListResponse**: Schema para listagem com paginação
+
+```python
+class AnamnesisBase(BaseModel):
+    chief_complaint: str = Field(..., min_length=3, description="Queixa principal do paciente")
+    medical_history: Optional[str] = Field(None, description="Histórico médico do paciente")
+    allergies: Optional[str] = Field(None, description="Lista de alergias do paciente")
+    medications: Optional[str] = Field(None, description="Medicamentos que o paciente está tomando")
+    notes: Optional[str] = Field(None, description="Observações adicionais")
+```
+
+### 6. Endpoints da API
+
+A API expõe as seguintes rotas (aninhadas sob `/patients/{patient_id}/anamneses`):
+
+| Método HTTP | Endpoint                             | Descrição                               |
+|-------------|------------------------------------- |----------------------------------------|
+| POST        | /patients/{id}/anamneses/            | Criar uma nova anamnese                |
+| GET         | /patients/{id}/anamneses/{anam_id}   | Obter detalhes de uma anamnese         |
+| GET         | /patients/{id}/anamneses/            | Listar anamneses do paciente           |
+| PUT         | /patients/{id}/anamneses/{anam_id}   | Atualizar uma anamnese                 |
+| DELETE      | /patients/{id}/anamneses/{anam_id}   | Excluir uma anamnese (exclusão lógica) |
+
+### 7. Segurança e Validação
+
+- Todas as rotas implementam segurança multi-tenant via `subscriber_id`
+- Validação dupla: Pydantic na API e lógica de negócio na entidade
+- Testes confirmam o funcionamento adequado dos endpoints:
+  - Criar (POST): 201 Created - Retorna o objeto criado
+  - Listar (GET): 200 OK - Retorna itens paginados com total
+  - Obter (GET): 200 OK - Retorna detalhes completos da anamnese
+  - Atualizar (PUT): 200 OK - Retorna objeto atualizado
+  - Excluir (DELETE): 204 No Content - Indica exclusão bem-sucedida
+
+### 8. Integração com Módulo de Pacientes
+
+O módulo de Anamnese integra-se diretamente com o módulo de Pacientes:
+
+- As anamneses são sempre associadas a um paciente específico
+- As rotas são aninhadas (nested routes) sob o recurso de pacientes
+- A segurança verifica se a anamnese pertence ao paciente indicado na URL
+
 ## Conclusão
 
 Siga estas diretrizes ao implementar novos módulos ou modificar os existentes para garantir:

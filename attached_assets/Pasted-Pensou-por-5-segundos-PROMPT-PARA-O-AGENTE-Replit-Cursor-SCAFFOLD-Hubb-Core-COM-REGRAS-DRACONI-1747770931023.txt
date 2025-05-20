@@ -1,0 +1,81 @@
+Pensou por 5 segundos
+PROMPT PARA O AGENTE (Replit/Cursor) – SCAFFOLD “Hubb Core” COM REGRAS DRACONIANAS
+
+ATENÇÃO! QUALQUER DESVIO É FALHA GRAVE DE ARQUITETURA!
+
+ESCOPO & ATOMICIDADE
+– Só crie/edite os arquivos e pastas do esqueleto abaixo.
+– Não crie, mova ou remova NADA fora desta lista.
+– Se algo mudar, recuse a operação até correção.
+
+SEM CONFLITOS DE NOMES
+– Use nomes exatos e únicos (veja abaixo).
+– Não duplique ou choque com arquivos existentes.
+
+ZERO FLASK
+– Este sistema é FastAPI puro ASGI.
+– Proibido qualquer referência a main_flask.py ou Flask.
+
+MIGRAÇÕES CONTROLADAS
+– Para a parte backend, só gere Alembic depois de aprovar.
+– Uma migration por vez, down_revision correto, alembic upgrade head e conferência no banco.
+
+HEALTH‐CHECK OBRIGATÓRIO
+– Em backend/app/main.py antes de tudo:
+
+python
+Copiar
+Editar
+@app.get("/health", tags=["health"])
+async def health_check():
+    return {"status":"ok"}
+– Valide via curl -i localhost:5000/health → 200 OK.
+
+VERSÃO & COMMIT
+– Depois de cada etapa, commit & push.
+– Se falhar, reverta ao último estado estável.
+
+SEM INSTALAÇÕES AUTOMÁTICAS
+– Não altere requirements.txt sem revisão manual.
+
+ESTRUTURA DE PASTAS A CRIAR
+pgsql
+Copiar
+Editar
+hubb-core/
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── v1/
+│   │   │       ├── upload.py
+│   │   │       ├── collections.py
+│   │   │       └── documents.py
+│   │   ├── core/
+│   │   │   ├── converter.py
+│   │   │   └── models.py
+│   │   ├── db/
+│   │   │   ├── crud.py
+│   │   │   └── session.py
+│   │   ├── main.py
+│   │   └── requirements.txt
+│   └── .replit
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── api/
+│   │   │   └── collections.ts
+│   │   ├── components/
+│   │   ├── features/
+│   │   │   └── collections/
+│   │   │       ├── CollectionList.tsx
+│   │   │       ├── CollectionDetail.tsx
+│   │   │       └── CreateCollectionForm.tsx
+│   │   ├── hooks/
+│   │   │   └── useCollections.ts
+│   │   ├── App.tsx
+│   │   └── index.tsx
+│   ├── tailwind.config.js
+│   └── package.json
+│
+└── README.md
