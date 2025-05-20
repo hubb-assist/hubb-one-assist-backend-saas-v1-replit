@@ -218,6 +218,126 @@ app/
 - **Domain Events**: Para notificar mudanças significativas nas entidades
 - **Agregados**: Identifique grupos de entidades que devem ser tratadas como uma unidade
 
+## Implementação de Módulo Financeiro
+
+O módulo Financeiro foi implementado seguindo rigorosamente os princípios de DDD apresentados neste documento, com o objetivo de gerenciar contas a pagar, contas a receber, fluxo de caixa e cálculo de lucro.
+
+### 1. Estrutura de Arquivos - Módulo Financeiro
+
+```
+app/
+├── api/
+│   └── routes/
+│       └── finance_router.py             # Rotas da API para o módulo Financeiro
+├── application/
+│   └── use_cases/
+│       └── finance_use_cases.py          # Casos de uso para operações financeiras
+├── domain/
+│   └── finance/
+│       ├── entities.py                   # Entidades de domínio (Payable, Receivable, ValueObjects)
+│       └── interfaces.py                 # Interface do repositório financeiro
+├── infrastructure/
+│   └── repositories/
+│       └── finance_sqlalchemy.py         # Implementação do repositório
+├── db/
+│   ├── models_payable.py                 # Modelo SQLAlchemy para contas a pagar
+│   └── models_receivable.py              # Modelo SQLAlchemy para contas a receber
+└── schemas/
+    └── finance_schema.py                 # Esquemas Pydantic para validação
+```
+
+### 2. Entidades e Value Objects
+
+O módulo implementa duas entidades principais e dois value objects:
+
+- **PayableEntity**: Entidade para contas a pagar (obrigações financeiras)
+- **ReceivableEntity**: Entidade para contas a receber (direitos creditórios)
+- **CashFlowSummary (Value Object)**: Representa o sumário de fluxo de caixa em um período
+- **ProfitCalculation (Value Object)**: Representa o cálculo de lucro com base em receitas e custos
+
+### 3. Interface do Repositório
+
+Interface `IFinanceRepository` define os seguintes métodos:
+
+```python
+class IFinanceRepository(ABC):
+    # Métodos para Payables
+    @abstractmethod
+    def create_payable(self, data: PayableCreate, subscriber_id: UUID) -> PayableEntity:
+        pass
+    
+    @abstractmethod
+    def get_payable(self, id: UUID, subscriber_id: UUID) -> Optional[PayableEntity]:
+        pass
+    
+    # ... outros métodos para Payables ...
+    
+    # Métodos para Receivables
+    @abstractmethod
+    def create_receivable(self, data: ReceivableCreate, subscriber_id: UUID) -> ReceivableEntity:
+        pass
+    
+    # ... outros métodos para Receivables ...
+    
+    # Métodos para CashFlow e Profit
+    @abstractmethod
+    def get_cashflow(self, subscriber_id: UUID, from_date: date, to_date: date) -> CashFlowSummary:
+        pass
+    
+    @abstractmethod
+    def calculate_profit(self, subscriber_id: UUID, period_from: date, period_to: date) -> ProfitCalculation:
+        pass
+```
+
+### 4. Casos de Uso
+
+Os casos de uso implementados incluem:
+
+- **CreatePayableUseCase**: Cria uma nova conta a pagar
+- **GetPayableUseCase**: Busca uma conta a pagar pelo ID
+- **ListPayablesUseCase**: Lista contas a pagar com filtros
+- **UpdatePayableUseCase**: Atualiza uma conta a pagar existente
+- **DeletePayableUseCase**: Exclui (logicamente) uma conta a pagar
+- **Casos equivalentes para Receivables**
+- **GetCashFlowUseCase**: Calcula o fluxo de caixa em um período
+- **CalculateProfitUseCase**: Calcula lucro baseado em receitas e custos
+
+### 5. Endpoints da API
+
+A API expõe as seguintes rotas principais:
+
+| Método HTTP | Endpoint                    | Descrição                                    |
+|-------------|-----------------------------|--------------------------------------------|
+| POST        | /finance/payables           | Criar uma nova conta a pagar                |
+| GET         | /finance/payables/{id}      | Obter detalhes de uma conta a pagar         |
+| GET         | /finance/payables           | Listar contas a pagar com filtros           |
+| PUT         | /finance/payables/{id}      | Atualizar uma conta a pagar                 |
+| DELETE      | /finance/payables/{id}      | Excluir uma conta a pagar                   |
+| POST        | /finance/receivables        | Criar uma nova conta a receber              |
+| GET         | /finance/receivables/{id}   | Obter detalhes de uma conta a receber       |
+| GET         | /finance/receivables        | Listar contas a receber com filtros         |
+| PUT         | /finance/receivables/{id}   | Atualizar uma conta a receber               |
+| DELETE      | /finance/receivables/{id}   | Excluir uma conta a receber                 |
+| GET         | /finance/cashflow           | Calcular fluxo de caixa em um período       |
+| GET         | /finance/profit             | Calcular lucro em um período                |
+
+### 6. Segurança e Validação
+
+- Todas as rotas implementam segurança multi-tenant via `subscriber_id`
+- Validação com Pydantic para todos os dados de entrada
+- Validação adicional nas entidades de domínio
+- Tratamento adequado de erros com códigos HTTP específicos
+
+### 7. Integração com Módulo de Custos
+
+O cálculo de lucro (`CalculateProfitUseCase`) integra-se com os módulos de Custos:
+
+- Custos Fixos
+- Custos Variáveis
+- Custos Clínicos
+
+Esta integração permite um cálculo preciso de lucro com base em todas as despesas registradas no sistema.
+
 ## Conclusão
 
 Siga estas diretrizes ao implementar novos módulos ou modificar os existentes para garantir:
