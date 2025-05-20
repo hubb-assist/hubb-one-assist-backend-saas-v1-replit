@@ -91,3 +91,23 @@ class ICostClinicalRepository(ABC):
             Lista de entidades de custos clínicos
         """
         pass
+        
+    @abstractmethod
+    def count(
+        self,
+        subscriber_id: UUID,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None
+    ) -> int:
+        """
+        Conta o número total de custos clínicos do assinante.
+        
+        Args:
+            subscriber_id: ID do assinante
+            date_from: Data inicial para filtro
+            date_to: Data final para filtro
+            
+        Returns:
+            Número total de custos clínicos
+        """
+        pass

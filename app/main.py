@@ -38,6 +38,8 @@ from app.api.routes_insumos import router as insumos_router
 from app.api.routes_custos_fixos import router as custos_fixos_router
 # Rotas para gerenciamento de custos variáveis
 from app.api.routes_custos_variaveis import router as custos_variaveis_router
+# Rotas para gerenciamento de custos clínicos
+from app.api.routes_custos_clinicos import router as custos_clinicos_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
 from app.api.routes_api_compatibility import router as compatibility_router, external_api_router
 # Rota especial para tratar problemas de CORS com subscribers
@@ -115,6 +117,7 @@ app.include_router(patients_ddd_router) # Novo router de pacientes com arquitetu
 app.include_router(insumos_router) # Router para gerenciamento de insumos (módulo de Custos)
 app.include_router(custos_fixos_router) # Router para gerenciamento de custos fixos
 app.include_router(custos_variaveis_router) # Router para gerenciamento de custos variáveis
+app.include_router(custos_clinicos_router) # Router para gerenciamento de custos clínicos
 # Módulo Arduino foi desativado como parte da refatoração do domínio
 # O router existe apenas para compatibilidade com código existente, mas não é exposto na API
 
