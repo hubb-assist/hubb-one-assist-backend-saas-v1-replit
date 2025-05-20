@@ -42,6 +42,8 @@ from app.api.routes_custos_variaveis import router as custos_variaveis_router
 from app.api.routes_custos_clinicos import router as custos_clinicos_router
 # Rotas para relatórios de custos
 from app.api.routes_relatorios_custos import router as relatorios_custos_router
+# Rotas para agendamentos (novo módulo DDD)
+from app.api.routes.appointment_router import router as appointment_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
 from app.api.routes_api_compatibility import router as compatibility_router, external_api_router
 # Rota especial para tratar problemas de CORS com subscribers
@@ -121,6 +123,7 @@ app.include_router(custos_fixos_router) # Router para gerenciamento de custos fi
 app.include_router(custos_variaveis_router) # Router para gerenciamento de custos variáveis
 app.include_router(custos_clinicos_router) # Router para gerenciamento de custos clínicos
 app.include_router(relatorios_custos_router) # Router para relatórios de custos
+app.include_router(appointment_router) # Router para agendamentos (DDD)
 # Módulo Arduino foi desativado como parte da refatoração do domínio
 # O router existe apenas para compatibilidade com código existente, mas não é exposto na API
 

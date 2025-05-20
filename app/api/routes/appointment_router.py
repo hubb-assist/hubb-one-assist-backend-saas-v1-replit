@@ -8,7 +8,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, get_db
+from app.core.dependencies import get_current_user, get_db
 from app.application.use_cases.appointment_use_cases import (
     CreateAppointmentUseCase,
     GetAppointmentUseCase,
@@ -18,7 +18,7 @@ from app.application.use_cases.appointment_use_cases import (
 )
 from app.domain.appointment.interfaces import IAppointmentRepository
 from app.infrastructure.repositories.appointment_sqlalchemy import AppointmentSQLAlchemyRepository
-from app.models import User
+from app.db.models import User
 from app.schemas.appointment_schema import (
     AppointmentCreate,
     AppointmentResponse,
