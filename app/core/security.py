@@ -12,7 +12,6 @@ import jwt
 SECRET_KEY = os.environ.get("API_SECRET_KEY", "development_secret_key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # Contexto de criptografia para senhas
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -80,50 +79,3 @@ def create_access_token(
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     
     return encoded_jwt
-
-def create_refresh_token(
-    data: Dict[str, Any],
-    expires_delta: Optional[timedelta] = None
-) -> str:
-    """
-    Cria um token JWT de refresh.
-    
-    Args:
-        data: Dados a serem codificados no token
-        expires_delta: Tempo de expiração do token
-        
-    Returns:
-        str: Token JWT de refresh codificado
-    """
-    to_encode = data.copy()
-    
-    # Definir expiração (tokens de refresh tipicamente duram mais)
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        # Refresh token with longer lifetime (7 days)
-        expire = datetime.utcnow() + timedelta(days=7)
-    
-    # Adicionar expiração e tipo aos dados
-    to_encode.update({"exp": expire, "token_type": "refresh"})
-    
-    # Criar token JWT
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    
-    return encoded_jwt
-
-
-def decode_token(token: str) -> Dict[str, Any]:
-    """
-    Decodifica o token JWT.
-    
-    Args:
-        token: Token JWT
-        
-    Returns:
-        Dict[str, Any]: Payload do token decodificado
-        
-    Raises:
-        JWTError: Se o token for inválido
-    """
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
