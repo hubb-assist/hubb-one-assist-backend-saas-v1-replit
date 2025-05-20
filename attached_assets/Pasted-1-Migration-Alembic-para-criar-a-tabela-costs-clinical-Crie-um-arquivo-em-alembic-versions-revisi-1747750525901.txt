@@ -1,0 +1,75 @@
+1. Migration Alembic para criar a tabela costs_clinical
+
+Crie um arquivo em alembic/versions/{revision}_create_costs_clinical_table.py:
+
+python
+Copiar
+Editar
+"""create costs_clinical table
+
+Revision ID: zzzz
+Revises: yyyy
+Create Date: 2025-05-20 12:00:00.000000
+
+"""
+from alembic import op
+import sqlalchemy as sa
+import uuid
+
+
+revision = "zzzz"
+down_revision = "yyyy"
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    op.create_table(
+        "costs_clinical",
+        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
+        sa.Column("subscriber_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("subscribers.id"), nullable=False),
+        sa.Column("procedure_name", sa.String(length=255), nullable=False),
+        sa.Column("duration_hours", sa.Numeric(5, 2), nullable=False),
+        sa.Column("hourly_rate", sa.Numeric(12, 2), nullable=False),
+        sa.Column("total_cost", sa.Numeric(12, 2), nullable=False),
+        sa.Column("date", sa.Date(), nullable=False),
+        sa.Column("observacoes", sa.Text(), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
+        sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now()),
+    )
+
+
+def downgrade():
+    op.drop_table("costs_clinical")
+Após salvar, rode:
+
+bash
+Copiar
+Editar
+alembic upgrade head
+2. Modelo SQLAlchemy em app/db/models_cost_clinical.py
+
+python
+Copiar
+Editar
+from uuid import uuid4
+from datetime import datetime
+from sqlalchemy import Column, String, Numeric, Date, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.session import Base
+
+class CostClinical(Base):
+    __tablename__ = "costs_clinical"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    procedure_name = Column(String(255), nullable=False)
+    duration_hours = Column(Numeric(5, 2), nullable=False)
+    hourly_rate = Column(Numeric(12, 2), nullable=False)
+    total_cost = Column(Numeric(12, 2), nullable=False)
+    date = Column(Date, nullable=False)
+    observacoes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

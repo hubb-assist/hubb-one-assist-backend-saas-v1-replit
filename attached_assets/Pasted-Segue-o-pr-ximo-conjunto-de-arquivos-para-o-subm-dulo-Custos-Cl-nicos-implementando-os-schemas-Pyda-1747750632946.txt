@@ -1,0 +1,118 @@
+Segue o próximo conjunto de arquivos para o submódulo Custos Clínicos, implementando os schemas Pydantic, a entidade de domínio e a interface do repositório:
+
+3. Schemas Pydantic
+📁 app/schemas/custo_clinico.py
+
+python
+Copiar
+Editar
+from pydantic import BaseModel, condecimal
+from datetime import date, datetime
+from uuid import UUID
+from typing import Optional
+
+class CostClinicalBase(BaseModel):
+    procedure_name: str
+    duration_hours: condecimal(gt=0, decimal_places=2)
+    hourly_rate: condecimal(gt=0, decimal_places=2)
+    date: date
+    observacoes: Optional[str] = None
+
+class CostClinicalCreate(CostClinicalBase):
+    pass
+
+class CostClinicalUpdate(BaseModel):
+    procedure_name: Optional[str]
+    duration_hours: Optional[condecimal(gt=0, decimal_places=2)]
+    hourly_rate: Optional[condecimal(gt=0, decimal_places=2)]
+    date: Optional[date]
+    observacoes: Optional[str]
+    is_active: Optional[bool]
+
+class CostClinicalResponse(CostClinicalBase):
+    id: UUID
+    subscriber_id: UUID
+    total_cost: condecimal(gt=0, decimal_places=2)
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+4. Entidade de Domínio
+📁 app/domain/cost_clinical/entities.py
+
+python
+Copiar
+Editar
+from uuid import UUID
+from datetime import date, datetime
+from typing import Optional
+
+class CostClinicalEntity:
+    def __init__(
+        self,
+        id: UUID,
+        subscriber_id: UUID,
+        procedure_name: str,
+        duration_hours: float,
+        hourly_rate: float,
+        total_cost: float,
+        date: date,
+        observacoes: Optional[str],
+        is_active: bool,
+        created_at: datetime,
+        updated_at: datetime
+    ):
+        self.id = id
+        self.subscriber_id = subscriber_id
+        self.procedure_name = procedure_name
+        self.duration_hours = duration_hours
+        self.hourly_rate = hourly_rate
+        self.total_cost = total_cost
+        self.date = date
+        self.observacoes = observacoes
+        self.is_active = is_active
+        self.created_at = created_at
+        self.updated_at = updated_at
+5. Interface de Repositório
+📁 app/domain/cost_clinical/interfaces.py
+
+python
+Copiar
+Editar
+from abc import ABC, abstractmethod
+from uuid import UUID
+from datetime import date
+from typing import List, Optional
+from app.domain.cost_clinical.entities import CostClinicalEntity
+from app.schemas.custo_clinico import CostClinicalCreate, CostClinicalUpdate
+
+class ICostClinicalRepository(ABC):
+    @abstractmethod
+    def create(self, data: CostClinicalCreate, subscriber_id: UUID) -> CostClinicalEntity:
+        ...
+
+    @abstractmethod
+    def get_by_id(self, id: UUID, subscriber_id: UUID) -> Optional[CostClinicalEntity]:
+        ...
+
+    @abstractmethod
+    def update(self, id: UUID, data: CostClinicalUpdate, subscriber_id: UUID) -> CostClinicalEntity:
+        ...
+
+    @abstractmethod
+    def delete(self, id: UUID, subscriber_id: UUID) -> None:
+        ...
+
+    @abstractmethod
+    def list_all(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None
+    ) -> List[CostClinicalEntity]:
+        ...
+Assim já temos a estrutura de validação, a representação em memória e o contrato que nosso repositório deverá cumprir.
