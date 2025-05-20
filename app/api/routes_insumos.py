@@ -17,7 +17,7 @@ from app.application.use_cases.insumo.update_insumo import UpdateInsumoUseCase
 from app.application.use_cases.insumo.delete_insumo import DeleteInsumoUseCase
 from app.application.use_cases.insumo.atualizar_estoque import AtualizarEstoqueUseCase
 from app.infrastructure.repositories.insumo_repository import SQLAlchemyInsumoRepository
-from app.schemas.insumo_minimal import (
+from app.schemas.insumo import (
     InsumoCreate,
     InsumoResponse,
     InsumoUpdate,

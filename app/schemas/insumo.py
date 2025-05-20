@@ -3,10 +3,10 @@ Esquemas Pydantic para validação de dados na API de Insumos.
 """
 
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, ClassVar
 from uuid import UUID
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 class ModuloAssociationBase(BaseModel):
     """
@@ -52,17 +52,17 @@ class InsumoBase(BaseModel):
     data_validade: Optional[datetime] = Field(None, description="Data de validade")
     data_compra: Optional[datetime] = Field(None, description="Data da última compra")
     observacoes: Optional[str] = Field(None, description="Observações adicionais")
-    modules_used: Optional[List[ModuloAssociationCreate]] = Field(default_factory=list, description="Módulos associados ao insumo")
+    modules_used: List[ModuloAssociationCreate] = Field(default_factory=list, description="Módulos associados ao insumo")
 
-    @validator('data_validade')
-    def data_validade_futuro(cls, v):
+    @field_validator('data_validade')
+    def data_validade_futuro(cls, v: Optional[datetime]) -> Optional[datetime]:
         """Valida se a data de validade é futura"""
         if v and v < datetime.utcnow():
             raise ValueError("Data de validade deve ser futura")
         return v
 
-    @validator('data_compra')
-    def data_compra_passado(cls, v):
+    @field_validator('data_compra')
+    def data_compra_passado(cls, v: Optional[datetime]) -> Optional[datetime]:
         """Valida se a data de compra é passada"""
         if v and v > datetime.utcnow():
             raise ValueError("Data de compra não pode ser futura")
@@ -96,22 +96,22 @@ class InsumoUpdate(BaseModel):
     observacoes: Optional[str] = Field(None, description="Observações adicionais")
     modules_used: Optional[List[ModuloAssociationCreate]] = None
 
-    @validator('data_validade')
-    def data_validade_futuro(cls, v):
+    @field_validator('data_validade')
+    def data_validade_futuro(cls, v: Optional[datetime]) -> Optional[datetime]:
         """Valida se a data de validade é futura"""
         if v and v < datetime.utcnow():
             raise ValueError("Data de validade deve ser futura")
         return v
 
-    @validator('data_compra')
-    def data_compra_passado(cls, v):
+    @field_validator('data_compra')
+    def data_compra_passado(cls, v: Optional[datetime]) -> Optional[datetime]:
         """Valida se a data de compra é passada"""
         if v and v > datetime.utcnow():
             raise ValueError("Data de compra não pode ser futura")
         return v
 
 
-class InsumoResponse(InsumoBase):
+class InsumoResponse(BaseModel):
     """
     Esquema para resposta de um Insumo.
     
@@ -119,6 +119,19 @@ class InsumoResponse(InsumoBase):
     e status de ativação.
     """
     id: UUID
+    nome: str
+    descricao: str
+    categoria: str
+    valor_unitario: float
+    unidade_medida: str
+    estoque_minimo: int
+    estoque_atual: int
+    fornecedor: Optional[str] = None
+    codigo_referencia: Optional[str] = None
+    data_validade: Optional[datetime] = None
+    data_compra: Optional[datetime] = None
+    observacoes: Optional[str] = None
+    modules_used: List[ModuloAssociationResponse] = Field(default_factory=list)
     subscriber_id: UUID
     is_active: bool
     created_at: datetime
@@ -131,7 +144,6 @@ class InsumoResponse(InsumoBase):
         False, 
         description="Indica se o insumo está expirado"
     )
-    modules_used: List[ModuloAssociationResponse] = Field(default_factory=list)
 
     model_config = {
         "from_attributes": True
