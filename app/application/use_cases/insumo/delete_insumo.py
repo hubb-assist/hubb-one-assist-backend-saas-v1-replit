@@ -1,5 +1,5 @@
 """
-Caso de uso para exclusão lógica de insumo.
+Caso de uso para excluir um insumo.
 """
 
 from uuid import UUID
@@ -9,36 +9,29 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 class DeleteInsumoUseCase:
     """
-    Caso de uso para exclusão lógica de um insumo.
+    Caso de uso para excluir logicamente um insumo (soft delete).
     
-    Implementa a lógica de negócio para excluir um insumo,
-    sem depender de detalhes específicos de banco de dados ou framework.
-    Realiza exclusão lógica (soft delete) mantendo o histórico.
+    Permite marcar um insumo como inativo sem removê-lo fisicamente
+    do banco de dados, preservando o histórico.
     """
     
-    def __init__(self, insumo_repository: InsumoRepositoryInterface):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com o repositório de insumos.
+        Inicializa o caso de uso com uma implementação de repositório.
         
         Args:
-            insumo_repository: Repositório de insumos que segue a interface definida
+            repository: Implementação do repositório de insumos
         """
-        self.insumo_repository = insumo_repository
+        self.repository = repository
     
     def execute(self, insumo_id: UUID) -> bool:
         """
-        Executa o caso de uso para excluir um insumo logicamente.
+        Executa o caso de uso para excluir logicamente um insumo.
         
         Args:
-            insumo_id: UUID do insumo a excluir
+            insumo_id: ID do insumo a ser excluído
             
         Returns:
-            bool: True se bem-sucedido, False se o insumo não existir
+            bool: True se a exclusão foi bem-sucedida, False caso contrário
         """
-        # Verificar se o insumo existe antes de tentar excluir
-        insumo = self.insumo_repository.get_by_id(insumo_id)
-        if not insumo:
-            return False
-            
-        # Executar exclusão lógica no repositório
-        return self.insumo_repository.delete(insumo_id)
+        return self.repository.delete(insumo_id)

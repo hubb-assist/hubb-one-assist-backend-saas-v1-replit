@@ -1,64 +1,65 @@
 """
-Caso de uso para atualização de insumo.
+Caso de uso para atualizar um insumo existente.
 """
 
-from typing import Optional, Dict, Any
+from typing import Dict, Any, List, Optional
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
+from app.domain.insumo.value_objects.modulo_association import ModuloAssociation
 
 
 class UpdateInsumoUseCase:
     """
-    Caso de uso para atualização de um insumo existente.
+    Caso de uso para atualizar um insumo existente.
     
-    Implementa a lógica de negócio para atualizar um insumo,
-    sem depender de detalhes específicos de banco de dados ou framework.
+    Permite modificar os atributos de um insumo existente,
+    mantendo a integridade dos dados e regras de negócio.
     """
     
-    def __init__(self, insumo_repository: InsumoRepositoryInterface):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com o repositório de insumos.
+        Inicializa o caso de uso com uma implementação de repositório.
         
         Args:
-            insumo_repository: Repositório de insumos que segue a interface definida
+            repository: Implementação do repositório de insumos
         """
-        self.insumo_repository = insumo_repository
+        self.repository = repository
     
     def execute(self, insumo_id: UUID, data: Dict[str, Any]) -> Optional[InsumoEntity]:
         """
-        Executa o caso de uso para atualizar um insumo.
+        Executa o caso de uso para atualizar um insumo existente.
         
         Args:
-            insumo_id: UUID do insumo a atualizar
+            insumo_id: ID do insumo a ser atualizado
             data: Dicionário com os campos a serem atualizados
             
         Returns:
-            Optional[InsumoEntity]: Entidade de insumo atualizada ou None se não encontrado
+            Optional[InsumoEntity]: Entidade atualizada ou None se não encontrada
             
         Raises:
-            ValueError: Se os dados de atualização forem inválidos
+            ValueError: Se os dados fornecidos forem inválidos
         """
-        # Buscar insumo existente para verificar se existe
-        insumo = self.insumo_repository.get_by_id(insumo_id)
-        if not insumo:
+        # Primeiro, buscar o insumo existente
+        insumo_existente = self.repository.get_by_id(insumo_id)
+        if not insumo_existente:
             return None
             
-        # Validar dados antes de atualizar
-        if 'valor_unitario' in data and data['valor_unitario'] is not None:
-            if float(data['valor_unitario']) <= 0:
-                raise ValueError("Valor unitário deve ser maior que zero")
-                
-        if 'estoque_minimo' in data and data['estoque_minimo'] is not None:
-            if int(data['estoque_minimo']) < 0:
-                raise ValueError("Estoque mínimo não pode ser negativo")
-                
-        if 'estoque_atual' in data and data['estoque_atual'] is not None:
-            if int(data['estoque_atual']) < 0:
-                raise ValueError("Estoque atual não pode ser negativo")
-                
-        # Executar atualização no repositório
-        insumo_atualizado = self.insumo_repository.update(insumo_id, data)
+        # Processar associações de módulos, se fornecidas
+        if "modules_used" in data and data["modules_used"]:
+            modulos = []
+            for module_data in data["modules_used"]:
+                module = ModuloAssociation(
+                    module_id=module_data["module_id"],
+                    quantidade_padrao=module_data.get("quantidade_padrao", 1),
+                    observacao=module_data.get("observacao"),
+                    module_nome=module_data.get("module_nome")
+                )
+                modulos.append(module)
+            data["modules_used"] = modulos
         
-        return insumo_atualizado
+        # Atualizar o insumo utilizando o repositório
+        updated_insumo = self.repository.update(insumo_id, data)
+        
+        return updated_insumo
