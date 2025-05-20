@@ -1,0 +1,127 @@
+# app/application/use_cases/finance_use_cases.py
+from uuid import UUID
+from datetime import date
+from typing import List
+
+from app.domain.finance.interfaces import IFinanceRepository
+from app.domain.finance.entities import (
+    PayableEntity, ReceivableEntity, CashFlowSummary, ProfitCalculation
+)
+from app.schemas.finance_schema import (
+    PayableCreate, PayableUpdate, ReceivableCreate, ReceivableUpdate
+)
+
+# --- Payables Use Cases ---
+class CreatePayableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, data: PayableCreate, subscriber_id: UUID) -> PayableEntity:
+        return self.repo.create_payable(data, subscriber_id)
+
+class GetPayableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID) -> PayableEntity:
+        inst = self.repo.get_payable(id, subscriber_id)
+        if not inst:
+            raise ValueError("Payable not found")
+        return inst
+
+class ListPayablesUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        paid: bool = None,
+        due_from: date = None,
+        due_to: date = None,
+    ) -> List[PayableEntity]:
+        return self.repo.list_payables(subscriber_id, skip, limit, paid, due_from, due_to)
+
+class UpdatePayableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, data: PayableUpdate, subscriber_id: UUID) -> PayableEntity:
+        inst = self.repo.update_payable(id, data, subscriber_id)
+        if not inst:
+            raise ValueError("Payable not found for update")
+        return inst
+
+class DeletePayableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID) -> None:
+        self.repo.delete_payable(id, subscriber_id)
+
+# --- Receivables Use Cases ---
+class CreateReceivableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, data: ReceivableCreate, subscriber_id: UUID) -> ReceivableEntity:
+        return self.repo.create_receivable(data, subscriber_id)
+
+class GetReceivableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID) -> ReceivableEntity:
+        inst = self.repo.get_receivable(id, subscriber_id)
+        if not inst:
+            raise ValueError("Receivable not found")
+        return inst
+
+class ListReceivablesUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        received: bool = None,
+        due_from: date = None,
+        due_to: date = None,
+    ) -> List[ReceivableEntity]:
+        return self.repo.list_receivables(subscriber_id, skip, limit, received, due_from, due_to)
+
+class UpdateReceivableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, data: ReceivableUpdate, subscriber_id: UUID) -> ReceivableEntity:
+        inst = self.repo.update_receivable(id, data, subscriber_id)
+        if not inst:
+            raise ValueError("Receivable not found for update")
+        return inst
+
+class DeleteReceivableUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID) -> None:
+        self.repo.delete_receivable(id, subscriber_id)
+
+# --- Cash Flow & Profit Use Cases ---
+class GetCashFlowUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, subscriber_id: UUID, from_date: date, to_date: date) -> CashFlowSummary:
+        return self.repo.get_cashflow(subscriber_id, from_date, to_date)
+
+class CalculateProfitUseCase:
+    def __init__(self, repo: IFinanceRepository):
+        self.repo = repo
+
+    def execute(self, subscriber_id: UUID, period_from: date, period_to: date) -> ProfitCalculation:
+        return self.repo.calculate_profit(subscriber_id, period_from, period_to)
