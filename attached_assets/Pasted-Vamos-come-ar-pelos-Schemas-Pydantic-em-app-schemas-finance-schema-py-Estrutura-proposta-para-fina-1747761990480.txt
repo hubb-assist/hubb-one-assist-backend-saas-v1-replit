@@ -1,0 +1,91 @@
+Vamos começar pelos Schemas Pydantic em app/schemas/finance_schema.py.
+
+Estrutura proposta para finance_schema.py
+python
+Copiar
+Editar
+from pydantic import BaseModel, condecimal, conint
+from uuid import UUID
+from datetime import date, datetime
+from typing import Optional, List
+
+# --- PAYABLES ---
+class PayableBase(BaseModel):
+    description: str
+    amount: condecimal(gt=0, decimal_places=2)
+    due_date: date
+    notes: Optional[str] = None
+
+class PayableCreate(PayableBase):
+    pass
+
+class PayableUpdate(BaseModel):
+    description: Optional[str]
+    amount: Optional[condecimal(gt=0, decimal_places=2)]
+    due_date: Optional[date]
+    paid: Optional[bool]
+    payment_date: Optional[datetime]
+    notes: Optional[str]
+    is_active: Optional[bool]
+
+class PayableResponse(PayableBase):
+    id: UUID
+    subscriber_id: UUID
+    paid: bool
+    payment_date: Optional[datetime]
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+# --- RECEIVABLES ---
+class ReceivableBase(BaseModel):
+    patient_id: UUID
+    description: str
+    amount: condecimal(gt=0, decimal_places=2)
+    due_date: date
+    notes: Optional[str] = None
+
+class ReceivableCreate(ReceivableBase):
+    pass
+
+class ReceivableUpdate(BaseModel):
+    patient_id: Optional[UUID]
+    description: Optional[str]
+    amount: Optional[condecimal(gt=0, decimal_places=2)]
+    due_date: Optional[date]
+    received: Optional[bool]
+    receive_date: Optional[datetime]
+    notes: Optional[str]
+    is_active: Optional[bool]
+
+class ReceivableResponse(ReceivableBase):
+    id: UUID
+    subscriber_id: UUID
+    received: bool
+    receive_date: Optional[datetime]
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+
+# --- CASH FLOW & PROFIT ---
+class CashFlowSummary(BaseModel):
+    total_inflows: condecimal(decimal_places=2)
+    total_outflows: condecimal(decimal_places=2)
+    net_flow: condecimal(decimal_places=2)
+
+class ProfitCalculation(BaseModel):
+    total_revenue: condecimal(decimal_places=2)
+    total_costs: condecimal(decimal_places=2)
+    gross_profit: condecimal(decimal_places=2)
+    net_profit: condecimal(decimal_places=2)
+Próximo passo após validar estes schemas:
+
+Implementar as interfaces de repositório em app/domain/finance/interfaces.py.
+
+Criar os use cases em app/application/use_cases/finance_use_cases.py.
