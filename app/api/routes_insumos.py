@@ -48,8 +48,10 @@ def create_insumo(
         )
     
     # Utilizar o subscriber_id do usuário atual, se não foi fornecido explicitamente
-    if not insumo_data.subscriber_id:
-        insumo_data.subscriber_id = current_user.get("subscriber_id")
+    # Cria uma cópia do objeto para não modificar diretamente
+    data_dict = insumo_data.dict()
+    if not data_dict.get("subscriber_id"):
+        data_dict["subscriber_id"] = current_user.get("subscriber_id")
     
     # Criar repositório e caso de uso
     repository = SQLAlchemyInsumoRepository(db)
@@ -57,11 +59,14 @@ def create_insumo(
     
     try:
         # Preparar dados para o caso de uso
-        data = insumo_data.dict()
+        data = data_dict  # Usar dados já preparados com subscriber_id
         
-        # Converter associações de módulos para dicionários se existirem
-        if data.get("modules_used"):
-            data["modules_used"] = [module.dict() for module in insumo_data.modules_used]
+        # Garantir que modules_used seja uma lista vazia se for nulo
+        modules = getattr(insumo_data, "modules_used", None)
+        if modules and isinstance(modules, list):
+            data["modules_used"] = [module.dict() for module in modules]
+        else:
+            data["modules_used"] = []
         
         # Executar o caso de uso
         insumo = use_case.execute(data)
