@@ -6,7 +6,7 @@ from sqlalchemy import and_, desc
 
 from app.domain.cost_fixed.entities import CostFixedEntity
 from app.domain.cost_fixed.interfaces import ICostFixedRepository
-from app.db.models_cost_fixed import CostFixed
+from app.db.models.cost_fixed import CostFixed
 
 
 class CostFixedSQLAlchemyRepository(ICostFixedRepository):

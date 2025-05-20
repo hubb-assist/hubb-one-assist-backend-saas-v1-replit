@@ -1,26 +1,38 @@
-from dataclasses import dataclass
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 from uuid import UUID, uuid4
 
 
-@dataclass
 class CostFixedEntity:
     """Entidade de domínio para custos fixos."""
     
-    nome: str
-    valor: Decimal
-    data: date
-    subscriber_id: UUID
-    observacoes: Optional[str] = None
-    id: UUID = uuid4()
-    is_active: bool = True
-    created_at: datetime = datetime.utcnow()
-    updated_at: datetime = datetime.utcnow()
+    def __init__(
+        self,
+        nome: str,
+        valor: Decimal,
+        data: date,
+        subscriber_id: UUID,
+        observacoes: Optional[str] = None,
+        id: Optional[UUID] = None,
+        is_active: bool = True,
+        created_at: Optional[datetime] = None,
+        updated_at: Optional[datetime] = None
+    ):
+        self.id = id if id is not None else uuid4()
+        self.nome = nome
+        self.valor = valor
+        self.data = data
+        self.subscriber_id = subscriber_id
+        self.observacoes = observacoes
+        self.is_active = is_active
+        self.created_at = created_at if created_at is not None else datetime.utcnow()
+        self.updated_at = updated_at if updated_at is not None else datetime.utcnow()
+        
+        self._validate()
     
-    def __post_init__(self):
-        """Valida os dados após a inicialização."""
+    def _validate(self):
+        """Valida os dados da entidade."""
         if not self.nome or len(self.nome.strip()) == 0:
             raise ValueError("O nome não pode estar vazio")
         
@@ -40,7 +52,7 @@ class CostFixedEntity:
         self.updated_at = datetime.utcnow()
         
         # Valida novamente após as atualizações
-        self.__post_init__()
+        self._validate()
         
         return self
         
