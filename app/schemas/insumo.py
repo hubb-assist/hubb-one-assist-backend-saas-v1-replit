@@ -1,90 +1,73 @@
 """
-Schemas Pydantic para o módulo de Insumos.
+Schemas para validação e serialização de dados de insumos.
 """
-from typing import List, Optional
+from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
 class InsumoBase(BaseModel):
-    """
-    Atributos base para um insumo.
-    """
-    nome: str = Field(..., description="Nome do insumo", min_length=3, max_length=100)
-    tipo: str = Field(..., description="Tipo do insumo (ex: medicamento, equipamento)", min_length=3, max_length=50)
-    unidade: str = Field(..., description="Unidade de medida (ex: kg, litro, unidade)", min_length=1, max_length=30)
-    categoria: str = Field(..., description="Categoria do insumo", min_length=3, max_length=50)
-    quantidade: float = Field(..., description="Quantidade disponível", ge=0)
-    observacoes: Optional[str] = Field(None, description="Observações sobre o insumo", max_length=500)
-    modulo_id: Optional[UUID] = Field(None, description="ID do módulo relacionado")
-    is_active: bool = Field(True, description="Se o insumo está ativo")
+    """Atributos comuns para criação e leitura de insumos."""
+    nome: str = Field(..., min_length=2, max_length=100, description="Nome do insumo")
+    tipo: str = Field(..., min_length=2, max_length=50, description="Tipo do insumo (ex: medicamento, material)")
+    unidade: str = Field(..., min_length=1, max_length=30, description="Unidade de medida (ex: unidade, caixa, ml)")
+    categoria: str = Field(..., min_length=2, max_length=50, description="Categoria do insumo (ex: cirúrgico)")
+    quantidade: float = Field(0.0, ge=0, description="Quantidade disponível do insumo")
+    observacoes: Optional[str] = Field(None, max_length=500, description="Observações adicionais sobre o insumo")
+    modulo_id: Optional[UUID] = Field(None, description="ID do módulo ao qual o insumo está relacionado")
+    
+    @validator("nome", "tipo", "unidade", "categoria")
+    def validate_text_fields(cls, v, values, **kwargs):
+        if v and not v.strip():
+            field_name = kwargs.get("field_name", "campo")
+            raise ValueError(f"O {field_name} não pode conter apenas espaços")
+        return v.strip() if v else v
 
 
 class InsumoCreate(InsumoBase):
-    """
-    Atributos para criar um novo insumo.
-    """
+    """Schema para criação de insumo."""
     pass
 
 
 class InsumoUpdate(BaseModel):
-    """
-    Atributos que podem ser atualizados em um insumo.
-    """
-    nome: Optional[str] = Field(None, description="Nome do insumo", min_length=3, max_length=100)
-    tipo: Optional[str] = Field(None, description="Tipo do insumo (ex: medicamento, equipamento)", min_length=3, max_length=50)
-    unidade: Optional[str] = Field(None, description="Unidade de medida (ex: kg, litro, unidade)", min_length=1, max_length=30)
-    categoria: Optional[str] = Field(None, description="Categoria do insumo", min_length=3, max_length=50)
-    quantidade: Optional[float] = Field(None, description="Quantidade disponível", ge=0)
-    observacoes: Optional[str] = Field(None, description="Observações sobre o insumo", max_length=500)
+    """Schema para atualização parcial de insumo."""
+    nome: Optional[str] = Field(None, min_length=2, max_length=100, description="Nome do insumo")
+    tipo: Optional[str] = Field(None, min_length=2, max_length=50, description="Tipo do insumo")
+    unidade: Optional[str] = Field(None, min_length=1, max_length=30, description="Unidade de medida")
+    categoria: Optional[str] = Field(None, min_length=2, max_length=50, description="Categoria do insumo")
+    quantidade: Optional[float] = Field(None, ge=0, description="Quantidade disponível")
+    observacoes: Optional[str] = Field(None, max_length=500, description="Observações adicionais")
     modulo_id: Optional[UUID] = Field(None, description="ID do módulo relacionado")
-    is_active: Optional[bool] = Field(None, description="Se o insumo está ativo")
+    is_active: Optional[bool] = Field(None, description="Indica se o insumo está ativo")
     
-    class Config:
-        schema_extra = {
-            "example": {
-                "nome": "Seringa descartável",
-                "tipo": "Equipamento",
-                "unidade": "unidade",
-                "categoria": "Material descartável",
-                "quantidade": 100.0,
-                "observacoes": "Utilizar conforme protocolo",
-                "is_active": True
-            }
-        }
+    @validator("nome", "tipo", "unidade", "categoria")
+    def validate_text_fields(cls, v, values, **kwargs):
+        if v and not v.strip():
+            field_name = kwargs.get("field_name", "campo")
+            raise ValueError(f"O {field_name} não pode conter apenas espaços")
+        return v.strip() if v else v
 
 
-class InsumoInDB(InsumoBase):
-    """
-    Atributos de um insumo como armazenado no banco de dados.
-    """
+class InsumoResponse(InsumoBase):
+    """Schema para resposta de insumo."""
     id: UUID
     subscriber_id: UUID
+    is_active: bool
     created_at: datetime
     updated_at: datetime
-
+    
     class Config:
         orm_mode = True
 
 
-class InsumoResponse(InsumoInDB):
-    """
-    Resposta para as operações de insumo.
-    """
-    pass
-
-
-class InsumoItem(InsumoInDB):
-    """
-    Insumo em uma listagem.
-    """
-    pass
-
-
-class InsumoList(BaseModel):
-    """
-    Lista paginada de insumos.
-    """
+class InsumoListResponse(BaseModel):
+    """Schema para resposta de listagem de insumos."""
+    items: List[InsumoResponse]
     total: int
-    items: List[InsumoItem]
+    skip: int
+    limit: int
+    filters: dict
+    
+    class Config:
+        orm_mode = True
