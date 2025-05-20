@@ -23,7 +23,7 @@ class InsumoEntity:
         valor: Decimal = Decimal("0.00"),
         observacoes: Optional[str] = None,
         categoria: str = "",
-        modulos: List[str] = None,
+        modulos: Optional[List[str]] = None,
         is_active: bool = True,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None
@@ -36,7 +36,7 @@ class InsumoEntity:
         self.valor = Decimal(str(valor))
         self.observacoes = observacoes.strip() if observacoes else None
         self.categoria = categoria.strip()
-        self.modulos = modulos or []
+        self.modulos = modulos if modulos is not None else []
         
         # Relacionamento e auditoria
         self.is_active = is_active
