@@ -57,16 +57,6 @@ class CustoVariavelResponse(CustoVariavelInDB):
     """Esquema para resposta de custos variáveis."""
     # Valor total calculado (valor_unitario * quantidade)
     valor_total: Decimal = Field(...)
-    
-    @field_validator('valor_total', mode='before')
-    @classmethod
-    def calcular_valor_total(cls, v: Any, values: dict) -> Decimal:
-        """Calcula o valor total a partir do valor unitário e quantidade."""
-        valor_unitario = values.data.get('valor_unitario')
-        quantidade = values.data.get('quantidade')
-        if valor_unitario is not None and quantidade is not None:
-            return valor_unitario * quantidade
-        return Decimal('0.00')
 
 class CustoVariavelList(BaseModel):
     """Esquema para lista paginada de custos variáveis."""
