@@ -13,11 +13,11 @@ class InsumoEntity:
     
     def __init__(
         self,
-        subscriber_id: UUID,
-        nome: str,
-        tipo: str,
-        unidade: str,
-        categoria: str,
+        subscriber_id: Optional[UUID] = None,
+        nome: str = "",
+        tipo: str = "",
+        unidade: str = "",
+        categoria: str = "",
         quantidade: float = 0.0,
         observacoes: Optional[str] = None,
         modulo_id: Optional[UUID] = None,
