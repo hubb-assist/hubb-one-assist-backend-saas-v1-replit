@@ -1,10 +1,10 @@
 """
-Módulo ASGI para iniciar a aplicação FastAPI com Uvicorn
+Script para deploy no Replit
+Este arquivo fornece uma função de saúde na raiz (/) para o health check do Replit
 """
 import uvicorn
 from app.main import app
 
-# Adiciona um endpoint de saúde simples para o deploy
 @app.get("/")
 async def health_check():
     """
@@ -18,4 +18,5 @@ async def health_check():
     }
 
 if __name__ == "__main__":
-    uvicorn.run("asgi:app", host="0.0.0.0", port=5000, reload=True)
+    # Inicia o servidor Uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=5000)
