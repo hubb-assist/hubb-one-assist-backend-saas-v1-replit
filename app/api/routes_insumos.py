@@ -274,7 +274,7 @@ def update_estoque(
     insumo_id: UUID,
     estoque_data: InsumoEstoqueMovimento,
     db: Session = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Atualiza o estoque de um insumo (entrada ou saída).
@@ -282,7 +282,7 @@ def update_estoque(
     Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
     """
     # Verificar se o usuário tem acesso
-    subscriber_id = current_user.get("subscriber_id")
+    subscriber_id = getattr(current_user, "subscriber_id", None)
     if not subscriber_id:
         raise HTTPException(
             status_code=403,
