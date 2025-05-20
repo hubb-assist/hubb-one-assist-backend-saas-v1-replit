@@ -12,10 +12,10 @@ from app.core.dependencies import get_current_user
 from app.db.session import get_db
 from app.application.use_cases.insumo.create_insumo import CreateInsumoUseCase
 from app.application.use_cases.insumo.get_insumo import GetInsumoUseCase
-from app.application.use_cases.insumo.list_insumos import ListInsumosUseCase, ListInsumosBySubscriberUseCase
+from app.application.use_cases.insumo.list_insumos import ListInsumosUseCase, ListInsumosByFilterUseCase as ListInsumosBySubscriberUseCase
 from app.application.use_cases.insumo.update_insumo import UpdateInsumoUseCase
 from app.application.use_cases.insumo.delete_insumo import DeleteInsumoUseCase
-from app.application.use_cases.insumo.atualizar_estoque import AtualizarEstoqueInsumoUseCase
+from app.application.use_cases.insumo.atualizar_estoque import AtualizarEstoqueUseCase
 from app.infrastructure.repositories.insumo_repository import SQLAlchemyInsumoRepository
 from app.schemas.insumo import (
     InsumoCreate,
@@ -29,7 +29,7 @@ from app.schemas.insumo import (
 router = APIRouter(prefix="/insumos", tags=["insumos"])
 
 
-@router.post("/", response_model=InsumoRead)
+@router.post("/", response_model=InsumoResponse)
 def create_insumo(
     insumo_data: InsumoCreate,
     db: Session = Depends(get_db),
@@ -56,23 +56,15 @@ def create_insumo(
     use_case = CreateInsumoUseCase(repository)
     
     try:
+        # Preparar dados para o caso de uso
+        data = insumo_data.dict()
+        
+        # Converter associações de módulos para dicionários se existirem
+        if data.get("modules_used"):
+            data["modules_used"] = [module.dict() for module in insumo_data.modules_used]
+        
         # Executar o caso de uso
-        insumo = use_case.execute(
-            nome=insumo_data.nome,
-            descricao=insumo_data.descricao,
-            categoria=insumo_data.categoria,
-            valor_unitario=insumo_data.valor_unitario,
-            unidade_medida=insumo_data.unidade_medida,
-            estoque_minimo=insumo_data.estoque_minimo,
-            estoque_atual=insumo_data.estoque_atual,
-            subscriber_id=insumo_data.subscriber_id,
-            fornecedor=insumo_data.fornecedor,
-            codigo_referencia=insumo_data.codigo_referencia,
-            data_validade=insumo_data.data_validade,
-            data_compra=insumo_data.data_compra,
-            observacoes=insumo_data.observacoes,
-            modules_used=[module.dict() for module in insumo_data.modules_used] if insumo_data.modules_used else None
-        )
+        insumo = use_case.execute(data)
         return insumo
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -80,7 +72,7 @@ def create_insumo(
         raise HTTPException(status_code=500, detail=f"Erro ao criar insumo: {str(e)}")
 
 
-@router.get("/{insumo_id}", response_model=InsumoRead)
+@router.get("/{insumo_id}", response_model=InsumoResponse)
 def get_insumo(
     insumo_id: UUID,
     db: Session = Depends(get_db),
@@ -155,17 +147,23 @@ def list_insumos(
     use_case = ListInsumosBySubscriberUseCase(repository)
     
     # Executar o caso de uso
-    result = use_case.execute(
-        subscriber_id=subscriber_id,
-        skip=skip,
-        limit=limit,
-        filters=filters
+    insumos = use_case.execute(
+        subscriber_id=subscriber_id, 
+        **filters
     )
+    
+    # Formatar resposta com paginação
+    result = {
+        "items": insumos[skip:skip+limit],
+        "total": len(insumos),
+        "skip": skip,
+        "limit": limit
+    }
     
     return result
 
 
-@router.put("/{insumo_id}", response_model=InsumoRead)
+@router.put("/{insumo_id}", response_model=InsumoResponse)
 def update_insumo(
     insumo_id: UUID,
     insumo_data: InsumoUpdate,
@@ -266,10 +264,10 @@ def delete_insumo(
     return {"success": result}
 
 
-@router.post("/{insumo_id}/estoque", response_model=InsumoRead)
+@router.post("/{insumo_id}/estoque", response_model=InsumoResponse)
 def update_estoque(
     insumo_id: UUID,
-    estoque_data: EstoqueUpdate,
+    estoque_data: InsumoEstoqueMovimento,
     db: Session = Depends(get_db),
     current_user: Dict[str, Any] = Depends(get_current_user)
 ):
@@ -302,15 +300,14 @@ def update_estoque(
         )
     
     # Criar caso de uso de atualização de estoque
-    estoque_use_case = AtualizarEstoqueInsumoUseCase(repository)
+    estoque_use_case = AtualizarEstoqueUseCase(repository)
     
     try:
         # Executar o caso de uso
         updated_insumo = estoque_use_case.execute(
             insumo_id=insumo_id,
             quantidade=estoque_data.quantidade,
-            tipo_movimento=estoque_data.tipo_movimento,
-            observacao=estoque_data.observacao
+            tipo_movimento=estoque_data.tipo_movimento
         )
         
         if not updated_insumo:
