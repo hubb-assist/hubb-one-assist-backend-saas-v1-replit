@@ -104,24 +104,34 @@ class InsumoRepository(InsumoRepositoryInterface):
         try:
             # Verificar se o insumo existe
             model = self.db.query(Insumo).filter(
-                Insumo.id == entity.id,
-                Insumo.subscriber_id == entity.subscriber_id,
+                Insumo.id == insumo_id,
+                Insumo.subscriber_id == subscriber_id,
                 Insumo.is_active == True
             ).first()
             
             if not model:
-                raise EntityNotFoundException(f"Insumo com ID {entity.id} não encontrado")
+                raise EntityNotFoundException(f"Insumo com ID {insumo_id} não encontrado")
             
-            # Atualizar campos
-            model.nome = entity.nome
-            model.tipo = entity.tipo
-            model.unidade = entity.unidade
-            model.quantidade = entity.quantidade
-            model.categoria = entity.categoria
-            model.modulo_id = entity.modulo_id
-            model.observacoes = entity.observacoes
-            model.is_active = entity.is_active
-            model.updated_at = datetime.utcnow()
+            # Atualizar campos do modelo a partir do dicionário update_data
+            if "nome" in update_data:
+                setattr(model, "nome", update_data["nome"])
+            if "tipo" in update_data:
+                setattr(model, "tipo", update_data["tipo"])
+            if "unidade" in update_data:
+                setattr(model, "unidade", update_data["unidade"])
+            if "quantidade" in update_data:
+                setattr(model, "quantidade", update_data["quantidade"])
+            if "categoria" in update_data:
+                setattr(model, "categoria", update_data["categoria"])
+            if "modulo_id" in update_data:
+                setattr(model, "modulo_id", update_data["modulo_id"])
+            if "observacoes" in update_data:
+                setattr(model, "observacoes", update_data["observacoes"])
+            if "is_active" in update_data:
+                setattr(model, "is_active", update_data["is_active"])
+                
+            # Atualizar timestamp
+            setattr(model, "updated_at", datetime.utcnow())
             
             # Persistir alterações
             self.db.commit()
@@ -156,8 +166,8 @@ class InsumoRepository(InsumoRepositoryInterface):
             raise EntityNotFoundException(f"Insumo com ID {insumo_id} não encontrado")
         
         # Marcar como inativo (exclusão lógica)
-        model.is_active = False
-        model.updated_at = datetime.utcnow()
+        setattr(model, "is_active", False)
+        setattr(model, "updated_at", datetime.utcnow())
         
         # Persistir alterações
         self.db.commit()

@@ -47,12 +47,14 @@ class InsumoRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def update(self, entity: InsumoEntity) -> InsumoEntity:
+    def update(self, insumo_id: UUID, subscriber_id: UUID, update_data: dict) -> InsumoEntity:
         """
         Atualiza um insumo existente.
         
         Args:
-            entity: Entidade de insumo atualizada
+            insumo_id: ID do insumo a ser atualizado
+            subscriber_id: ID do assinante proprietário para validação
+            update_data: Dados a serem atualizados no insumo
             
         Returns:
             InsumoEntity: Entidade de insumo atualizada
