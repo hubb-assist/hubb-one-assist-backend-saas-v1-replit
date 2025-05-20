@@ -4,7 +4,9 @@ Esquemas Pydantic para o módulo de Agendamentos
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, Field, validator
+
+from pydantic import BaseModel, Field, root_validator
+
 
 class AppointmentBase(BaseModel):
     """
@@ -17,21 +19,24 @@ class AppointmentBase(BaseModel):
     end_time: datetime = Field(..., description="Data e hora de término")
     notes: Optional[str] = Field(None, description="Observações adicionais")
     
-    @validator('end_time')
-    def end_time_must_be_after_start_time(cls, v, values):
+    @root_validator
+    def end_time_must_be_after_start_time(cls, v):
         """
         Valida se o horário de término é posterior ao de início
         """
-        if 'start_time' in values and v <= values['start_time']:
-            raise ValueError('O horário de término deve ser posterior ao horário de início')
+        start_time, end_time = v.get('start_time'), v.get('end_time')
+        if start_time and end_time and end_time <= start_time:
+            raise ValueError("Horário de término deve ser posterior ao horário de início")
         return v
-    
+
+
 class AppointmentCreate(AppointmentBase):
     """
     Esquema para criação de agendamentos
     """
     status: Optional[str] = Field("scheduled", description="Status do agendamento")
-    
+
+
 class AppointmentUpdate(BaseModel):
     """
     Esquema para atualização de agendamentos
@@ -44,19 +49,17 @@ class AppointmentUpdate(BaseModel):
     status: Optional[str] = Field(None, description="Status do agendamento")
     notes: Optional[str] = Field(None, description="Observações adicionais")
     
-    @validator('end_time')
-    def end_time_must_be_after_start_time(cls, v, values):
+    @root_validator
+    def end_time_must_be_after_start_time(cls, v):
         """
         Valida se o horário de término é posterior ao de início, quando ambos estão presentes
         """
-        if v is None:
-            return v
-            
-        start_time = values.get('start_time')
-        if start_time and v <= start_time:
-            raise ValueError('O horário de término deve ser posterior ao horário de início')
+        start_time, end_time = v.get('start_time'), v.get('end_time')
+        if start_time and end_time and end_time <= start_time:
+            raise ValueError("Horário de término deve ser posterior ao horário de início")
         return v
-    
+
+
 class AppointmentResponse(AppointmentBase):
     """
     Esquema para resposta de agendamentos

@@ -4,12 +4,10 @@ Casos de uso para o módulo de Agendamentos
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 from uuid import UUID
-import logging
 
-from app.domain.appointment.entities import AppointmentEntity
+from app.domain.appointment.entities import Appointment
 from app.domain.appointment.interfaces import IAppointmentRepository
 
-logger = logging.getLogger(__name__)
 
 class CreateAppointmentUseCase:
     """
@@ -17,90 +15,70 @@ class CreateAppointmentUseCase:
     """
     
     def __init__(self, repository: IAppointmentRepository):
+        """
+        Inicializa o caso de uso com um repositório
+        
+        Args:
+            repository: Repositório de agendamentos
+        """
         self.repository = repository
     
-    def execute(self, data: Dict[str, Any], subscriber_id: UUID) -> AppointmentEntity:
+    def execute(self, data: Dict[str, Any], subscriber_id: UUID) -> Appointment:
         """
-        Executa a criação de um novo agendamento
+        Executa o caso de uso para criar um agendamento
         
         Args:
             data: Dados do agendamento
-            subscriber_id: ID do assinante
+            subscriber_id: ID do assinante (para segurança multi-tenant)
             
         Returns:
-            AppointmentEntity: Agendamento criado
+            Appointment: Entidade criada
             
         Raises:
-            ValueError: Se houver conflitos de horário ou dados inválidos
+            ValueError: Se houver erro na validação ou criação
         """
-        logger.info(f"Iniciando criação de agendamento para subscriber_id={subscriber_id}")
-        
-        # Validações adicionais podem ser feitas aqui
-        if 'start_time' not in data or 'end_time' not in data:
-            logger.error("Dados de agendamento incompletos: horários ausentes")
-            raise ValueError("Os horários de início e término são obrigatórios")
-            
-        if data['start_time'] >= data['end_time']:
-            logger.error("Validação falhou: horário de início posterior ou igual ao término")
-            raise ValueError("O horário de início deve ser anterior ao horário de término")
-            
-        if 'patient_id' not in data:
-            logger.error("Dados de agendamento incompletos: paciente ausente")
-            raise ValueError("O ID do paciente é obrigatório")
-            
-        if 'provider_id' not in data:
-            logger.error("Dados de agendamento incompletos: profissional ausente")
-            raise ValueError("O ID do profissional é obrigatório")
-            
-        if 'service_name' not in data:
-            logger.error("Dados de agendamento incompletos: serviço ausente")
-            raise ValueError("O nome do serviço é obrigatório")
-        
-        # Criar o agendamento (o repositório já verifica conflitos de horário)
         try:
-            appointment = self.repository.create(data, subscriber_id)
-            logger.info(f"Agendamento criado com sucesso: {appointment.id}")
-            return appointment
-        except ValueError as e:
-            logger.error(f"Erro ao criar agendamento: {str(e)}")
-            raise
+            # Adicionar o subscriber_id aos dados
+            data["subscriber_id"] = subscriber_id
+            
+            # Criar a entidade de domínio
+            appointment = Appointment(**data)
+            
+            # Persistir no repositório
+            return self.repository.create(appointment)
         except Exception as e:
-            logger.error(f"Erro inesperado ao criar agendamento: {str(e)}")
-            raise ValueError(f"Não foi possível criar o agendamento: {str(e)}")
+            raise ValueError(f"Erro ao criar agendamento: {str(e)}")
 
 
 class GetAppointmentUseCase:
     """
-    Caso de uso para buscar um agendamento por ID
+    Caso de uso para buscar um agendamento pelo ID
     """
     
     def __init__(self, repository: IAppointmentRepository):
-        self.repository = repository
-    
-    def execute(self, id: UUID, subscriber_id: UUID) -> Optional[AppointmentEntity]:
         """
-        Executa a busca de um agendamento por ID
+        Inicializa o caso de uso com um repositório
         
         Args:
-            id: ID do agendamento
-            subscriber_id: ID do assinante
+            repository: Repositório de agendamentos
+        """
+        self.repository = repository
+    
+    def execute(self, appointment_id: UUID, subscriber_id: UUID) -> Appointment:
+        """
+        Executa o caso de uso para buscar um agendamento
+        
+        Args:
+            appointment_id: ID do agendamento
+            subscriber_id: ID do assinante (para segurança multi-tenant)
             
         Returns:
-            Optional[AppointmentEntity]: Agendamento encontrado ou None
+            Appointment: Entidade encontrada
             
         Raises:
             ValueError: Se o agendamento não for encontrado
         """
-        logger.info(f"Buscando agendamento id={id} para subscriber_id={subscriber_id}")
-        
-        appointment = self.repository.get_by_id(id, subscriber_id)
-        
-        if not appointment:
-            logger.warning(f"Agendamento não encontrado: {id}")
-            raise ValueError("Agendamento não encontrado")
-            
-        logger.info(f"Agendamento encontrado: {id}")
-        return appointment
+        return self.repository.get_by_id(appointment_id, subscriber_id)
 
 
 class UpdateAppointmentUseCase:
@@ -109,67 +87,42 @@ class UpdateAppointmentUseCase:
     """
     
     def __init__(self, repository: IAppointmentRepository):
-        self.repository = repository
-    
-    def execute(self, id: UUID, data: Dict[str, Any], subscriber_id: UUID) -> AppointmentEntity:
         """
-        Executa a atualização de um agendamento
+        Inicializa o caso de uso com um repositório
         
         Args:
-            id: ID do agendamento
-            data: Dados do agendamento a serem atualizados
-            subscriber_id: ID do assinante
+            repository: Repositório de agendamentos
+        """
+        self.repository = repository
+    
+    def execute(self, appointment_id: UUID, data: Dict[str, Any], subscriber_id: UUID) -> Appointment:
+        """
+        Executa o caso de uso para atualizar um agendamento
+        
+        Args:
+            appointment_id: ID do agendamento
+            data: Dados a serem atualizados
+            subscriber_id: ID do assinante (para segurança multi-tenant)
             
         Returns:
-            AppointmentEntity: Agendamento atualizado
+            Appointment: Entidade atualizada
             
         Raises:
-            ValueError: Se o agendamento não for encontrado ou houver conflitos
+            ValueError: Se o agendamento não for encontrado ou houver erro na validação
         """
-        logger.info(f"Iniciando atualização de agendamento id={id} para subscriber_id={subscriber_id}")
-        
-        # Validações adicionais podem ser feitas aqui
-        if 'start_time' in data and 'end_time' in data:
-            if data['start_time'] >= data['end_time']:
-                logger.error("Validação falhou: horário de início posterior ou igual ao término")
-                raise ValueError("O horário de início deve ser anterior ao horário de término")
-        elif 'start_time' in data:
-            # Buscar o agendamento atual para verificar com o end_time existente
-            current = self.repository.get_by_id(id, subscriber_id)
-            if not current:
-                logger.error(f"Agendamento não encontrado para atualização: {id}")
-                raise ValueError("Agendamento não encontrado")
-                
-            if data['start_time'] >= current.end_time:
-                logger.error("Validação falhou: novo horário de início posterior ou igual ao término atual")
-                raise ValueError("O horário de início deve ser anterior ao horário de término")
-        elif 'end_time' in data:
-            # Buscar o agendamento atual para verificar com o start_time existente
-            current = self.repository.get_by_id(id, subscriber_id)
-            if not current:
-                logger.error(f"Agendamento não encontrado para atualização: {id}")
-                raise ValueError("Agendamento não encontrado")
-                
-            if current.start_time >= data['end_time']:
-                logger.error("Validação falhou: horário de início atual posterior ou igual ao novo término")
-                raise ValueError("O horário de início deve ser anterior ao horário de término")
-        
-        # Atualizar o agendamento
         try:
-            appointment = self.repository.update(id, data, subscriber_id)
+            # Buscar o agendamento existente
+            appointment = self.repository.get_by_id(appointment_id, subscriber_id)
             
-            if not appointment:
-                logger.error(f"Agendamento não encontrado para atualização: {id}")
-                raise ValueError("Agendamento não encontrado")
-                
-            logger.info(f"Agendamento atualizado com sucesso: {id}")
-            return appointment
+            # Atualizar os dados
+            appointment.update(data)
+            
+            # Persistir no repositório
+            return self.repository.update(appointment)
         except ValueError as e:
-            logger.error(f"Erro ao atualizar agendamento: {str(e)}")
-            raise
+            raise e
         except Exception as e:
-            logger.error(f"Erro inesperado ao atualizar agendamento: {str(e)}")
-            raise ValueError(f"Não foi possível atualizar o agendamento: {str(e)}")
+            raise ValueError(f"Erro ao atualizar agendamento: {str(e)}")
 
 
 class CancelAppointmentUseCase:
@@ -178,40 +131,43 @@ class CancelAppointmentUseCase:
     """
     
     def __init__(self, repository: IAppointmentRepository):
-        self.repository = repository
-    
-    def execute(self, id: UUID, subscriber_id: UUID) -> bool:
         """
-        Executa o cancelamento de um agendamento
+        Inicializa o caso de uso com um repositório
         
         Args:
-            id: ID do agendamento
-            subscriber_id: ID do assinante
+            repository: Repositório de agendamentos
+        """
+        self.repository = repository
+    
+    def execute(self, appointment_id: UUID, subscriber_id: UUID) -> bool:
+        """
+        Executa o caso de uso para cancelar um agendamento
+        
+        Args:
+            appointment_id: ID do agendamento
+            subscriber_id: ID do assinante (para segurança multi-tenant)
             
         Returns:
-            bool: True se cancelado com sucesso
+            bool: True se foi cancelado com sucesso
             
         Raises:
-            ValueError: Se o agendamento não for encontrado
+            ValueError: Se o agendamento não for encontrado ou não puder ser cancelado
         """
-        logger.info(f"Iniciando cancelamento de agendamento id={id} para subscriber_id={subscriber_id}")
-        
         try:
-            # O método delete realiza um soft delete (is_active=False)
-            result = self.repository.delete(id, subscriber_id)
+            # Buscar o agendamento existente
+            appointment = self.repository.get_by_id(appointment_id, subscriber_id)
             
-            if not result:
-                logger.error(f"Agendamento não encontrado para cancelamento: {id}")
-                raise ValueError("Agendamento não encontrado")
-                
-            logger.info(f"Agendamento cancelado com sucesso: {id}")
+            # Cancelar o agendamento
+            appointment.cancel()
+            
+            # Atualizar no repositório
+            self.repository.update(appointment)
+            
             return True
         except ValueError as e:
-            logger.error(f"Erro ao cancelar agendamento: {str(e)}")
-            raise
+            raise e
         except Exception as e:
-            logger.error(f"Erro inesperado ao cancelar agendamento: {str(e)}")
-            raise ValueError(f"Não foi possível cancelar o agendamento: {str(e)}")
+            raise ValueError(f"Erro ao cancelar agendamento: {str(e)}")
 
 
 class ListAppointmentsUseCase:
@@ -220,24 +176,32 @@ class ListAppointmentsUseCase:
     """
     
     def __init__(self, repository: IAppointmentRepository):
-        self.repository = repository
-    
-    def execute(self,
-               subscriber_id: UUID,
-               skip: int = 0,
-               limit: int = 100,
-               date_from: Optional[datetime] = None,
-               date_to: Optional[datetime] = None,
-               patient_id: Optional[UUID] = None,
-               provider_id: Optional[int] = None,
-               status: Optional[str] = None) -> List[AppointmentEntity]:
         """
-        Executa a listagem de agendamentos com filtros
+        Inicializa o caso de uso com um repositório
         
         Args:
-            subscriber_id: ID do assinante
-            skip: Quantidade de itens para pular
-            limit: Limite de itens por página
+            repository: Repositório de agendamentos
+        """
+        self.repository = repository
+    
+    def execute(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        patient_id: Optional[UUID] = None,
+        provider_id: Optional[int] = None,
+        status: Optional[str] = None
+    ) -> List[Appointment]:
+        """
+        Executa o caso de uso para listar agendamentos
+        
+        Args:
+            subscriber_id: ID do assinante (para segurança multi-tenant)
+            skip: Número de registros para pular (paginação)
+            limit: Número máximo de registros para retornar
             date_from: Data de início para filtro
             date_to: Data de fim para filtro
             patient_id: ID do paciente para filtro
@@ -245,24 +209,15 @@ class ListAppointmentsUseCase:
             status: Status do agendamento para filtro
             
         Returns:
-            List[AppointmentEntity]: Lista de agendamentos
+            List[Appointment]: Lista de entidades Appointment
         """
-        logger.info(f"Listando agendamentos para subscriber_id={subscriber_id} com filtros")
-        
-        try:
-            appointments = self.repository.list_all(
-                subscriber_id=subscriber_id,
-                skip=skip,
-                limit=limit,
-                date_from=date_from,
-                date_to=date_to,
-                patient_id=patient_id,
-                provider_id=provider_id,
-                status=status
-            )
-            
-            logger.info(f"Listagem de agendamentos concluída: {len(appointments)} encontrados")
-            return appointments
-        except Exception as e:
-            logger.error(f"Erro ao listar agendamentos: {str(e)}")
-            raise ValueError(f"Não foi possível listar os agendamentos: {str(e)}")
+        return self.repository.list(
+            subscriber_id=subscriber_id,
+            skip=skip,
+            limit=limit,
+            date_from=date_from,
+            date_to=date_to,
+            patient_id=patient_id,
+            provider_id=provider_id,
+            status=status
+        )

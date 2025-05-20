@@ -2,12 +2,24 @@
 Modelo SQLAlchemy para a tabela de Agendamentos
 """
 from datetime import datetime
+from typing import Optional
 from uuid import uuid4
-from sqlalchemy import Column, String, DateTime, Text, Integer, ForeignKey, Boolean, text
+
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    text
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from app.db.base import Base
+from app.db.session import Base
+
 
 class Appointment(Base):
     """
@@ -27,7 +39,7 @@ class Appointment(Base):
     is_active = Column(Boolean, nullable=False, server_default=text("true"))
     created_at = Column(DateTime, nullable=False, server_default=text("CURRENT_TIMESTAMP"))
     updated_at = Column(DateTime, nullable=True, onupdate=datetime.utcnow)
-
+    
     # Relacionamentos
     subscriber = relationship("Subscriber", backref="appointments")
     patient = relationship("Patient", backref="appointments")

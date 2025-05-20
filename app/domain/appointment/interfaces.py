@@ -3,90 +3,105 @@ Interfaces para o módulo de Agendamentos
 """
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from uuid import UUID
 
-from app.domain.appointment.entities import AppointmentEntity
+from app.domain.appointment.entities import Appointment
+
 
 class IAppointmentRepository(ABC):
     """
     Interface para o repositório de agendamentos
+    
+    Define as operações que devem ser implementadas por qualquer repositório
+    que trabalhe com a entidade Appointment
     """
     
     @abstractmethod
-    def create(self, data: Dict[str, Any], subscriber_id: UUID) -> AppointmentEntity:
+    def create(self, appointment: Appointment) -> Appointment:
         """
-        Cria um novo agendamento
+        Cria um novo agendamento no repositório
         
         Args:
-            data: Dados do agendamento
-            subscriber_id: ID do assinante
+            appointment: Entidade Appointment a ser criada
             
         Returns:
-            AppointmentEntity: Entidade de agendamento criada
+            Appointment: Entidade criada com ID gerado
+            
+        Raises:
+            ValueError: Se houver erro na validação ou criação
         """
         pass
     
     @abstractmethod
-    def get_by_id(self, id: UUID, subscriber_id: UUID) -> Optional[AppointmentEntity]:
+    def get_by_id(self, appointment_id: UUID, subscriber_id: UUID) -> Appointment:
         """
         Busca um agendamento pelo ID
         
         Args:
-            id: ID do agendamento
-            subscriber_id: ID do assinante
+            appointment_id: ID do agendamento
+            subscriber_id: ID do assinante para segurança multi-tenant
             
         Returns:
-            Optional[AppointmentEntity]: Entidade de agendamento ou None se não encontrado
+            Appointment: Entidade encontrada
+            
+        Raises:
+            ValueError: Se o agendamento não for encontrado
         """
         pass
     
     @abstractmethod
-    def update(self, id: UUID, data: Dict[str, Any], subscriber_id: UUID) -> Optional[AppointmentEntity]:
+    def update(self, appointment: Appointment) -> Appointment:
         """
-        Atualiza um agendamento
+        Atualiza um agendamento existente
         
         Args:
-            id: ID do agendamento
-            data: Dados do agendamento para atualizar
-            subscriber_id: ID do assinante
+            appointment: Entidade Appointment com as atualizações
             
         Returns:
-            Optional[AppointmentEntity]: Entidade atualizada ou None se não encontrada
+            Appointment: Entidade atualizada
+            
+        Raises:
+            ValueError: Se o agendamento não for encontrado ou houver erro na validação
         """
         pass
     
     @abstractmethod
-    def delete(self, id: UUID, subscriber_id: UUID) -> bool:
+    def delete(self, appointment_id: UUID, subscriber_id: UUID) -> bool:
         """
-        Remove logicamente um agendamento (soft delete)
+        Exclui logicamente um agendamento (define is_active=False)
         
         Args:
-            id: ID do agendamento
-            subscriber_id: ID do assinante
+            appointment_id: ID do agendamento
+            subscriber_id: ID do assinante para segurança multi-tenant
             
         Returns:
-            bool: True se removido com sucesso, False caso contrário
+            bool: True se foi excluído com sucesso, False caso contrário
+            
+        Raises:
+            ValueError: Se o agendamento não for encontrado
         """
         pass
     
     @abstractmethod
-    def list_all(self, 
-                subscriber_id: UUID, 
-                skip: int = 0, 
-                limit: int = 100,
-                date_from: Optional[datetime] = None,
-                date_to: Optional[datetime] = None,
-                patient_id: Optional[UUID] = None,
-                provider_id: Optional[int] = None,
-                status: Optional[str] = None) -> List[AppointmentEntity]:
+    def list(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        patient_id: Optional[UUID] = None,
+        provider_id: Optional[int] = None,
+        status: Optional[str] = None
+    ) -> List[Appointment]:
         """
-        Lista todos os agendamentos com filtros
+        Lista agendamentos com filtros opcionais
         
         Args:
-            subscriber_id: ID do assinante
-            skip: Quantidade de itens para pular
-            limit: Limite de itens por página
+            subscriber_id: ID do assinante para segurança multi-tenant
+            skip: Número de registros para pular (paginação)
+            limit: Número máximo de registros para retornar
             date_from: Data de início para filtro
             date_to: Data de fim para filtro
             patient_id: ID do paciente para filtro
@@ -94,28 +109,6 @@ class IAppointmentRepository(ABC):
             status: Status do agendamento para filtro
             
         Returns:
-            List[AppointmentEntity]: Lista de entidades de agendamento
-        """
-        pass
-    
-    @abstractmethod
-    def check_conflicts(self, 
-                        provider_id: int, 
-                        start_time: datetime, 
-                        end_time: datetime,
-                        subscriber_id: UUID,
-                        exclude_id: Optional[UUID] = None) -> bool:
-        """
-        Verifica se há conflitos de horário para um profissional
-        
-        Args:
-            provider_id: ID do profissional
-            start_time: Hora de início do agendamento
-            end_time: Hora de término do agendamento
-            subscriber_id: ID do assinante
-            exclude_id: ID do agendamento a ser excluído da verificação (para updates)
-            
-        Returns:
-            bool: True se houver conflito, False caso contrário
+            List[Appointment]: Lista de entidades Appointment
         """
         pass

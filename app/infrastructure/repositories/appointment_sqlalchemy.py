@@ -1,16 +1,17 @@
 """
-Implementação do repositório de agendamentos usando SQLAlchemy
+Implementação SQLAlchemy do repositório de agendamentos
 """
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import List, Optional
 from uuid import UUID
-import logging
-from sqlalchemy import and_, or_, desc
+
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
-from app.domain.appointment.entities import AppointmentEntity
+from app.db.models_appointment import Appointment as AppointmentModel
+from app.domain.appointment.entities import Appointment
 from app.domain.appointment.interfaces import IAppointmentRepository
-from app.db.models_appointment import Appointment
+
 
 class AppointmentSQLAlchemyRepository(IAppointmentRepository):
     """
@@ -18,20 +19,50 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
     """
     
     def __init__(self, db: Session):
-        self.db = db
-        self.logger = logging.getLogger(__name__)
-    
-    def _model_to_entity(self, model: Appointment) -> AppointmentEntity:
         """
-        Converte um modelo SQLAlchemy para entidade de domínio
+        Inicializa o repositório com uma sessão do banco de dados
+        
+        Args:
+            db: Sessão do SQLAlchemy
+        """
+        self.db = db
+    
+    def _entity_to_model(self, appointment: Appointment) -> AppointmentModel:
+        """
+        Converte uma entidade de domínio para um modelo SQLAlchemy
+        
+        Args:
+            appointment: Entidade de domínio
+            
+        Returns:
+            AppointmentModel: Modelo SQLAlchemy
+        """
+        return AppointmentModel(
+            id=appointment.id,
+            subscriber_id=appointment.subscriber_id,
+            patient_id=appointment.patient_id,
+            provider_id=appointment.provider_id,
+            service_name=appointment.service_name,
+            start_time=appointment.start_time,
+            end_time=appointment.end_time,
+            status=appointment.status,
+            notes=appointment.notes,
+            is_active=appointment.is_active,
+            created_at=appointment.created_at,
+            updated_at=appointment.updated_at
+        )
+    
+    def _model_to_entity(self, model: AppointmentModel) -> Appointment:
+        """
+        Converte um modelo SQLAlchemy para uma entidade de domínio
         
         Args:
             model: Modelo SQLAlchemy
             
         Returns:
-            AppointmentEntity: Entidade de domínio
+            Appointment: Entidade de domínio
         """
-        return AppointmentEntity(
+        return Appointment(
             id=model.id,
             subscriber_id=model.subscriber_id,
             patient_id=model.patient_id,
@@ -46,195 +77,162 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
             updated_at=model.updated_at
         )
     
-    def create(self, data: Dict[str, Any], subscriber_id: UUID) -> AppointmentEntity:
+    def create(self, appointment: Appointment) -> Appointment:
         """
-        Cria um novo agendamento
+        Cria um novo agendamento no banco de dados
         
         Args:
-            data: Dados do agendamento
-            subscriber_id: ID do assinante
+            appointment: Entidade Appointment a ser criada
             
         Returns:
-            AppointmentEntity: Entidade de agendamento criada
-        """
-        # Verificar conflitos de horário
-        if self.check_conflicts(
-            provider_id=data['provider_id'],
-            start_time=data['start_time'],
-            end_time=data['end_time'],
-            subscriber_id=subscriber_id
-        ):
-            self.logger.error(
-                f"Conflito de horário detectado para provider_id={data['provider_id']}, "
-                f"start_time={data['start_time']}, end_time={data['end_time']}"
-            )
-            raise ValueError("Conflito de horário: Este profissional já possui um agendamento neste horário")
+            Appointment: Entidade criada com ID gerado
             
-        # Criar agendamento
-        appointment = Appointment(
-            subscriber_id=subscriber_id,
-            patient_id=data['patient_id'],
-            provider_id=data['provider_id'],
-            service_name=data['service_name'],
-            start_time=data['start_time'],
-            end_time=data['end_time'],
-            status=data.get('status', 'scheduled'),
-            notes=data.get('notes')
-        )
-        
+        Raises:
+            ValueError: Se houver erro na validação ou criação
+        """
         try:
-            self.db.add(appointment)
+            model = self._entity_to_model(appointment)
+            self.db.add(model)
             self.db.commit()
-            self.db.refresh(appointment)
-            self.logger.info(f"Agendamento criado com sucesso: {appointment.id}")
-            return self._model_to_entity(appointment)
+            self.db.refresh(model)
+            return self._model_to_entity(model)
         except Exception as e:
             self.db.rollback()
-            self.logger.error(f"Erro ao criar agendamento: {str(e)}")
-            raise
+            raise ValueError(f"Erro ao criar agendamento: {str(e)}")
     
-    def get_by_id(self, id: UUID, subscriber_id: UUID) -> Optional[AppointmentEntity]:
+    def get_by_id(self, appointment_id: UUID, subscriber_id: UUID) -> Appointment:
         """
         Busca um agendamento pelo ID
         
         Args:
-            id: ID do agendamento
-            subscriber_id: ID do assinante
+            appointment_id: ID do agendamento
+            subscriber_id: ID do assinante para segurança multi-tenant
             
         Returns:
-            Optional[AppointmentEntity]: Entidade de agendamento ou None se não encontrado
+            Appointment: Entidade encontrada
+            
+        Raises:
+            ValueError: Se o agendamento não for encontrado
         """
-        appointment = self.db.query(Appointment).filter(
-            Appointment.id == id,
-            Appointment.subscriber_id == subscriber_id,
-            Appointment.is_active == True
-        ).first()
+        model = (
+            self.db.query(AppointmentModel)
+            .filter(
+                and_(
+                    AppointmentModel.id == appointment_id,
+                    AppointmentModel.subscriber_id == subscriber_id,
+                    AppointmentModel.is_active == True
+                )
+            )
+            .first()
+        )
         
-        if appointment:
-            return self._model_to_entity(appointment)
+        if not model:
+            raise ValueError(f"Agendamento com ID {appointment_id} não encontrado")
         
-        return None
+        return self._model_to_entity(model)
     
-    def update(self, id: UUID, data: Dict[str, Any], subscriber_id: UUID) -> Optional[AppointmentEntity]:
+    def update(self, appointment: Appointment) -> Appointment:
         """
-        Atualiza um agendamento
+        Atualiza um agendamento existente
         
         Args:
-            id: ID do agendamento
-            data: Dados do agendamento para atualizar
-            subscriber_id: ID do assinante
+            appointment: Entidade Appointment com as atualizações
             
         Returns:
-            Optional[AppointmentEntity]: Entidade atualizada ou None se não encontrada
+            Appointment: Entidade atualizada
+            
+        Raises:
+            ValueError: Se o agendamento não for encontrado ou houver erro na validação
         """
-        appointment = self.db.query(Appointment).filter(
-            Appointment.id == id,
-            Appointment.subscriber_id == subscriber_id,
-            Appointment.is_active == True
-        ).first()
-        
-        if not appointment:
-            self.logger.warning(f"Agendamento não encontrado para atualização: {id}")
-            return None
-        
-        # Verificar conflitos de horário se datas estiverem sendo atualizadas
-        if 'start_time' in data or 'end_time' in data:
-            start_time = data.get('start_time', appointment.start_time)
-            end_time = data.get('end_time', appointment.end_time)
-            provider_id = data.get('provider_id', appointment.provider_id)
-            
-            if self.check_conflicts(
-                provider_id=provider_id,
-                start_time=start_time,
-                end_time=end_time,
-                subscriber_id=subscriber_id,
-                exclude_id=id
-            ):
-                self.logger.error(
-                    f"Conflito de horário detectado na atualização para provider_id={provider_id}, "
-                    f"start_time={start_time}, end_time={end_time}"
+        model = (
+            self.db.query(AppointmentModel)
+            .filter(
+                and_(
+                    AppointmentModel.id == appointment.id,
+                    AppointmentModel.subscriber_id == appointment.subscriber_id,
+                    AppointmentModel.is_active == True
                 )
-                raise ValueError("Conflito de horário: Este profissional já possui um agendamento neste horário")
-                
-        # Atualizar campos
-        if 'patient_id' in data:
-            appointment.patient_id = data['patient_id']
-        if 'provider_id' in data:
-            appointment.provider_id = data['provider_id']
-        if 'service_name' in data:
-            appointment.service_name = data['service_name']
-        if 'start_time' in data:
-            appointment.start_time = data['start_time']
-        if 'end_time' in data:
-            appointment.end_time = data['end_time']
-        if 'status' in data:
-            appointment.status = data['status']
-        if 'notes' in data:
-            appointment.notes = data['notes']
-            
-        appointment.updated_at = datetime.now()
+            )
+            .first()
+        )
+        
+        if not model:
+            raise ValueError(f"Agendamento com ID {appointment.id} não encontrado")
         
         try:
+            # Atualizar os atributos do modelo
+            model.patient_id = appointment.patient_id
+            model.provider_id = appointment.provider_id
+            model.service_name = appointment.service_name
+            model.start_time = appointment.start_time
+            model.end_time = appointment.end_time
+            model.status = appointment.status
+            model.notes = appointment.notes
+            model.updated_at = appointment.updated_at or datetime.utcnow()
+            
             self.db.commit()
-            self.db.refresh(appointment)
-            self.logger.info(f"Agendamento atualizado com sucesso: {id}")
-            return self._model_to_entity(appointment)
+            self.db.refresh(model)
+            return self._model_to_entity(model)
         except Exception as e:
             self.db.rollback()
-            self.logger.error(f"Erro ao atualizar agendamento: {str(e)}")
-            raise
+            raise ValueError(f"Erro ao atualizar agendamento: {str(e)}")
     
-    def delete(self, id: UUID, subscriber_id: UUID) -> bool:
+    def delete(self, appointment_id: UUID, subscriber_id: UUID) -> bool:
         """
-        Remove logicamente um agendamento (soft delete)
+        Exclui logicamente um agendamento (define is_active=False)
         
         Args:
-            id: ID do agendamento
-            subscriber_id: ID do assinante
+            appointment_id: ID do agendamento
+            subscriber_id: ID do assinante para segurança multi-tenant
             
         Returns:
-            bool: True se removido com sucesso, False caso contrário
+            bool: True se foi excluído com sucesso, False caso contrário
+            
+        Raises:
+            ValueError: Se o agendamento não for encontrado
         """
-        appointment = self.db.query(Appointment).filter(
-            Appointment.id == id,
-            Appointment.subscriber_id == subscriber_id,
-            Appointment.is_active == True
-        ).first()
+        model = (
+            self.db.query(AppointmentModel)
+            .filter(
+                and_(
+                    AppointmentModel.id == appointment_id,
+                    AppointmentModel.subscriber_id == subscriber_id,
+                    AppointmentModel.is_active == True
+                )
+            )
+            .first()
+        )
         
-        if not appointment:
-            self.logger.warning(f"Agendamento não encontrado para remoção: {id}")
-            return False
+        if not model:
+            raise ValueError(f"Agendamento com ID {appointment_id} não encontrado")
         
         try:
-            # Soft delete
-            appointment.is_active = False
-            appointment.status = "cancelled"
-            appointment.updated_at = datetime.now()
-            
+            model.is_active = False
+            model.updated_at = datetime.utcnow()
             self.db.commit()
-            self.logger.info(f"Agendamento removido com sucesso: {id}")
             return True
         except Exception as e:
             self.db.rollback()
-            self.logger.error(f"Erro ao remover agendamento: {str(e)}")
-            return False
+            raise ValueError(f"Erro ao excluir agendamento: {str(e)}")
     
-    def list_all(self, 
-                subscriber_id: UUID, 
-                skip: int = 0, 
-                limit: int = 100,
-                date_from: Optional[datetime] = None,
-                date_to: Optional[datetime] = None,
-                patient_id: Optional[UUID] = None,
-                provider_id: Optional[int] = None,
-                status: Optional[str] = None) -> List[AppointmentEntity]:
+    def list(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        date_from: Optional[datetime] = None,
+        date_to: Optional[datetime] = None,
+        patient_id: Optional[UUID] = None,
+        provider_id: Optional[int] = None,
+        status: Optional[str] = None
+    ) -> List[Appointment]:
         """
-        Lista todos os agendamentos com filtros
+        Lista agendamentos com filtros opcionais
         
         Args:
-            subscriber_id: ID do assinante
-            skip: Quantidade de itens para pular
-            limit: Limite de itens por página
+            subscriber_id: ID do assinante para segurança multi-tenant
+            skip: Número de registros para pular (paginação)
+            limit: Número máximo de registros para retornar
             date_from: Data de início para filtro
             date_to: Data de fim para filtro
             patient_id: ID do paciente para filtro
@@ -242,86 +240,42 @@ class AppointmentSQLAlchemyRepository(IAppointmentRepository):
             status: Status do agendamento para filtro
             
         Returns:
-            List[AppointmentEntity]: Lista de entidades de agendamento
+            List[Appointment]: Lista de entidades Appointment
         """
-        query = self.db.query(Appointment).filter(
-            Appointment.subscriber_id == subscriber_id,
-            Appointment.is_active == True
-        )
-        
-        # Aplicar filtros
-        if date_from:
-            query = query.filter(Appointment.start_time >= date_from)
-        
-        if date_to:
-            query = query.filter(Appointment.start_time <= date_to)
-        
-        if patient_id:
-            query = query.filter(Appointment.patient_id == patient_id)
-        
-        if provider_id:
-            query = query.filter(Appointment.provider_id == provider_id)
-        
-        if status:
-            query = query.filter(Appointment.status == status)
-        
-        # Ordenar por data de início (mais recentes primeiro)
-        query = query.order_by(desc(Appointment.start_time))
-        
-        # Aplicar paginação
-        query = query.offset(skip).limit(limit)
-        
-        appointments = query.all()
-        
-        return [self._model_to_entity(appointment) for appointment in appointments]
-    
-    def check_conflicts(self, 
-                        provider_id: int, 
-                        start_time: datetime, 
-                        end_time: datetime,
-                        subscriber_id: UUID,
-                        exclude_id: Optional[UUID] = None) -> bool:
-        """
-        Verifica se há conflitos de horário para um profissional
-        
-        Args:
-            provider_id: ID do profissional
-            start_time: Hora de início do agendamento
-            end_time: Hora de término do agendamento
-            subscriber_id: ID do assinante
-            exclude_id: ID do agendamento a ser excluído da verificação (para updates)
-            
-        Returns:
-            bool: True se houver conflito, False caso contrário
-        """
-        query = self.db.query(Appointment).filter(
-            Appointment.provider_id == provider_id,
-            Appointment.subscriber_id == subscriber_id,
-            Appointment.is_active == True,
-            Appointment.status.in_(["scheduled", "confirmed", "rescheduled"]),
-            # Verificar se há sobreposição de horários
-            or_(
-                # Caso 1: O início do novo agendamento está entre o início e o fim de um agendamento existente
+        # Construir a consulta base
+        query = (
+            self.db.query(AppointmentModel)
+            .filter(
                 and_(
-                    Appointment.start_time <= start_time,
-                    Appointment.end_time > start_time
-                ),
-                # Caso 2: O fim do novo agendamento está entre o início e o fim de um agendamento existente
-                and_(
-                    Appointment.start_time < end_time,
-                    Appointment.end_time >= end_time
-                ),
-                # Caso 3: O novo agendamento engloba completamente um agendamento existente
-                and_(
-                    Appointment.start_time >= start_time,
-                    Appointment.end_time <= end_time
+                    AppointmentModel.subscriber_id == subscriber_id,
+                    AppointmentModel.is_active == True
                 )
             )
         )
         
-        # Excluir o próprio agendamento da verificação (para updates)
-        if exclude_id:
-            query = query.filter(Appointment.id != exclude_id)
+        # Aplicar filtros opcionais
+        if date_from:
+            query = query.filter(AppointmentModel.start_time >= date_from)
         
-        # Se encontrar algum agendamento conflitante, retorna True
-        return query.first() is not None
+        if date_to:
+            query = query.filter(AppointmentModel.start_time <= date_to)
+        
+        if patient_id:
+            query = query.filter(AppointmentModel.patient_id == patient_id)
+        
+        if provider_id:
+            query = query.filter(AppointmentModel.provider_id == provider_id)
+        
+        if status:
+            query = query.filter(AppointmentModel.status == status)
+        
+        # Ordenar, paginar e executar a consulta
+        models = (
+            query.order_by(AppointmentModel.start_time.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+        
+        # Converter os modelos para entidades
+        return [self._model_to_entity(model) for model in models]
