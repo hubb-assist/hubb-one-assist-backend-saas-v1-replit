@@ -1,3 +1,3 @@
 """
-Módulo core para componentes essenciais do sistema
+Inicialização do pacote core.
 """

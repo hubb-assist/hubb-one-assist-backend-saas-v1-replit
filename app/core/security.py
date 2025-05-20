@@ -1,92 +1,86 @@
 """
-Utilitários de segurança e autenticação
+Configurações e utilitários de segurança.
 """
-
 import os
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, Union
+from typing import Any, Union, Optional
+from passlib.context import CryptContext
+from jose import jwt
 
-from jose import jwt, JWTError
-from fastapi import HTTPException, status
-from dotenv import load_dotenv
+# Configuração para geração de hash de senha
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Carrega variáveis de ambiente
-load_dotenv()
-
-# Configurações JWT
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "chave_secreta_temporaria_deve_ser_alterada_em_producao")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+# Configurações de JWT
+SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "temporarysecretkey")
 ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    subject: Union[str, Any], 
+    role: str = None,
+    subscriber_id: str = None,
+    segment_id: str = None, 
+    permissions: dict = None,
+    expires_delta: Optional[timedelta] = None
+) -> str:
     """
-    Cria um token JWT de acesso
+    Cria um token JWT para autenticação.
     
     Args:
-        data: Dados a serem codificados no token
-        expires_delta: Tempo de expiração opcional
+        subject: Identificador único do usuário (geralmente ID)
+        role: Papel do usuário no sistema
+        subscriber_id: ID do assinante ao qual o usuário pertence
+        segment_id: ID do segmento ao qual o usuário pertence
+        permissions: Dicionário de permissões personalizadas
+        expires_delta: Tempo de expiração personalizado
         
     Returns:
-        str: Token JWT assinado
+        str: Token JWT codificado
     """
-    to_encode = data.copy()
-    
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    to_encode = {"exp": expire, "sub": str(subject)}
     
+    # Adicionar claims adicionais ao token se fornecidos
+    if role:
+        to_encode["role"] = role
+    if subscriber_id:
+        to_encode["subscriber_id"] = str(subscriber_id)
+    if segment_id:
+        to_encode["segment_id"] = str(segment_id)
+    if permissions:
+        to_encode["permissions"] = permissions
+    
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Cria um token JWT de refresh
+    Verifica se a senha fornecida corresponde ao hash armazenado.
     
     Args:
-        data: Dados a serem codificados no token
-        expires_delta: Tempo de expiração opcional
+        plain_password: Senha em texto puro
+        hashed_password: Hash da senha armazenado
         
     Returns:
-        str: Token JWT de refresh assinado
+        bool: True se a senha corresponder, False caso contrário
     """
-    to_encode = data.copy()
-    
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    
-    return encoded_jwt
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-def decode_token(token: str) -> Dict[str, Any]:
+def get_password_hash(password: str) -> str:
     """
-    Decodifica um token JWT e retorna seu payload
+    Gera um hash seguro para a senha.
     
     Args:
-        token: Token JWT a ser decodificado
+        password: Senha em texto puro
         
     Returns:
-        Dict[str, Any]: Payload do token
-        
-    Raises:
-        HTTPException: Se o token for inválido ou expirado
+        str: Hash da senha
     """
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido ou expirado",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
+    return pwd_context.hash(password)
