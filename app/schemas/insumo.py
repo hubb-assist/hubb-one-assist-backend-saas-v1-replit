@@ -143,7 +143,7 @@ class InsumoEstoqueMovimento(BaseModel):
     Esquema para movimentação de estoque (entrada ou saída).
     """
     quantidade: int = Field(..., gt=0, description="Quantidade a ser adicionada ou removida")
-    tipo_movimento: str = Field(..., regex=r'^(entrada|saida)$', description="Tipo de movimento: 'entrada' ou 'saida'")
+    tipo_movimento: str = Field(..., pattern=r'^(entrada|saida)$', description="Tipo de movimento: 'entrada' ou 'saida'")
 
     class Config:
         schema_extra = {
