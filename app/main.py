@@ -28,6 +28,7 @@ from app.api.routes_public_arduino import router as public_arduino_router
 from app.api.routes_public_segments import router as public_segments_router
 from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
+from app.api.health import router as health_router
 # CRUD de pacientes
 from app.api.routes_patients import router as patients_router
 # Rotas DDD para pacientes
@@ -110,6 +111,7 @@ from app.core.cors_fixer import cors_fixer_middleware
 app.add_middleware(cors_fixer_middleware)
 
 # Incluir routers
+app.include_router(health_router)  # Router de saúde deve ser o primeiro para a raiz (/)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(segments_router)
