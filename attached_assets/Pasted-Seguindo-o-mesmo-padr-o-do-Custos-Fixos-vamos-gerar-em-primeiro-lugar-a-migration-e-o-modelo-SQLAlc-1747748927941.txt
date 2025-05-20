@@ -1,0 +1,82 @@
+Seguindo o mesmo padrão do Custos Fixos, vamos gerar em primeiro lugar a migration e o modelo SQLAlchemy para o submódulo Custos Variáveis.
+
+1. Migration Alembic para criar a tabela costs_variable
+Crie um arquivo em alembic/versions/xxxx_create_costs_variable_table.py:
+
+python
+Copiar
+Editar
+"""create costs_variable table
+
+Revision ID: yyyy
+Revises: xxxx
+Create Date: 2025-05-20 00:30:00.000000
+
+"""
+from alembic import op
+import sqlalchemy as sa
+import uuid
+
+
+revision = "yyyy"
+down_revision = "xxxx"   # substituir pelo ID da migration anterior (custos fixos)
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    op.create_table(
+        "costs_variable",
+        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
+        sa.Column("subscriber_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("subscribers.id"), nullable=False),
+        sa.Column("nome", sa.String(length=255), nullable=False),
+        sa.Column("valor_unitario", sa.Numeric(12, 2), nullable=False),
+        sa.Column("quantidade", sa.Integer(), nullable=False),
+        sa.Column("data", sa.Date(), nullable=False),
+        sa.Column("observacoes", sa.Text(), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
+        sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now()),
+    )
+
+
+def downgrade():
+    op.drop_table("costs_variable")
+Após salvar, rode:
+
+bash
+Copiar
+Editar
+alembic upgrade head
+2. Modelo SQLAlchemy em app/db/models_cost_variable.py
+python
+Copiar
+Editar
+from uuid import uuid4
+from datetime import datetime
+from sqlalchemy import Column, String, Numeric, Integer, Date, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from app.db.session import Base
+
+class CostVariable(Base):
+    __tablename__ = "costs_variable"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    nome = Column(String(255), nullable=False)
+    valor_unitario = Column(Numeric(12, 2), nullable=False)
+    quantidade = Column(Integer, nullable=False)
+    data = Column(Date, nullable=False)
+    observacoes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+Próximos passos (após rodar a migration e validar o modelo):
+
+Schemas Pydantic (app/schemas/custo_variavel.py)
+
+Interface de repositório e entidade de domínio
+
+Repositório SQLAlchemy e use cases
+
+Router FastAPI em app/api/routes_custos_variaveis.py
