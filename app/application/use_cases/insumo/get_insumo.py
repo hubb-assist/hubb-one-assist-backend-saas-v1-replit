@@ -1,5 +1,5 @@
 """
-Caso de uso para obter um insumo pelo ID.
+Caso de uso para obter um insumo por ID.
 """
 
 from typing import Optional
@@ -11,10 +11,10 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 class GetInsumoUseCase:
     """
-    Caso de uso para obter um insumo pelo ID.
+    Caso de uso para obter um insumo por seu ID.
     
-    Implementa a lógica de negócio para recuperar um insumo específico,
-    sem depender de detalhes específicos de banco de dados ou framework.
+    Permite buscar um insumo específico sem depender de
+    detalhes de banco de dados ou persistência.
     """
     
     def __init__(self, insumo_repository: InsumoRepositoryInterface):
@@ -28,13 +28,12 @@ class GetInsumoUseCase:
     
     def execute(self, insumo_id: UUID) -> Optional[InsumoEntity]:
         """
-        Executa o caso de uso de busca de insumo pelo ID.
+        Executa o caso de uso para obter um insumo pelo ID.
         
         Args:
-            insumo_id: UUID do insumo a ser buscado
+            insumo_id: UUID do insumo a buscar
             
         Returns:
-            Optional[InsumoEntity]: Entidade de insumo se encontrada, None caso contrário
+            Optional[InsumoEntity]: Entidade de insumo encontrada ou None se não existir
         """
-        # Buscar no repositório
         return self.insumo_repository.get_by_id(insumo_id)

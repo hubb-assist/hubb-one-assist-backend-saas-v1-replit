@@ -1,5 +1,5 @@
 """
-Caso de uso para excluir (soft delete) um insumo existente.
+Caso de uso para exclusão lógica de insumo.
 """
 
 from uuid import UUID
@@ -9,10 +9,11 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 class DeleteInsumoUseCase:
     """
-    Caso de uso para exclusão lógica (soft delete) de um insumo.
+    Caso de uso para exclusão lógica de um insumo.
     
-    Implementa a lógica de negócio para marcar um insumo como inativo,
+    Implementa a lógica de negócio para excluir um insumo,
     sem depender de detalhes específicos de banco de dados ou framework.
+    Realiza exclusão lógica (soft delete) mantendo o histórico.
     """
     
     def __init__(self, insumo_repository: InsumoRepositoryInterface):
@@ -26,18 +27,18 @@ class DeleteInsumoUseCase:
     
     def execute(self, insumo_id: UUID) -> bool:
         """
-        Executa o caso de uso de exclusão lógica de insumo.
+        Executa o caso de uso para excluir um insumo logicamente.
         
         Args:
-            insumo_id: UUID do insumo a ser excluído
+            insumo_id: UUID do insumo a excluir
             
         Returns:
-            bool: True se a exclusão foi bem-sucedida, False caso contrário
+            bool: True se bem-sucedido, False se o insumo não existir
         """
-        # Verificar se o insumo existe
+        # Verificar se o insumo existe antes de tentar excluir
         insumo = self.insumo_repository.get_by_id(insumo_id)
         if not insumo:
             return False
-        
-        # Realizar a exclusão lógica (soft delete)
+            
+        # Executar exclusão lógica no repositório
         return self.insumo_repository.delete(insumo_id)

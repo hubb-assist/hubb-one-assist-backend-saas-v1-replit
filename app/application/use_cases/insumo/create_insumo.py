@@ -1,9 +1,8 @@
 """
-Caso de uso para criar um novo insumo.
+Caso de uso para criação de insumo.
 """
 
-from decimal import Decimal
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
@@ -12,9 +11,9 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 class CreateInsumoUseCase:
     """
-    Caso de uso para criar um novo insumo no sistema.
+    Caso de uso para criação de um novo insumo.
     
-    Implementa a lógica de negócio para criar um novo insumo,
+    Implementa a lógica de negócio para criar um insumo,
     sem depender de detalhes específicos de banco de dados ou framework.
     """
     
@@ -31,7 +30,7 @@ class CreateInsumoUseCase:
                 nome: str,
                 descricao: str,
                 categoria: str,
-                valor_unitario: Decimal,
+                valor_unitario: float,
                 unidade_medida: str,
                 estoque_minimo: int,
                 estoque_atual: int,
@@ -41,36 +40,49 @@ class CreateInsumoUseCase:
                 data_validade: Optional[str] = None,
                 data_compra: Optional[str] = None,
                 observacoes: Optional[str] = None,
-                modules_used: Optional[List[UUID]] = None) -> InsumoEntity:
+                modules_used: Optional[List[Dict[str, Any]]] = None) -> InsumoEntity:
         """
         Executa o caso de uso de criação de insumo.
         
         Args:
             nome: Nome do insumo
-            descricao: Descrição detalhada do insumo
-            categoria: Categoria do insumo (ex: MEDICAMENTO, EQUIPAMENTO)
-            valor_unitario: Valor unitário do insumo
-            unidade_medida: Unidade de medida (UN, CX, ML, KG)
-            estoque_minimo: Quantidade mínima recomendada em estoque
-            estoque_atual: Quantidade atual em estoque
-            subscriber_id: ID do assinante ao qual o insumo pertence
+            descricao: Descrição detalhada
+            categoria: Categoria do insumo
+            valor_unitario: Valor unitário
+            unidade_medida: Unidade de medida
+            estoque_minimo: Estoque mínimo recomendado
+            estoque_atual: Estoque atual
+            subscriber_id: ID do assinante proprietário
             fornecedor: Nome do fornecedor (opcional)
-            codigo_referencia: Código de referência ou SKU (opcional)
-            data_validade: Data de validade do insumo (opcional)
-            data_compra: Data da última compra (opcional)
+            codigo_referencia: Código de referência (opcional)
+            data_validade: Data de validade (opcional)
+            data_compra: Data de compra (opcional)
             observacoes: Observações adicionais (opcional)
-            modules_used: IDs dos módulos onde este insumo é usado (opcional)
+            modules_used: Lista de módulos que usam este insumo (opcional)
             
         Returns:
             InsumoEntity: Entidade de insumo criada
+        
+        Raises:
+            ValueError: Se os dados forem inválidos
         """
-        # Criar a entidade de domínio
-        insumo = InsumoEntity(
+        # Validações básicas
+        if valor_unitario <= 0:
+            raise ValueError("Valor unitário deve ser maior que zero")
+        
+        if estoque_minimo < 0:
+            raise ValueError("Estoque mínimo não pode ser negativo")
+        
+        if estoque_atual < 0:
+            raise ValueError("Estoque atual não pode ser negativo")
+        
+        # Criar insumo no repositório
+        insumo = self.insumo_repository.create(
             nome=nome,
             descricao=descricao,
-            categoria=categoria.upper(),
+            categoria=categoria,
             valor_unitario=valor_unitario,
-            unidade_medida=unidade_medida.upper(),
+            unidade_medida=unidade_medida,
             estoque_minimo=estoque_minimo,
             estoque_atual=estoque_atual,
             subscriber_id=subscriber_id,
@@ -79,8 +91,7 @@ class CreateInsumoUseCase:
             data_validade=data_validade,
             data_compra=data_compra,
             observacoes=observacoes,
-            modules_used=modules_used or []
+            modules_used=modules_used
         )
         
-        # Salvar no repositório
-        return self.insumo_repository.create(insumo)
+        return insumo
