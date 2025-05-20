@@ -322,31 +322,27 @@ async def get_subscribers_direct(
             }
         )
 
-# Página inicial HTML
-@app.get("/", response_class=HTMLResponse)
+# Página inicial HTML simples para health checks
+@app.get("/")
 async def home():
     """
-    Página inicial com informações sobre a API e regras do projeto.
+    Página inicial simples que passa nos health checks.
     """
-    # Ler arquivo rules.md
-    rules_file = Path.cwd().parent / 'rules.md'
-    
-    # Inicializar o conteúdo das regras
-    rules_html = ""
-    
-    # Verificar se o arquivo existe
-    try:
-        with open(rules_file, 'r', encoding='utf-8') as f:
-            rules_content = f.read()
-            # Converter markdown para HTML
-            rules_html = markdown.markdown(
-                rules_content,
-                extensions=[]
-            )
-    except Exception as e:
-        rules_html = f"<div class='warning'><p>Não foi possível carregar as regras do projeto: {str(e)}</p></div>"
-    
-    html_content = f"""
+    return {
+        "status": "online",
+        "name": "HUBB ONE Assist API",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "redoc": "/redoc"
+    }
+
+# Página HTML mais completa 
+@app.get("/home", response_class=HTMLResponse)
+async def home_html():
+    """
+    Página inicial com informações sobre a API.
+    """
+    html_content = """
     <!DOCTYPE html>
     <html>
     <head>
