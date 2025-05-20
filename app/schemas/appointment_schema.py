@@ -1,75 +1,61 @@
 """
-Esquemas Pydantic para o módulo de Agendamentos
+Esquemas Pydantic para validação e serialização dos dados de agendamento
 """
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, validator
 
 
 class AppointmentBase(BaseModel):
-    """
-    Esquema base para agendamentos
-    """
-    patient_id: UUID = Field(..., description="ID do paciente")
-    provider_id: int = Field(..., description="ID do profissional")
-    service_name: str = Field(..., description="Nome do serviço")
-    start_time: datetime = Field(..., description="Data e hora de início")
-    end_time: datetime = Field(..., description="Data e hora de término")
-    notes: Optional[str] = Field(None, description="Observações adicionais")
-    
-    @root_validator
-    def end_time_must_be_after_start_time(cls, v):
-        """
-        Valida se o horário de término é posterior ao de início
-        """
-        start_time, end_time = v.get('start_time'), v.get('end_time')
-        if start_time and end_time and end_time <= start_time:
-            raise ValueError("Horário de término deve ser posterior ao horário de início")
+    """Base schema com campos comuns para criação e resposta"""
+    patient_id: UUID
+    provider_id: UUID
+    service_name: str = Field(..., min_length=3, max_length=255)
+    start_time: datetime
+    end_time: datetime
+    notes: Optional[str] = None
+
+    @validator('end_time')
+    def end_time_after_start_time(cls, v, values):
+        """Validar que o horário de término é posterior ao de início"""
+        if 'start_time' in values and v <= values['start_time']:
+            raise ValueError('O horário de término deve ser posterior ao horário de início')
         return v
 
 
 class AppointmentCreate(AppointmentBase):
-    """
-    Esquema para criação de agendamentos
-    """
-    status: Optional[str] = Field("scheduled", description="Status do agendamento")
+    """Schema para criação de agendamento"""
+    pass
 
 
 class AppointmentUpdate(BaseModel):
-    """
-    Esquema para atualização de agendamentos
-    """
-    patient_id: Optional[UUID] = Field(None, description="ID do paciente")
-    provider_id: Optional[int] = Field(None, description="ID do profissional")
-    service_name: Optional[str] = Field(None, description="Nome do serviço")
-    start_time: Optional[datetime] = Field(None, description="Data e hora de início")
-    end_time: Optional[datetime] = Field(None, description="Data e hora de término")
-    status: Optional[str] = Field(None, description="Status do agendamento")
-    notes: Optional[str] = Field(None, description="Observações adicionais")
-    
-    @root_validator
-    def end_time_must_be_after_start_time(cls, v):
-        """
-        Valida se o horário de término é posterior ao de início, quando ambos estão presentes
-        """
-        start_time, end_time = v.get('start_time'), v.get('end_time')
-        if start_time and end_time and end_time <= start_time:
-            raise ValueError("Horário de término deve ser posterior ao horário de início")
+    """Schema para atualização parcial de agendamento"""
+    patient_id: Optional[UUID] = None
+    provider_id: Optional[UUID] = None
+    service_name: Optional[str] = Field(None, min_length=3, max_length=255)
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    status: Optional[str] = Field(None, regex='^(scheduled|confirmed|cancelled|completed)$')
+    notes: Optional[str] = None
+
+    @validator('end_time')
+    def end_time_after_start_time(cls, v, values):
+        """Validar que o horário de término é posterior ao de início, se fornecido"""
+        if v and 'start_time' in values and values['start_time'] and v <= values['start_time']:
+            raise ValueError('O horário de término deve ser posterior ao horário de início')
         return v
 
 
 class AppointmentResponse(AppointmentBase):
-    """
-    Esquema para resposta de agendamentos
-    """
+    """Schema para resposta com agendamento"""
     id: UUID
     subscriber_id: UUID
     status: str
     is_active: bool
     created_at: datetime
-    updated_at: Optional[datetime] = None
-    
+    updated_at: datetime
+
     class Config:
         orm_mode = True

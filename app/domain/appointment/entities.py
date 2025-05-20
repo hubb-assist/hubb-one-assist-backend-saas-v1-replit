@@ -17,7 +17,7 @@ class Appointment:
         self,
         subscriber_id: UUID,
         patient_id: UUID,
-        provider_id: int,
+        provider_id: UUID,
         service_name: str,
         start_time: datetime,
         end_time: datetime,
@@ -56,7 +56,7 @@ class Appointment:
         self.notes = notes
         self.is_active = is_active
         self.created_at = created_at or datetime.utcnow()
-        self.updated_at = updated_at
+        self.updated_at = updated_at or datetime.utcnow()
         
         self._validate()
     
@@ -67,11 +67,30 @@ class Appointment:
         Raises:
             ValueError: Se alguma regra de negócio for violada
         """
-        if self.end_time <= self.start_time:
-            raise ValueError("Horário de término deve ser posterior ao horário de início")
+        if not self.subscriber_id:
+            raise ValueError("subscriber_id é obrigatório")
         
-        if self.status not in ["scheduled", "confirmed", "cancelled", "completed", "no_show"]:
-            raise ValueError("Status inválido para agendamento")
+        if not self.patient_id:
+            raise ValueError("patient_id é obrigatório")
+        
+        if not self.provider_id:
+            raise ValueError("provider_id é obrigatório")
+        
+        if not self.service_name or len(self.service_name.strip()) < 3:
+            raise ValueError("service_name é obrigatório e deve ter pelo menos 3 caracteres")
+        
+        if not self.start_time:
+            raise ValueError("start_time é obrigatório")
+        
+        if not self.end_time:
+            raise ValueError("end_time é obrigatório")
+        
+        if self.end_time <= self.start_time:
+            raise ValueError("end_time deve ser posterior a start_time")
+        
+        valid_statuses = ["scheduled", "confirmed", "cancelled", "completed"]
+        if self.status not in valid_statuses:
+            raise ValueError(f"status deve ser um dos seguintes: {', '.join(valid_statuses)}")
     
     def update(self, data: dict) -> None:
         """
@@ -83,12 +102,28 @@ class Appointment:
         Raises:
             ValueError: Se alguma regra de negócio for violada após a atualização
         """
-        # Atualizar apenas os atributos que foram passados
-        for key, value in data.items():
-            if hasattr(self, key) and key not in ['id', 'subscriber_id', 'created_at']:
-                setattr(self, key, value)
+        # Atualizar apenas os atributos presentes no dicionário
+        if "patient_id" in data:
+            self.patient_id = data["patient_id"]
         
-        # Atualizar a data de atualização
+        if "provider_id" in data:
+            self.provider_id = data["provider_id"]
+        
+        if "service_name" in data:
+            self.service_name = data["service_name"]
+        
+        if "start_time" in data:
+            self.start_time = data["start_time"]
+        
+        if "end_time" in data:
+            self.end_time = data["end_time"]
+        
+        if "status" in data:
+            self.status = data["status"]
+        
+        if "notes" in data:
+            self.notes = data["notes"]
+        
         self.updated_at = datetime.utcnow()
         
         # Validar após a atualização
@@ -126,7 +161,7 @@ class Appointment:
         """
         self.is_active = False
         self.updated_at = datetime.utcnow()
-        
+    
     def to_dict(self) -> dict:
         """
         Converte a entidade para um dicionário

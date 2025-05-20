@@ -92,7 +92,7 @@ class IAppointmentRepository(ABC):
         date_from: Optional[datetime] = None,
         date_to: Optional[datetime] = None,
         patient_id: Optional[UUID] = None,
-        provider_id: Optional[int] = None,
+        provider_id: Optional[UUID] = None,
         status: Optional[str] = None
     ) -> List[Appointment]:
         """
