@@ -6,9 +6,7 @@ from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field, validator, root_validator
-import re
-
+from pydantic import BaseModel, Field, validator
 
 class ModuloAssociationBase(BaseModel):
     """
@@ -54,7 +52,7 @@ class InsumoBase(BaseModel):
     data_validade: Optional[datetime] = Field(None, description="Data de validade")
     data_compra: Optional[datetime] = Field(None, description="Data da última compra")
     observacoes: Optional[str] = Field(None, description="Observações adicionais")
-    modules_used: Optional[List[ModuloAssociationCreate]] = Field([], description="Módulos associados ao insumo")
+    modules_used: Optional[List[ModuloAssociationCreate]] = Field(default_factory=list, description="Módulos associados ao insumo")
 
     @validator('data_validade')
     def data_validade_futuro(cls, v):
@@ -111,7 +109,7 @@ class InsumoUpdate(BaseModel):
         if v and v > datetime.utcnow():
             raise ValueError("Data de compra não pode ser futura")
         return v
-        
+
 
 class InsumoResponse(InsumoBase):
     """
