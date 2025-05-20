@@ -1,81 +1,92 @@
 """
-Utilitários de segurança.
+Utilitários de segurança e autenticação
 """
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
-from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
+
 import os
-import jwt
+from datetime import datetime, timedelta
+from typing import Optional, Dict, Any, Union
 
-# Configurações de segurança
-SECRET_KEY = os.environ.get("API_SECRET_KEY", "development_secret_key")
+from jose import jwt, JWTError
+from fastapi import HTTPException, status
+from dotenv import load_dotenv
+
+# Carrega variáveis de ambiente
+load_dotenv()
+
+# Configurações JWT
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "chave_secreta_temporaria_deve_ser_alterada_em_producao")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-# Contexto de criptografia para senhas
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# Esquema OAuth2 para autenticação
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="auth/login",
-    auto_error=True
-)
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """
-    Verifica se a senha em texto puro corresponde ao hash.
-    
-    Args:
-        plain_password: Senha em texto puro
-        hashed_password: Hash da senha armazenado
-        
-    Returns:
-        bool: True se a senha corresponder ao hash, False caso contrário
-    """
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password: str) -> str:
-    """
-    Gera o hash da senha.
-    
-    Args:
-        password: Senha em texto puro
-        
-    Returns:
-        str: Hash da senha
-    """
-    return pwd_context.hash(password)
-
-
-def create_access_token(
-    data: Dict[str, Any],
-    expires_delta: Optional[timedelta] = None
-) -> str:
-    """
-    Cria um token JWT de acesso.
+    Cria um token JWT de acesso
     
     Args:
         data: Dados a serem codificados no token
-        expires_delta: Tempo de expiração do token
+        expires_delta: Tempo de expiração opcional
         
     Returns:
-        str: Token JWT codificado
+        str: Token JWT assinado
     """
     to_encode = data.copy()
     
-    # Definir expiração
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    # Adicionar expiração aos dados
     to_encode.update({"exp": expire})
-    
-    # Criar token JWT
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     
     return encoded_jwt
+
+
+def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Cria um token JWT de refresh
+    
+    Args:
+        data: Dados a serem codificados no token
+        expires_delta: Tempo de expiração opcional
+        
+    Returns:
+        str: Token JWT de refresh assinado
+    """
+    to_encode = data.copy()
+    
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    
+    return encoded_jwt
+
+
+def decode_token(token: str) -> Dict[str, Any]:
+    """
+    Decodifica um token JWT e retorna seu payload
+    
+    Args:
+        token: Token JWT a ser decodificado
+        
+    Returns:
+        Dict[str, Any]: Payload do token
+        
+    Raises:
+        HTTPException: Se o token for inválido ou expirado
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido ou expirado",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
