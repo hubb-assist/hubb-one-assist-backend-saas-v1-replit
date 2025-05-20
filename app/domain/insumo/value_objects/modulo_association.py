@@ -8,7 +8,7 @@ from typing import Optional
 from uuid import UUID
 
 
-@dataclass(frozen=True)
+@dataclass
 class ModuloAssociation:
     """
     Value Object para associação entre um insumo e um módulo.
@@ -27,4 +27,16 @@ class ModuloAssociation:
         Validação pós-inicialização.
         """
         if self.quantidade_padrao <= 0:
-            raise ValueError("Quantidade padrão deve ser um número positivo")
+            raise ValueError("Quantidade padrão deve ser maior que zero")
+            
+    def calcular_valor_total(self, valor_unitario: float) -> float:
+        """
+        Calcula o valor total para esta associação.
+        
+        Args:
+            valor_unitario: Valor unitário do insumo
+            
+        Returns:
+            float: Valor total (quantidade * valor unitário)
+        """
+        return self.quantidade_padrao * valor_unitario

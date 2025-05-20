@@ -1,8 +1,8 @@
 """
-Caso de uso para atualizar o estoque de um insumo.
+Caso de uso para atualização de estoque de insumo.
 """
 
-from typing import Optional, Dict, Any, Tuple
+from typing import Optional, Dict, Any
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
@@ -11,10 +11,10 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 class AtualizarEstoqueInsumoUseCase:
     """
-    Caso de uso para atualizar o estoque de um insumo.
+    Caso de uso para atualização de estoque de um insumo.
     
-    Implementa a lógica de negócio para adicionar ou remover
-    quantidades do estoque de um insumo.
+    Implementa a lógica de negócio para atualizar o estoque de um insumo,
+    permitindo entrada ou saída de itens e mantendo histórico.
     """
     
     def __init__(self, insumo_repository: InsumoRepositoryInterface):
@@ -26,55 +26,50 @@ class AtualizarEstoqueInsumoUseCase:
         """
         self.insumo_repository = insumo_repository
     
-    def execute(self, 
-                insumo_id: UUID, 
-                quantidade: int,
-                observacao: Optional[str] = None) -> Tuple[bool, Optional[InsumoEntity], str]:
+    def execute(self, insumo_id: UUID, quantidade: int, tipo_movimento: str, 
+                observacao: Optional[str] = None) -> Optional[InsumoEntity]:
         """
-        Executa o caso de uso de atualização de estoque.
+        Executa o caso de uso para atualizar o estoque de um insumo.
         
         Args:
-            insumo_id: UUID do insumo a ser atualizado
-            quantidade: Quantidade a adicionar (positiva) ou remover (negativa)
-            observacao: Observação opcional sobre a movimentação
+            insumo_id: UUID do insumo a atualizar
+            quantidade: Quantidade a ser adicionada ou removida (sempre positiva)
+            tipo_movimento: Tipo de movimento ("entrada" ou "saida")
+            observacao: Observação sobre o movimento (opcional)
             
         Returns:
-            Tuple[bool, Optional[InsumoEntity], str]: 
-                - Sucesso da operação (bool)
-                - Entidade atualizada (InsumoEntity ou None em caso de erro)
-                - Mensagem de resultado ou erro
+            Optional[InsumoEntity]: Entidade de insumo atualizada ou None se não encontrado
+            
+        Raises:
+            ValueError: Se os dados de atualização forem inválidos
         """
-        # Verificar se o insumo existe
+        # Validar entrada de dados
+        if quantidade <= 0:
+            raise ValueError("A quantidade deve ser maior que zero")
+            
+        if tipo_movimento not in ["entrada", "saida"]:
+            raise ValueError("Tipo de movimento deve ser 'entrada' ou 'saida'")
+        
+        # Buscar insumo existente
         insumo = self.insumo_repository.get_by_id(insumo_id)
         if not insumo:
-            return False, None, "Insumo não encontrado"
+            return None
+            
+        # Preparar dados para atualização
+        update_data = {}
         
-        # Verificar se a quantidade não levará o estoque para negativo
-        novo_estoque = insumo.estoque_atual + quantidade
-        if novo_estoque < 0:
-            return False, None, f"Estoque insuficiente. Disponível: {insumo.estoque_atual}"
+        # Calcular novo estoque com base no tipo de movimento
+        if tipo_movimento == "entrada":
+            update_data["estoque_atual"] = insumo.estoque_atual + quantidade
+        else:  # saida
+            if insumo.estoque_atual < quantidade:
+                raise ValueError(f"Estoque insuficiente. Disponível: {insumo.estoque_atual}, Solicitado: {quantidade}")
+            update_data["estoque_atual"] = insumo.estoque_atual - quantidade
         
-        # Atualizar o estoque
-        data = {
-            "estoque_atual": novo_estoque
-        }
+        # Executar atualização
+        insumo_atualizado = self.insumo_repository.update(insumo_id, update_data)
         
-        # Se tiver observação, atualizar também
-        if observacao:
-            # Concatenar com observações existentes, se houver
-            if insumo.observacoes:
-                data["observacoes"] = f"{insumo.observacoes}\n{observacao}"
-            else:
-                data["observacoes"] = observacao
+        # TODO: Em uma implementação mais completa, registrar o histórico de movimentação
+        # em uma tabela específica para rastreabilidade.
         
-        # Atualizar no repositório
-        insumo_atualizado = self.insumo_repository.update(insumo_id, data)
-        
-        if not insumo_atualizado:
-            return False, None, "Erro ao atualizar estoque"
-        
-        # Verificar se o estoque está abaixo do mínimo após a operação
-        if insumo_atualizado.estoque_atual < insumo_atualizado.estoque_minimo:
-            return True, insumo_atualizado, f"Estoque atualizado, mas está abaixo do mínimo recomendado ({insumo_atualizado.estoque_minimo})"
-        
-        return True, insumo_atualizado, f"Estoque atualizado com sucesso. Novo estoque: {insumo_atualizado.estoque_atual}"
+        return insumo_atualizado

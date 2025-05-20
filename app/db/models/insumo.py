@@ -1,50 +1,69 @@
 """
-Modelo de banco de dados para Insumos.
+Modelos SQLAlchemy para insumos e associações com módulos.
 """
 
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, Boolean, Float, DateTime, ForeignKey, Table
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from decimal import Decimal
+from typing import List, Optional
+from uuid import UUID, uuid4
+
+from sqlalchemy import Column, String, Integer, Float, Boolean, ForeignKey, DateTime, Text
+from sqlalchemy.dialects.postgresql import UUID as PgUUID
 from sqlalchemy.orm import relationship
-from uuid import uuid4
 
-from app.db.session import Base
-
-
-# Tabela de associação entre insumos e módulos
-insumo_module = Table(
-    'insumo_module',
-    Base.metadata,
-    Column('insumo_id', UUID(as_uuid=True), ForeignKey('insumos.id'), primary_key=True),
-    Column('module_id', UUID(as_uuid=True), ForeignKey('modules.id'), primary_key=True)
-)
+from app.db.base_class import Base
 
 
 class Insumo(Base):
-    """Modelo SQLAlchemy para Insumos no banco de dados."""
+    """
+    Modelo SQLAlchemy para a tabela de insumos.
     
+    Representa um insumo no banco de dados, com seus atributos
+    e relacionamentos com outras entidades.
+    """
     __tablename__ = "insumos"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4, index=True)
-    nome = Column(String(100), nullable=False)
-    descricao = Column(String(500), nullable=False)
-    categoria = Column(String(50), nullable=False)
+    id = Column(PgUUID(as_uuid=True), primary_key=True, default=uuid4)
+    nome = Column(String(255), nullable=False, index=True)
+    descricao = Column(Text, nullable=False)
+    categoria = Column(String(100), nullable=False, index=True)
     valor_unitario = Column(Float, nullable=False)
-    unidade_medida = Column(String(10), nullable=False)
+    unidade_medida = Column(String(50), nullable=False)
     estoque_minimo = Column(Integer, nullable=False, default=0)
     estoque_atual = Column(Integer, nullable=False, default=0)
-    fornecedor = Column(String(100), nullable=True)
-    codigo_referencia = Column(String(50), nullable=True)
+    fornecedor = Column(String(255), nullable=True)
+    codigo_referencia = Column(String(100), nullable=True)
     data_validade = Column(DateTime, nullable=True)
     data_compra = Column(DateTime, nullable=True)
-    observacoes = Column(String(1000), nullable=True)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    observacoes = Column(Text, nullable=True)
+    subscriber_id = Column(PgUUID(as_uuid=True), nullable=False, index=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     
-    # Relacionamento com Subscriber (multitenant)
-    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
-    subscriber = relationship("Subscriber", back_populates="insumos")
+    # Relacionamentos
+    modules_used = relationship("InsumoModuleAssociation", back_populates="insumo", cascade="all, delete-orphan")
+
+
+class InsumoModuleAssociation(Base):
+    """
+    Modelo SQLAlchemy para a tabela de associação entre insumos e módulos.
     
-    # Relacionamento com Modules (muitos-para-muitos)
-    modules = relationship("Module", secondary=insumo_module, back_populates="insumos")
+    Representa uma relação muitos-para-muitos entre insumos e módulos,
+    com atributos adicionais como quantidade padrão.
+    """
+    __tablename__ = "insumo_module_associations"
+    
+    insumo_id = Column(PgUUID(as_uuid=True), ForeignKey("insumos.id", ondelete="CASCADE"), primary_key=True)
+    module_id = Column(PgUUID(as_uuid=True), ForeignKey("modules.id", ondelete="CASCADE"), primary_key=True)
+    quantidade_padrao = Column(Integer, nullable=False, default=1)
+    observacao = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relacionamentos
+    insumo = relationship("Insumo", back_populates="modules_used")
+    module = relationship("Module")
+    
+    def __repr__(self):
+        return f"<InsumoModuleAssociation insumo_id={self.insumo_id} module_id={self.module_id}>"

@@ -1,97 +1,135 @@
 """
-Esquemas Pydantic para validação de insumos na API.
+Esquemas Pydantic para insumos.
 """
 
 from datetime import datetime
-from typing import Optional, List, Dict, Any
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field, validator
 
 
 class InsumoModuleAssociationBase(BaseModel):
-    """Esquema base para associação entre insumo e módulo"""
+    """Esquema base para associação entre insumo e módulo."""
     module_id: UUID
-    quantidade_padrao: int = Field(1, description="Quantidade padrão utilizada deste insumo pelo módulo")
-    observacao: Optional[str] = Field(None, description="Observação sobre o uso deste insumo no módulo")
+    quantidade_padrao: int = Field(default=1, gt=0)
+    observacao: Optional[str] = None
 
 
 class InsumoModuleAssociationCreate(InsumoModuleAssociationBase):
-    """Esquema para criação de associação entre insumo e módulo"""
+    """Esquema para criação de associação entre insumo e módulo."""
     pass
 
 
-class InsumoModuleAssociationResponse(InsumoModuleAssociationBase):
-    """Esquema para resposta de associação entre insumo e módulo"""
-    module_nome: Optional[str] = Field(None, description="Nome do módulo (preenchido automaticamente)")
+class InsumoModuleAssociationRead(InsumoModuleAssociationBase):
+    """Esquema para leitura de associação entre insumo e módulo."""
+    module_nome: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class InsumoBase(BaseModel):
-    """Esquema base para insumos"""
-    nome: str = Field(..., min_length=2, max_length=150, description="Nome do insumo")
-    descricao: Optional[str] = Field(None, description="Descrição detalhada do insumo")
-    categoria: str = Field(..., min_length=2, max_length=100, description="Categoria do insumo (ex: Material de Escritório, Produtos de Limpeza)")
-    valor_unitario: float = Field(..., gt=0, description="Valor unitário do insumo")
-    unidade_medida: str = Field(..., min_length=1, max_length=50, description="Unidade de medida (ex: Unidade, Kg, Litro)")
-    estoque_minimo: int = Field(1, ge=0, description="Estoque mínimo recomendado")
-    estoque_atual: int = Field(0, ge=0, description="Estoque atual")
-    fornecedor: Optional[str] = Field(None, description="Nome do fornecedor")
-    codigo_referencia: Optional[str] = Field(None, description="Código de referência do fornecedor ou interno")
-    data_validade: Optional[datetime] = Field(None, description="Data de validade")
-    data_compra: Optional[datetime] = Field(None, description="Data da última compra")
-    observacoes: Optional[str] = Field(None, description="Observações adicionais")
+    """Esquema base para insumo."""
+    nome: str
+    descricao: str
+    categoria: str
+    valor_unitario: float
+    unidade_medida: str
+    estoque_minimo: int = Field(default=0, ge=0)
+    estoque_atual: int = Field(default=0, ge=0)
+    fornecedor: Optional[str] = None
+    codigo_referencia: Optional[str] = None
+    data_validade: Optional[str] = None
+    data_compra: Optional[str] = None
+    observacoes: Optional[str] = None
 
 
 class InsumoCreate(InsumoBase):
-    """Esquema para criação de insumo"""
-    subscriber_id: UUID = Field(..., description="ID do assinante que possui o insumo")
-    modules_used: Optional[List[InsumoModuleAssociationCreate]] = Field([], description="Módulos onde este insumo é utilizado")
+    """Esquema para criação de insumo."""
+    subscriber_id: Optional[UUID] = None  # Será preenchido a partir do token JWT
+    modules_used: Optional[List[InsumoModuleAssociationCreate]] = None
+
+    @validator('valor_unitario')
+    def valor_unitario_must_be_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Valor unitário deve ser maior que zero')
+        return v
+
+    @validator('estoque_minimo')
+    def estoque_minimo_must_be_non_negative(cls, v):
+        if v < 0:
+            raise ValueError('Estoque mínimo não pode ser negativo')
+        return v
+
+    @validator('estoque_atual')
+    def estoque_atual_must_be_non_negative(cls, v):
+        if v < 0:
+            raise ValueError('Estoque atual não pode ser negativo')
+        return v
 
 
 class InsumoUpdate(BaseModel):
-    """Esquema para atualização de insumo (todos os campos são opcionais)"""
-    nome: Optional[str] = Field(None, min_length=2, max_length=150, description="Nome do insumo")
-    descricao: Optional[str] = Field(None, description="Descrição detalhada do insumo")
-    categoria: Optional[str] = Field(None, min_length=2, max_length=100, description="Categoria do insumo (ex: Material de Escritório, Produtos de Limpeza)")
-    valor_unitario: Optional[float] = Field(None, gt=0, description="Valor unitário do insumo")
-    unidade_medida: Optional[str] = Field(None, min_length=1, max_length=50, description="Unidade de medida (ex: Unidade, Kg, Litro)")
-    estoque_minimo: Optional[int] = Field(None, ge=0, description="Estoque mínimo recomendado")
-    estoque_atual: Optional[int] = Field(None, ge=0, description="Estoque atual")
-    fornecedor: Optional[str] = Field(None, description="Nome do fornecedor")
-    codigo_referencia: Optional[str] = Field(None, description="Código de referência do fornecedor ou interno")
-    data_validade: Optional[datetime] = Field(None, description="Data de validade")
-    data_compra: Optional[datetime] = Field(None, description="Data da última compra")
-    observacoes: Optional[str] = Field(None, description="Observações adicionais")
-    is_active: Optional[bool] = Field(None, description="Status ativo/inativo do insumo")
-    modules_used: Optional[List[InsumoModuleAssociationCreate]] = Field(None, description="Módulos onde este insumo é utilizado")
+    """Esquema para atualização de insumo."""
+    nome: Optional[str] = None
+    descricao: Optional[str] = None
+    categoria: Optional[str] = None
+    valor_unitario: Optional[float] = None
+    unidade_medida: Optional[str] = None
+    estoque_minimo: Optional[int] = None
+    estoque_atual: Optional[int] = None
+    fornecedor: Optional[str] = None
+    codigo_referencia: Optional[str] = None
+    data_validade: Optional[str] = None
+    data_compra: Optional[str] = None
+    observacoes: Optional[str] = None
+    modules_used: Optional[List[InsumoModuleAssociationCreate]] = None
+
+    @validator('valor_unitario')
+    def valor_unitario_must_be_positive(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError('Valor unitário deve ser maior que zero')
+        return v
+
+    @validator('estoque_minimo')
+    def estoque_minimo_must_be_non_negative(cls, v):
+        if v is not None and v < 0:
+            raise ValueError('Estoque mínimo não pode ser negativo')
+        return v
+
+    @validator('estoque_atual')
+    def estoque_atual_must_be_non_negative(cls, v):
+        if v is not None and v < 0:
+            raise ValueError('Estoque atual não pode ser negativo')
+        return v
 
 
-class InsumoResponse(InsumoBase):
-    """Esquema para resposta de insumo"""
+class InsumoRead(InsumoBase):
+    """Esquema para leitura de insumo."""
     id: UUID
     subscriber_id: UUID
-    modules_used: List[InsumoModuleAssociationResponse] = []
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    estoque_baixo: bool = Field(False, description="Indica se o estoque está abaixo do mínimo")
-    valor_total_estoque: float = Field(0.0, description="Valor total do estoque (estoque_atual * valor_unitario)")
-
+    modules_used: List[InsumoModuleAssociationRead] = []
+    
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
-class InsumoListResponse(BaseModel):
-    """Esquema para resposta de listagem paginada de insumos"""
-    items: List[InsumoResponse]
-    total: int
-    skip: int
-    limit: int
+class EstoqueUpdate(BaseModel):
+    """Esquema para atualização de estoque de insumo."""
+    quantidade: int = Field(..., gt=0)
+    tipo_movimento: str = Field(..., regex='^(entrada|saida)$')
+    observacao: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+
+class InsumoFilter(BaseModel):
+    """Esquema para filtros de busca de insumos."""
+    nome: Optional[str] = None
+    categoria: Optional[str] = None
+    fornecedor: Optional[str] = None
+    estoque_baixo: Optional[bool] = None
+    module_id: Optional[UUID] = None

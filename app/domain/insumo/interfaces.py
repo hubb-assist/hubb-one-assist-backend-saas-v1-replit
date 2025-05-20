@@ -1,9 +1,9 @@
 """
-Interfaces para o domínio de Insumos.
+Interfaces para o domínio de insumos.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any, Tuple
+from typing import Dict, Any, List, Optional, Union
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
@@ -11,93 +11,57 @@ from app.domain.insumo.entities import InsumoEntity
 
 class InsumoRepositoryInterface(ABC):
     """
-    Interface para repositório de insumos.
+    Interface para o repositório de insumos.
     
-    Define os métodos que qualquer implementação de repositório
-    de insumos deve fornecer.
+    Define os contratos que qualquer implementação de repositório de insumos
+    deve seguir, garantindo a inversão de dependência (SOLID).
     """
     
     @abstractmethod
-    def create(self, 
-               nome: str,
-               descricao: str,
-               categoria: str,
-               valor_unitario: float,
-               unidade_medida: str,
-               estoque_minimo: int,
-               estoque_atual: int,
-               subscriber_id: UUID,
-               fornecedor: Optional[str] = None,
-               codigo_referencia: Optional[str] = None,
-               data_validade: Optional[str] = None,
-               data_compra: Optional[str] = None,
-               observacoes: Optional[str] = None,
-               modules_used: Optional[List[Dict[str, Any]]] = None) -> InsumoEntity:
+    def create(self, insumo: InsumoEntity) -> InsumoEntity:
         """
-        Cria um novo insumo.
+        Cria um novo insumo no repositório.
         
         Args:
-            nome: Nome do insumo
-            descricao: Descrição detalhada
-            categoria: Categoria do insumo
-            valor_unitario: Valor unitário
-            unidade_medida: Unidade de medida
-            estoque_minimo: Estoque mínimo recomendado
-            estoque_atual: Estoque atual
-            subscriber_id: ID do assinante proprietário
-            fornecedor: Nome do fornecedor (opcional)
-            codigo_referencia: Código de referência (opcional)
-            data_validade: Data de validade (opcional)
-            data_compra: Data de compra (opcional)
-            observacoes: Observações adicionais (opcional)
-            modules_used: Lista de módulos que usam este insumo (opcional)
+            insumo: Entidade de insumo a ser criada
             
         Returns:
-            InsumoEntity: Entidade de insumo criada
+            InsumoEntity: Entidade criada com ID gerado
         """
         pass
     
     @abstractmethod
     def get_by_id(self, insumo_id: UUID) -> Optional[InsumoEntity]:
         """
-        Obtém um insumo pelo ID.
+        Busca um insumo pelo ID.
         
         Args:
-            insumo_id: UUID do insumo
+            insumo_id: ID do insumo a buscar
             
         Returns:
-            Optional[InsumoEntity]: Entidade de insumo ou None se não encontrado
+            Optional[InsumoEntity]: Entidade encontrada ou None
         """
         pass
     
     @abstractmethod
-    def list(self, skip: int = 0, limit: int = 100, filters: Dict[str, Any] = None) -> Dict[str, Any]:
+    def list_by_subscriber(
+        self, 
+        subscriber_id: UUID, 
+        skip: int = 0, 
+        limit: int = 100,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
-        Lista insumos com paginação e filtros.
-        
-        Args:
-            skip: Quantos insumos pular (paginação)
-            limit: Limite de insumos a retornar
-            filters: Filtros a aplicar
-            
-        Returns:
-            Dict[str, Any]: Dicionário com itens, total, skip e limit
-        """
-        pass
-    
-    @abstractmethod
-    def list_by_subscriber(self, subscriber_id: UUID, skip: int = 0, limit: int = 100, filters: Dict[str, Any] = None) -> Dict[str, Any]:
-        """
-        Lista insumos de um assinante específico.
+        Lista insumos de um assinante com paginação e filtros opcionais.
         
         Args:
             subscriber_id: ID do assinante
-            skip: Quantos insumos pular (paginação)
-            limit: Limite de insumos a retornar
-            filters: Filtros a aplicar
+            skip: Quantos registros pular
+            limit: Limite de registros a retornar
+            filters: Filtros a aplicar (nome, categoria, etc.)
             
         Returns:
-            Dict[str, Any]: Dicionário com itens, total, skip e limit
+            Dict[str, Any]: Dicionário com itens e informações de paginação
         """
         pass
     
@@ -107,11 +71,11 @@ class InsumoRepositoryInterface(ABC):
         Atualiza um insumo existente.
         
         Args:
-            insumo_id: UUID do insumo a atualizar
-            data: Dicionário com campos a atualizar
+            insumo_id: ID do insumo a atualizar
+            data: Dicionário com os campos a atualizar
             
         Returns:
-            Optional[InsumoEntity]: Entidade atualizada ou None se não encontrado
+            Optional[InsumoEntity]: Entidade atualizada ou None
         """
         pass
     
@@ -121,9 +85,31 @@ class InsumoRepositoryInterface(ABC):
         Exclui logicamente um insumo (soft delete).
         
         Args:
-            insumo_id: UUID do insumo a excluir
+            insumo_id: ID do insumo a excluir
             
         Returns:
-            bool: True se bem-sucedido, False caso contrário
+            bool: True se excluído com sucesso, False caso contrário
+        """
+        pass
+    
+    @abstractmethod
+    def update_estoque(
+        self, 
+        insumo_id: UUID, 
+        quantidade: int,
+        tipo_movimento: str,
+        observacao: Optional[str] = None
+    ) -> Optional[InsumoEntity]:
+        """
+        Atualiza o estoque de um insumo (entrada ou saída).
+        
+        Args:
+            insumo_id: ID do insumo
+            quantidade: Quantidade a adicionar/remover
+            tipo_movimento: 'entrada' ou 'saida'
+            observacao: Observação opcional sobre o movimento
+            
+        Returns:
+            Optional[InsumoEntity]: Entidade atualizada ou None
         """
         pass

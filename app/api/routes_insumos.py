@@ -1,172 +1,61 @@
 """
-Rotas da API para gerenciamento de Insumos.
+Rotas da API para o módulo de insumos.
 """
 
-from typing import List, Optional, Dict, Any
+from typing import Dict, Any, List, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Path, Body, status
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_db, get_current_user
-from app.core.permissions import has_permission
-from app.db.models import User
-from app.domain.insumo.entities import InsumoEntity
-from app.schemas.insumo import (
-    InsumoCreate, InsumoUpdate, InsumoResponse, InsumoListResponse
-)
-from app.infrastructure.repositories.insumo_repository import SQLAlchemyInsumoRepository
+from app.api.deps import get_current_user, get_db
 from app.application.use_cases.insumo.create_insumo import CreateInsumoUseCase
 from app.application.use_cases.insumo.get_insumo import GetInsumoUseCase
-from app.application.use_cases.insumo.list_insumos import ListInsumosUseCase
+from app.application.use_cases.insumo.list_insumos import ListInsumosUseCase, ListInsumosBySubscriberUseCase
 from app.application.use_cases.insumo.update_insumo import UpdateInsumoUseCase
 from app.application.use_cases.insumo.delete_insumo import DeleteInsumoUseCase
 from app.application.use_cases.insumo.atualizar_estoque import AtualizarEstoqueInsumoUseCase
-
-# Criar o router para insumos
-router = APIRouter(prefix="/insumos", tags=["insumos"])
-
-
-@router.get("", response_model=InsumoListResponse)
-async def list_insumos(
-    skip: int = Query(0, ge=0, description="Quantos insumos pular (paginação)"),
-    limit: int = Query(100, ge=1, le=1000, description="Limite de insumos retornados"),
-    nome: Optional[str] = Query(None, description="Filtrar por nome (parcial)"),
-    categoria: Optional[str] = Query(None, description="Filtrar por categoria"),
-    fornecedor: Optional[str] = Query(None, description="Filtrar por fornecedor (parcial)"),
-    estoque_baixo: Optional[bool] = Query(None, description="Filtrar apenas insumos com estoque abaixo do mínimo"),
-    module_id: Optional[UUID] = Query(None, description="Filtrar insumos associados a um módulo específico"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Lista insumos com opções de paginação e filtros.
-    Requer autenticação.
-    """
-    # Verificar permissão
-    if not has_permission(current_user, "insumos:read"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para listar insumos"
-        )
-    
-    # Construir filtros a partir dos parâmetros
-    filters = {}
-    if nome:
-        filters["nome"] = nome
-    if categoria:
-        filters["categoria"] = categoria
-    if fornecedor:
-        filters["fornecedor"] = fornecedor
-    if estoque_baixo is not None:
-        filters["estoque_baixo"] = estoque_baixo
-    if module_id:
-        filters["module_id"] = module_id
-    
-    # Instanciar repositório e caso de uso
-    repository = SQLAlchemyInsumoRepository(db)
-    use_case = ListInsumosUseCase(repository)
-    
-    # Executar caso de uso com controle multitenant
-    subscriber_id = current_user.subscriber_id if current_user.role != "SUPER_ADMIN" else None
-    result = use_case.execute(skip=skip, limit=limit, subscriber_id=subscriber_id, filters=filters)
-    
-    # Transformar entidades em resposta da API
-    return {
-        "items": [
-            {
-                **vars(item),
-                "estoque_baixo": item.verificar_estoque_baixo(),
-                "valor_total_estoque": float(item.calcular_valor_total())
-            }
-            for item in result["items"]
-        ],
-        "total": result["total"],
-        "skip": result["skip"],
-        "limit": result["limit"]
-    }
+from app.infrastructure.repositories.insumo_repository import SQLAlchemyInsumoRepository
+from app.schemas.insumo import (
+    InsumoCreate,
+    InsumoRead,
+    InsumoUpdate,
+    EstoqueUpdate,
+    InsumoFilter
+)
 
 
-@router.get("/{insumo_id}", response_model=InsumoResponse)
-async def get_insumo(
-    insumo_id: UUID = Path(..., description="ID do insumo"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Obtém detalhes de um insumo pelo ID.
-    Requer autenticação.
-    """
-    # Verificar permissão
-    if not has_permission(current_user, "insumos:read"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para visualizar insumos"
-        )
-    
-    # Instanciar repositório e caso de uso
-    repository = SQLAlchemyInsumoRepository(db)
-    use_case = GetInsumoUseCase(repository)
-    
-    # Executar caso de uso
-    insumo = use_case.execute(insumo_id=insumo_id)
-    
-    if not insumo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Insumo não encontrado"
-        )
-    
-    # Verificar se o usuário tem acesso a este insumo (multitenant)
-    if current_user.role != "SUPER_ADMIN" and insumo.subscriber_id != current_user.subscriber_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para acessar este insumo"
-        )
-    
-    # Transformar entidade em resposta da API
-    return {
-        **vars(insumo),
-        "estoque_baixo": insumo.verificar_estoque_baixo(),
-        "valor_total_estoque": float(insumo.calcular_valor_total())
-    }
+router = APIRouter()
 
 
-@router.post("", response_model=InsumoResponse, status_code=status.HTTP_201_CREATED)
-async def create_insumo(
+@router.post("/", response_model=InsumoRead)
+def create_insumo(
     insumo_data: InsumoCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Cria um novo insumo.
-    Requer autenticação e permissão específica.
+    
+    Requer autenticação com um usuário que pertença a um assinante.
     """
-    # Verificar permissão
-    if not has_permission(current_user, "insumos:create"):
+    # Verificar se o usuário tem acesso
+    if not current_user.get("subscriber_id"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para criar insumos"
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
         )
     
-    # Definir subscriber_id com base no usuário atual (multitenant)
-    subscriber_id = current_user.subscriber_id
-    if not subscriber_id and current_user.role != "SUPER_ADMIN":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Usuário sem assinante associado não pode criar insumos"
-        )
+    # Utilizar o subscriber_id do usuário atual, se não foi fornecido explicitamente
+    if not insumo_data.subscriber_id:
+        insumo_data.subscriber_id = current_user.get("subscriber_id")
     
-    # Usar subscriber_id do payload apenas para admin, senão usar o do usuário
-    if current_user.role != "SUPER_ADMIN":
-        insumo_data.subscriber_id = subscriber_id
-    
-    # Instanciar repositório e caso de uso
+    # Criar repositório e caso de uso
     repository = SQLAlchemyInsumoRepository(db)
     use_case = CreateInsumoUseCase(repository)
     
-    # Executar caso de uso
     try:
+        # Executar o caso de uso
         insumo = use_case.execute(
             nome=insumo_data.nome,
             descricao=insumo_data.descricao,
@@ -181,185 +70,253 @@ async def create_insumo(
             data_validade=insumo_data.data_validade,
             data_compra=insumo_data.data_compra,
             observacoes=insumo_data.observacoes,
-            modules_used=insumo_data.modules_used
+            modules_used=[module.dict() for module in insumo_data.modules_used] if insumo_data.modules_used else None
         )
+        return insumo
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao criar insumo: {str(e)}")
+
+
+@router.get("/{insumo_id}", response_model=InsumoRead)
+def get_insumo(
+    insumo_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Obtém um insumo específico pelo ID.
+    
+    Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
+    """
+    # Criar repositório e caso de uso
+    repository = SQLAlchemyInsumoRepository(db)
+    use_case = GetInsumoUseCase(repository)
+    
+    # Executar o caso de uso
+    insumo = use_case.execute(insumo_id)
+    
+    if not insumo:
+        raise HTTPException(status_code=404, detail="Insumo não encontrado")
+    
+    # Verificar se o usuário tem acesso ao insumo
+    subscriber_id = current_user.get("subscriber_id")
+    if not subscriber_id or insumo.subscriber_id != subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Erro ao criar insumo: {str(e)}"
+            status_code=403,
+            detail="Acesso não autorizado a este insumo"
         )
     
-    # Transformar entidade em resposta da API
-    return {
-        **vars(insumo),
-        "estoque_baixo": insumo.verificar_estoque_baixo(),
-        "valor_total_estoque": float(insumo.calcular_valor_total())
-    }
+    return insumo
 
 
-@router.put("/{insumo_id}", response_model=InsumoResponse)
-async def update_insumo(
-    insumo_data: InsumoUpdate,
-    insumo_id: UUID = Path(..., description="ID do insumo"),
+@router.get("/", response_model=Dict[str, Any])
+def list_insumos(
+    skip: int = 0,
+    limit: int = 100,
+    nome: Optional[str] = None,
+    categoria: Optional[str] = None,
+    fornecedor: Optional[str] = None,
+    estoque_baixo: Optional[bool] = None,
+    module_id: Optional[UUID] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user)
+):
+    """
+    Lista insumos com paginação e filtros opcionais.
+    
+    Requer autenticação e retorna apenas insumos do assinante do usuário atual.
+    """
+    # Verificar se o usuário tem acesso
+    subscriber_id = current_user.get("subscriber_id")
+    if not subscriber_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
+        )
+    
+    # Criar filtros a partir dos parâmetros
+    filters = {}
+    if nome:
+        filters["nome"] = nome
+    if categoria:
+        filters["categoria"] = categoria
+    if fornecedor:
+        filters["fornecedor"] = fornecedor
+    if estoque_baixo is not None:
+        filters["estoque_baixo"] = estoque_baixo
+    if module_id:
+        filters["module_id"] = module_id
+    
+    # Criar repositório e caso de uso
+    repository = SQLAlchemyInsumoRepository(db)
+    use_case = ListInsumosBySubscriberUseCase(repository)
+    
+    # Executar o caso de uso
+    result = use_case.execute(
+        subscriber_id=subscriber_id,
+        skip=skip,
+        limit=limit,
+        filters=filters
+    )
+    
+    return result
+
+
+@router.put("/{insumo_id}", response_model=InsumoRead)
+def update_insumo(
+    insumo_id: UUID,
+    insumo_data: InsumoUpdate,
+    db: Session = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Atualiza um insumo existente.
-    Requer autenticação e permissão específica.
+    
+    Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
     """
-    # Verificar permissão
-    if not has_permission(current_user, "insumos:update"):
+    # Verificar se o usuário tem acesso
+    subscriber_id = current_user.get("subscriber_id")
+    if not subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para atualizar insumos"
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
         )
     
-    # Instanciar repositório e caso de uso
+    # Criar repositório e caso de uso
     repository = SQLAlchemyInsumoRepository(db)
-    
-    # Verificar se o insumo existe e pertence ao assinante do usuário (multitenant)
     get_use_case = GetInsumoUseCase(repository)
-    insumo = get_use_case.execute(insumo_id=insumo_id)
     
+    # Verificar se o insumo existe e pertence ao assinante do usuário
+    insumo = get_use_case.execute(insumo_id)
     if not insumo:
+        raise HTTPException(status_code=404, detail="Insumo não encontrado")
+        
+    if insumo.subscriber_id != subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Insumo não encontrado"
+            status_code=403,
+            detail="Acesso não autorizado a este insumo"
         )
     
-    # Verificar se o usuário tem acesso a este insumo (multitenant)
-    if current_user.role != "SUPER_ADMIN" and insumo.subscriber_id != current_user.subscriber_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para acessar este insumo"
-        )
-    
-    # Converter dados do Pydantic para dicionário, excluindo valores None
-    update_data = {k: v for k, v in insumo_data.dict().items() if v is not None}
-    
-    # Executar caso de uso de atualização
+    # Criar caso de uso de atualização
     update_use_case = UpdateInsumoUseCase(repository)
-    updated_insumo = update_use_case.execute(insumo_id=insumo_id, data=update_data)
     
-    if not updated_insumo:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erro ao atualizar insumo"
-        )
+    # Preparar dados para atualização
+    update_data = insumo_data.dict(exclude_unset=True)
     
-    # Transformar entidade em resposta da API
-    return {
-        **vars(updated_insumo),
-        "estoque_baixo": updated_insumo.verificar_estoque_baixo(),
-        "valor_total_estoque": float(updated_insumo.calcular_valor_total())
-    }
+    # Converter lista de associações de módulos para dicionários se presente
+    if "modules_used" in update_data and update_data["modules_used"]:
+        update_data["modules_used"] = [module.dict() for module in update_data["modules_used"]]
+    
+    try:
+        # Executar o caso de uso
+        updated_insumo = update_use_case.execute(insumo_id, update_data)
+        if not updated_insumo:
+            raise HTTPException(status_code=404, detail="Insumo não encontrado")
+        
+        return updated_insumo
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar insumo: {str(e)}")
 
 
-@router.delete("/{insumo_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_insumo(
-    insumo_id: UUID = Path(..., description="ID do insumo"),
+@router.delete("/{insumo_id}", response_model=Dict[str, bool])
+def delete_insumo(
+    insumo_id: UUID,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
     Exclui logicamente um insumo (soft delete).
-    Requer autenticação e permissão específica.
+    
+    Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
     """
-    # Verificar permissão
-    if not has_permission(current_user, "insumos:delete"):
+    # Verificar se o usuário tem acesso
+    subscriber_id = current_user.get("subscriber_id")
+    if not subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para excluir insumos"
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
         )
     
-    # Instanciar repositório e caso de uso
+    # Criar repositório e caso de uso
     repository = SQLAlchemyInsumoRepository(db)
-    
-    # Verificar se o insumo existe e pertence ao assinante do usuário (multitenant)
     get_use_case = GetInsumoUseCase(repository)
-    insumo = get_use_case.execute(insumo_id=insumo_id)
     
+    # Verificar se o insumo existe e pertence ao assinante do usuário
+    insumo = get_use_case.execute(insumo_id)
     if not insumo:
+        raise HTTPException(status_code=404, detail="Insumo não encontrado")
+        
+    if insumo.subscriber_id != subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Insumo não encontrado"
+            status_code=403,
+            detail="Acesso não autorizado a este insumo"
         )
     
-    # Verificar se o usuário tem acesso a este insumo (multitenant)
-    if current_user.role != "SUPER_ADMIN" and insumo.subscriber_id != current_user.subscriber_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para acessar este insumo"
-        )
-    
-    # Executar caso de uso de exclusão
+    # Criar caso de uso de exclusão
     delete_use_case = DeleteInsumoUseCase(repository)
-    success = delete_use_case.execute(insumo_id=insumo_id)
     
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Erro ao excluir insumo"
-        )
+    # Executar o caso de uso
+    result = delete_use_case.execute(insumo_id)
+    
+    return {"success": result}
 
 
-@router.post("/{insumo_id}/estoque", response_model=InsumoResponse)
-async def atualizar_estoque(
-    insumo_id: UUID = Path(..., description="ID do insumo"),
-    quantidade: int = Body(..., description="Quantidade a adicionar (positiva) ou remover (negativa)"),
-    observacao: Optional[str] = Body(None, description="Observação opcional sobre a movimentação"),
+@router.post("/{insumo_id}/estoque", response_model=InsumoRead)
+def update_estoque(
+    insumo_id: UUID,
+    estoque_data: EstoqueUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user)
 ):
     """
-    Atualiza o estoque de um insumo (adiciona ou remove quantidade).
-    Requer autenticação e permissão específica.
+    Atualiza o estoque de um insumo (entrada ou saída).
+    
+    Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
     """
-    # Verificar permissão
-    if not has_permission(current_user, "insumos:update"):
+    # Verificar se o usuário tem acesso
+    subscriber_id = current_user.get("subscriber_id")
+    if not subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para atualizar estoque de insumos"
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
         )
     
-    # Instanciar repositório e caso de uso
+    # Criar repositório e caso de uso
     repository = SQLAlchemyInsumoRepository(db)
-    
-    # Verificar se o insumo existe e pertence ao assinante do usuário (multitenant)
     get_use_case = GetInsumoUseCase(repository)
-    insumo = get_use_case.execute(insumo_id=insumo_id)
     
+    # Verificar se o insumo existe e pertence ao assinante do usuário
+    insumo = get_use_case.execute(insumo_id)
     if not insumo:
+        raise HTTPException(status_code=404, detail="Insumo não encontrado")
+        
+    if insumo.subscriber_id != subscriber_id:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Insumo não encontrado"
+            status_code=403,
+            detail="Acesso não autorizado a este insumo"
         )
     
-    # Verificar se o usuário tem acesso a este insumo (multitenant)
-    if current_user.role != "SUPER_ADMIN" and insumo.subscriber_id != current_user.subscriber_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Não possui permissão para acessar este insumo"
-        )
-    
-    # Executar caso de uso de atualização de estoque
+    # Criar caso de uso de atualização de estoque
     estoque_use_case = AtualizarEstoqueInsumoUseCase(repository)
-    success, updated_insumo, message = estoque_use_case.execute(
-        insumo_id=insumo_id,
-        quantidade=quantidade,
-        observacao=observacao
-    )
     
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=message
+    try:
+        # Executar o caso de uso
+        updated_insumo = estoque_use_case.execute(
+            insumo_id=insumo_id,
+            quantidade=estoque_data.quantidade,
+            tipo_movimento=estoque_data.tipo_movimento,
+            observacao=estoque_data.observacao
         )
-    
-    # Transformar entidade em resposta da API
-    return {
-        **vars(updated_insumo),
-        "estoque_baixo": updated_insumo.verificar_estoque_baixo(),
-        "valor_total_estoque": float(updated_insumo.calcular_valor_total())
-    }
+        
+        if not updated_insumo:
+            raise HTTPException(status_code=404, detail="Insumo não encontrado")
+        
+        return updated_insumo
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar estoque: {str(e)}")
