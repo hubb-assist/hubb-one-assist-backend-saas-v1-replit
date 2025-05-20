@@ -33,7 +33,7 @@ router = APIRouter(prefix="/insumos", tags=["insumos"])
 def create_insumo(
     insumo_data: InsumoCreate,
     db: Session = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Cria um novo insumo.
@@ -41,7 +41,8 @@ def create_insumo(
     Requer autenticação com um usuário que pertença a um assinante.
     """
     # Verificar se o usuário tem acesso
-    if not current_user.get("subscriber_id"):
+    subscriber_id = getattr(current_user, "subscriber_id", None)
+    if not subscriber_id:
         raise HTTPException(
             status_code=403,
             detail="Usuário não está associado a um assinante"
@@ -51,7 +52,7 @@ def create_insumo(
     # Cria uma cópia do objeto para não modificar diretamente
     data_dict = insumo_data.dict()
     if not data_dict.get("subscriber_id"):
-        data_dict["subscriber_id"] = current_user.get("subscriber_id")
+        data_dict["subscriber_id"] = subscriber_id
     
     # Criar repositório e caso de uso
     repository = SQLAlchemyInsumoRepository(db)
@@ -81,7 +82,7 @@ def create_insumo(
 def get_insumo(
     insumo_id: UUID,
     db: Session = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Obtém um insumo específico pelo ID.
@@ -99,7 +100,7 @@ def get_insumo(
         raise HTTPException(status_code=404, detail="Insumo não encontrado")
     
     # Verificar se o usuário tem acesso ao insumo
-    subscriber_id = current_user.get("subscriber_id")
+    subscriber_id = getattr(current_user, "subscriber_id", None)
     if not subscriber_id or insumo.subscriber_id != subscriber_id:
         raise HTTPException(
             status_code=403,
@@ -119,7 +120,7 @@ def list_insumos(
     estoque_baixo: Optional[bool] = None,
     module_id: Optional[UUID] = None,
     db: Session = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Lista insumos com paginação e filtros opcionais.
@@ -127,7 +128,7 @@ def list_insumos(
     Requer autenticação e retorna apenas insumos do assinante do usuário atual.
     """
     # Verificar se o usuário tem acesso
-    subscriber_id = current_user.get("subscriber_id")
+    subscriber_id = getattr(current_user, "subscriber_id", None)
     if not subscriber_id:
         raise HTTPException(
             status_code=403,
@@ -173,7 +174,7 @@ def update_insumo(
     insumo_id: UUID,
     insumo_data: InsumoUpdate,
     db: Session = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Atualiza um insumo existente.
@@ -181,7 +182,7 @@ def update_insumo(
     Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
     """
     # Verificar se o usuário tem acesso
-    subscriber_id = current_user.get("subscriber_id")
+    subscriber_id = getattr(current_user, "subscriber_id", None)
     if not subscriber_id:
         raise HTTPException(
             status_code=403,
@@ -230,7 +231,7 @@ def update_insumo(
 def delete_insumo(
     insumo_id: UUID,
     db: Session = Depends(get_db),
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user = Depends(get_current_user)
 ):
     """
     Exclui logicamente um insumo (soft delete).
@@ -238,7 +239,7 @@ def delete_insumo(
     Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
     """
     # Verificar se o usuário tem acesso
-    subscriber_id = current_user.get("subscriber_id")
+    subscriber_id = getattr(current_user, "subscriber_id", None)
     if not subscriber_id:
         raise HTTPException(
             status_code=403,
