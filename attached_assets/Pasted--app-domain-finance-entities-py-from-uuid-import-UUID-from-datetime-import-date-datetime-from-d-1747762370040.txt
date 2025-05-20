@@ -1,0 +1,184 @@
+# app/domain/finance/entities.py
+from uuid import UUID
+from datetime import date, datetime
+from decimal import Decimal
+from typing import Optional
+
+class PayableEntity:
+    def __init__(
+        self,
+        id: UUID,
+        subscriber_id: UUID,
+        description: str,
+        amount: Decimal,
+        due_date: date,
+        paid: bool,
+        payment_date: Optional[datetime],
+        notes: Optional[str],
+        is_active: bool,
+        created_at: datetime,
+        updated_at: datetime,
+    ):
+        self.id = id
+        self.subscriber_id = subscriber_id
+        self.description = description
+        self.amount = amount
+        self.due_date = due_date
+        self.paid = paid
+        self.payment_date = payment_date
+        self.notes = notes
+        self.is_active = is_active
+        self.created_at = created_at
+        self.updated_at = updated_at
+
+class ReceivableEntity:
+    def __init__(
+        self,
+        id: UUID,
+        subscriber_id: UUID,
+        patient_id: UUID,
+        description: str,
+        amount: Decimal,
+        due_date: date,
+        received: bool,
+        receive_date: Optional[datetime],
+        notes: Optional[str],
+        is_active: bool,
+        created_at: datetime,
+        updated_at: datetime,
+    ):
+        self.id = id
+        self.subscriber_id = subscriber_id
+        self.patient_id = patient_id
+        self.description = description
+        self.amount = amount
+        self.due_date = due_date
+        self.received = received
+        self.receive_date = receive_date
+        self.notes = notes
+        self.is_active = is_active
+        self.created_at = created_at
+        self.updated_at = updated_at
+
+class CashFlowSummary:
+    def __init__(
+        self,
+        total_inflows: Decimal,
+        total_outflows: Decimal,
+        net_flow: Decimal,
+    ):
+        self.total_inflows = total_inflows
+        self.total_outflows = total_outflows
+        self.net_flow = net_flow
+
+class ProfitCalculation:
+    def __init__(
+        self,
+        total_revenue: Decimal,
+        total_costs: Decimal,
+        gross_profit: Decimal,
+        net_profit: Decimal,
+    ):
+        self.total_revenue = total_revenue
+        self.total_costs = total_costs
+        self.gross_profit = gross_profit
+        self.net_profit = net_profit
+
+
+# app/domain/finance/interfaces.py
+from abc import ABC, abstractmethod
+from uuid import UUID
+from datetime import date
+from typing import List, Optional
+from app.domain.finance.entities import (
+    PayableEntity,
+    ReceivableEntity,
+    CashFlowSummary,
+    ProfitCalculation,
+)
+from app.schemas.finance_schema import (
+    PayableCreate,
+    PayableUpdate,
+    ReceivableCreate,
+    ReceivableUpdate,
+)
+
+class IFinanceRepository(ABC):
+    # Payables
+    @abstractmethod
+    def create_payable(self, data: PayableCreate, subscriber_id: UUID) -> PayableEntity:
+        pass
+
+    @abstractmethod
+    def get_payable(self, id: UUID, subscriber_id: UUID) -> Optional[PayableEntity]:
+        pass
+
+    @abstractmethod
+    def update_payable(self, id: UUID, data: PayableUpdate, subscriber_id: UUID) -> PayableEntity:
+        pass
+
+    @abstractmethod
+    def delete_payable(self, id: UUID, subscriber_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def list_payables(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        paid: Optional[bool] = None,
+        due_from: Optional[date] = None,
+        due_to: Optional[date] = None,
+    ) -> List[PayableEntity]:
+        pass
+
+    # Receivables
+    @abstractmethod
+    def create_receivable(self, data: ReceivableCreate, subscriber_id: UUID) -> ReceivableEntity:
+        pass
+
+    @abstractmethod
+    def get_receivable(self, id: UUID, subscriber_id: UUID) -> Optional[ReceivableEntity]:
+        pass
+
+    @abstractmethod
+    def update_receivable(
+        self, id: UUID, data: ReceivableUpdate, subscriber_id: UUID
+    ) -> ReceivableEntity:
+        pass
+
+    @abstractmethod
+    def delete_receivable(self, id: UUID, subscriber_id: UUID) -> None:
+        pass
+
+    @abstractmethod
+    def list_receivables(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        received: Optional[bool] = None,
+        due_from: Optional[date] = None,
+        due_to: Optional[date] = None,
+    ) -> List[ReceivableEntity]:
+        pass
+
+    # Cashflow & Profit
+    @abstractmethod
+    def get_cashflow(
+        self,
+        subscriber_id: UUID,
+        from_date: date,
+        to_date: date,
+    ) -> CashFlowSummary:
+        pass
+
+    @abstractmethod
+    def calculate_profit(
+        self,
+        subscriber_id: UUID,
+        period_from: date,
+        period_to: date,
+    ) -> ProfitCalculation:
+        pass
