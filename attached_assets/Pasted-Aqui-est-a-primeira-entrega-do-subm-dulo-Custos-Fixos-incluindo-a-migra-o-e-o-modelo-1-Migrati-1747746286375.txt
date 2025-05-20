@@ -1,0 +1,80 @@
+Aqui está a primeira entrega do submódulo Custos Fixos, incluindo a migração e o modelo:
+
+1. Migration Alembic para criar a tabela costs_fixed
+Crie um novo arquivo em
+alembic/versions/xxxx_create_costs_fixed_table.py:
+
+python
+Copiar
+Editar
+"""create costs_fixed table
+
+Revision ID: xxxx
+Revises: <última_revision>
+Create Date: 2025-05-20 00:00:00.000000
+
+"""
+from alembic import op
+import sqlalchemy as sa
+import uuid
+
+
+# revisão deste arquivo
+revision = "xxxx"
+down_revision = "<última_revision>"
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    op.create_table(
+        "costs_fixed",
+        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
+        sa.Column("subscriber_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("subscribers.id"), nullable=False),
+        sa.Column("nome", sa.String(length=255), nullable=False),
+        sa.Column("valor", sa.Numeric(12, 2), nullable=False),
+        sa.Column("data", sa.Date(), nullable=False),
+        sa.Column("observacoes", sa.Text(), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
+        sa.Column("created_at", sa.DateTime(), nullable=False, server_default=sa.func.now()),
+        sa.Column("updated_at", sa.DateTime(), nullable=False, server_default=sa.func.now(), onupdate=sa.func.now()),
+    )
+
+
+def downgrade():
+    op.drop_table("costs_fixed")
+Passo seguinte:
+
+bash
+Copiar
+Editar
+alembic upgrade head
+2. Modelo SQLAlchemy
+Crie app/db/models/cost_fixed.py:
+
+python
+Copiar
+Editar
+from uuid import uuid4
+from sqlalchemy import Column, String, Numeric, Date, Text, Boolean, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
+from app.db.session import Base
+from datetime import datetime
+
+class CostFixed(Base):
+    __tablename__ = "costs_fixed"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    nome = Column(String(255), nullable=False)
+    valor = Column(Numeric(12, 2), nullable=False)
+    data = Column(Date, nullable=False)
+    observacoes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Se precisar relacionar com outro modelo, use relationship()
+    # por agora, apenas FK de subscriber
+Com isso a tabela e o modelo estão prontos.

@@ -1,0 +1,111 @@
+Estrutura Geral de cada submódulo
+Para Custos Fixos, Custos Variáveis, Custos Clínicos e Relatórios, vamos repetir este fluxo:
+
+Domain
+
+Entidade (por ex. CostFixedEntity) com campos comuns:
+
+id: UUID
+
+subscriber_id: UUID
+
+nome: string
+
+valor: Decimal
+
+data: date (ou período, conforme o caso)
+
+observacoes?: string
+
+Value Objects se necessário (Money, DatePeriod).
+
+Schemas Pydantic
+
+CostFixedBase, CostFixedCreate, CostFixedUpdate, CostFixedResponse
+
+Equivalente para cada tipo de custo.
+
+Interface de Repositório
+
+ICostFixedRepository com métodos:
+
+create(...), get_by_id(...), update(...), delete(...), list_all(subscriber_id, filtros...)
+
+Caso de Uso
+
+CreateCostFixedUseCase, GetCostFixedUseCase, UpdateCostFixedUseCase, DeleteCostFixedUseCase, ListCostFixedUseCase
+
+Repositório SQLAlchemy
+
+CostFixedSQLAlchemyRepository implementando a interface, lidando com a tabela costs_fixed.
+
+Router FastAPI
+
+POST /custos/fixos/
+
+GET /custos/fixos/
+
+GET /custos/fixos/{id}
+
+PUT /custos/fixos/{id}
+
+DELETE /custos/fixos/{id}
+
+Replicar exatamente para Custos Variáveis (/custos/variaveis/) e Custos Clínicos (/custos/clinicos/).
+
+Módulo de Relatórios
+O submódulo de Relatórios é um pouco diferente: não persiste dados próprios, mas agrega os custos já lançados.
+
+Domain
+
+Nenhuma entidade persistente, apenas objetos de valor como CostSummary, CostComparative.
+
+Use Cases
+
+GetCostSummaryUseCase(subscriber_id, periodo: DatePeriod) -> CostSummary
+
+CompareCostPeriodUseCase(subscriber_id, periodoA, periodoB) -> CostComparative
+
+Router FastAPI
+
+GET /custos/relatorios/summary?date_from=&date_to=
+
+GET /custos/relatorios/comparativo?date_from_a=&date_to_a=&date_from_b=&date_to_b=
+
+Implementation
+
+Use os repositórios dos submódulos para buscar dados e agregar somas, médias, percentuais, etc.
+
+Retornar JSON com totais por categoria, comparativos e, se quiser, dados para gráfico (ex: série temporal).
+
+Exemplo de Estrutura de Pastas
+pgsql
+Copiar
+Editar
+app/
+ ├── domain/
+ │    ├── cost_fixed/
+ │    │    ├ entities.py
+ │    │    └ interfaces.py
+ │    ├── cost_variable/
+ │    ├── cost_clinical/
+ ├── schemas/
+ │    ├ cost_fixed_schema.py
+ │    ├ cost_variable_schema.py
+ │    ├ cost_clinical_schema.py
+ ├── infrastructure/
+ │    └ repositories/
+ │         ├ cost_fixed_sqlalchemy.py
+ │         ├ cost_variable_sqlalchemy.py
+ │         └ cost_clinical_sqlalchemy.py
+ ├── application/
+ │    └ use_cases/
+ │         ├ cost_fixed_use_cases.py
+ │         ├ cost_variable_use_cases.py
+ │         └ cost_clinical_use_cases.py
+ ├── api/
+ │    └ routes/
+ │         ├ cost_fixed_router.py
+ │         ├ cost_variable_router.py
+ │         ├ cost_clinical_router.py
+ │         └ report_router.py
