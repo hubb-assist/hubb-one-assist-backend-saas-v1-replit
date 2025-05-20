@@ -28,7 +28,6 @@ from app.api.routes_public_arduino import router as public_arduino_router
 from app.api.routes_public_segments import router as public_segments_router
 from app.api.routes_public_plans import router as public_plans_router
 from app.api.routes_public_subscribers import router as public_subscribers_router
-from app.api.health import router as health_router
 # CRUD de pacientes
 from app.api.routes_patients import router as patients_router
 # Rotas DDD para pacientes
@@ -43,8 +42,6 @@ from app.api.routes_custos_variaveis import router as custos_variaveis_router
 from app.api.routes_custos_clinicos import router as custos_clinicos_router
 # Rotas para relatórios de custos
 from app.api.routes_relatorios_custos import router as relatorios_custos_router
-# Rotas para agendamentos
-from app.api.routes_agendamentos import router as agendamentos_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
 from app.api.routes_api_compatibility import router as compatibility_router, external_api_router
 # Rota especial para tratar problemas de CORS com subscribers
@@ -111,7 +108,6 @@ from app.core.cors_fixer import cors_fixer_middleware
 app.add_middleware(cors_fixer_middleware)
 
 # Incluir routers
-app.include_router(health_router)  # Router de saúde deve ser o primeiro para a raiz (/)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(segments_router)
@@ -125,7 +121,6 @@ app.include_router(custos_fixos_router) # Router para gerenciamento de custos fi
 app.include_router(custos_variaveis_router) # Router para gerenciamento de custos variáveis
 app.include_router(custos_clinicos_router) # Router para gerenciamento de custos clínicos
 app.include_router(relatorios_custos_router) # Router para relatórios de custos
-app.include_router(agendamentos_router) # Router para gerenciamento de agendamentos
 # Módulo Arduino foi desativado como parte da refatoração do domínio
 # O router existe apenas para compatibilidade com código existente, mas não é exposto na API
 
@@ -324,27 +319,31 @@ async def get_subscribers_direct(
             }
         )
 
-# Página inicial HTML simples para health checks
-@app.get("/")
+# Página inicial HTML
+@app.get("/", response_class=HTMLResponse)
 async def home():
     """
-    Página inicial simples que passa nos health checks.
+    Página inicial com informações sobre a API e regras do projeto.
     """
-    return {
-        "status": "online",
-        "name": "HUBB ONE Assist API",
-        "version": "0.1.0",
-        "docs": "/docs",
-        "redoc": "/redoc"
-    }
-
-# Página HTML mais completa 
-@app.get("/home", response_class=HTMLResponse)
-async def home_html():
-    """
-    Página inicial com informações sobre a API.
-    """
-    html_content = """
+    # Ler arquivo rules.md
+    rules_file = Path.cwd().parent / 'rules.md'
+    
+    # Inicializar o conteúdo das regras
+    rules_html = ""
+    
+    # Verificar se o arquivo existe
+    try:
+        with open(rules_file, 'r', encoding='utf-8') as f:
+            rules_content = f.read()
+            # Converter markdown para HTML
+            rules_html = markdown.markdown(
+                rules_content,
+                extensions=[]
+            )
+    except Exception as e:
+        rules_html = f"<div class='warning'><p>Não foi possível carregar as regras do projeto: {str(e)}</p></div>"
+    
+    html_content = f"""
     <!DOCTYPE html>
     <html>
     <head>

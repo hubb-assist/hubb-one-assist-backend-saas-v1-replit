@@ -1,4 +1,4 @@
 """
 Módulo WSGI para iniciar a aplicação através do adaptador
 """
-from wsgi_adapter import application
+from wsgi_to_asgi import application

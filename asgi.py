@@ -1,21 +1,7 @@
 """
 Módulo ASGI para iniciar a aplicação FastAPI com Uvicorn
 """
-import uvicorn
 from app.main import app
 
-# Adiciona um endpoint de saúde simples para o deploy
-@app.get("/")
-async def health_check():
-    """
-    Endpoint de saúde para verificar o status da API.
-    Usado nos health checks do deploy do Replit.
-    """
-    return {
-        "status": "online",
-        "version": "0.1.0",
-        "name": "HUBB ONE Assist API"
-    }
-
-if __name__ == "__main__":
-    uvicorn.run("asgi:app", host="0.0.0.0", port=5000, reload=True)
+# Exportar a aplicação ASGI para o Uvicorn
+application = app

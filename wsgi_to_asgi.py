@@ -7,12 +7,6 @@ import typing
 from app.main import app as asgi_app
 
 
-# Classe para uso pelo wsgi.py
-class WSGIMiddleware:
-    def __init__(self, app):
-        self.app = app
-
-
 class ASGItoWSGIAdapter:
     """
     Adapta um aplicativo ASGI (FastAPI) para a interface WSGI (Gunicorn)
