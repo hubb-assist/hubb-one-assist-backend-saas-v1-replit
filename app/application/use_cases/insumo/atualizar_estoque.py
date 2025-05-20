@@ -1,5 +1,5 @@
 """
-Caso de uso para atualizar o estoque de um insumo.
+Caso de uso para atualizar o estoque de um insumo (entrada ou saída).
 """
 
 from typing import Optional
@@ -9,12 +9,12 @@ from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
-class AtualizarEstoqueInsumoUseCase:
+class AtualizarEstoqueUseCase:
     """
-    Caso de uso especializado para atualizar o estoque de um insumo.
+    Caso de uso para atualizar o estoque de um insumo (entrada ou saída).
     
-    Permite adicionar ou remover quantidades do estoque de um insumo,
-    respeitando as regras de negócio como validação de estoque disponível.
+    Responsável por registrar movimentações de estoque, como entradas
+    de novos produtos ou saídas para uso em procedimentos.
     """
     
     def __init__(self, repository: InsumoRepositoryInterface):
@@ -27,39 +27,40 @@ class AtualizarEstoqueInsumoUseCase:
         self.repository = repository
     
     def execute(
-        self,
-        insumo_id: UUID,
-        quantidade: int,
-        tipo_movimento: str,
-        observacao: Optional[str] = None
+        self, 
+        insumo_id: UUID, 
+        quantidade: int, 
+        tipo_movimento: str
     ) -> Optional[InsumoEntity]:
         """
         Executa o caso de uso para atualizar o estoque de um insumo.
         
         Args:
-            insumo_id: ID do insumo a ser atualizado
-            quantidade: Quantidade a adicionar ou remover (deve ser positiva)
-            tipo_movimento: Tipo do movimento ('entrada' ou 'saida')
-            observacao: Observação opcional sobre o movimento
+            insumo_id: ID do insumo a atualizar
+            quantidade: Quantidade a ser movimentada (sempre positiva)
+            tipo_movimento: Tipo de movimento ('entrada' ou 'saida')
             
         Returns:
             Optional[InsumoEntity]: Entidade atualizada ou None se não encontrada
             
         Raises:
-            ValueError: Se os parâmetros forem inválidos ou estoque insuficiente
+            ValueError: Se a quantidade for negativa ou tipo de movimento inválido
+            ValueError: Se a retirada resultar em estoque negativo
         """
-        # Validar tipo de movimento
-        if tipo_movimento not in ["entrada", "saida"]:
-            raise ValueError("Tipo de movimento deve ser 'entrada' ou 'saida'")
-            
-        # Validar quantidade
+        # Validações básicas
         if quantidade <= 0:
-            raise ValueError("Quantidade deve ser maior que zero")
+            raise ValueError("A quantidade deve ser maior que zero")
             
-        # Atualizar estoque utilizando o repositório
-        return self.repository.update_estoque(
-            insumo_id=insumo_id,
-            quantidade=quantidade,
-            tipo_movimento=tipo_movimento,
-            observacao=observacao
-        )
+        if tipo_movimento not in ['entrada', 'saida']:
+            raise ValueError("Tipo de movimento deve ser 'entrada' ou 'saida'")
+        
+        # Atualizar estoque via repositório
+        try:
+            return self.repository.update_stock(
+                insumo_id=insumo_id,
+                quantidade=quantidade,
+                tipo_movimento=tipo_movimento
+            )
+        except ValueError as e:
+            # Propagar erro de estoque insuficiente ou outras validações
+            raise ValueError(str(e))
