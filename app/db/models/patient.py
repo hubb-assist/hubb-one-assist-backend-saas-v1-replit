@@ -1,41 +1,31 @@
-
 """
-Modelo ORM para pacientes no sistema.
+Modelo de banco de dados para pacientes.
 """
-from datetime import datetime
-import uuid
-from sqlalchemy import Column, String, Date, DateTime, Boolean, ForeignKey, UUID
-from sqlalchemy.orm import relationship
+from uuid import UUID
+from sqlalchemy import Column, String, Boolean, ForeignKey, DateTime
+from sqlalchemy.dialects.postgresql import UUID as PGUUID
+from sqlalchemy.sql import func
 
-from app.db.base_class import Base
+from app.db.session import Base
+
 
 class Patient(Base):
     """
-    Modelo para pacientes no sistema, vinculados a assinantes.
+    Modelo de banco de dados para pacientes.
     """
     __tablename__ = "patients"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String(150), nullable=False, index=True)
-    cpf = Column(String(14), nullable=False, index=True)
-    rg = Column(String(20), nullable=True)
-    birth_date = Column(Date, nullable=False)
-    phone = Column(String(20), nullable=True)
-
-    # Endereço
-    zip_code = Column(String(10), nullable=True)
-    address = Column(String(150), nullable=True)
-    number = Column(String(20), nullable=True)
-    complement = Column(String(100), nullable=True)
-    district = Column(String(100), nullable=True)
-    city = Column(String(100), nullable=True)
-    state = Column(String(2), nullable=True)
-
-    # Relacionamento com assinante (multitenant)
-    subscriber_id = Column(UUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
-    subscriber = relationship("Subscriber", backref="patients")
     
-    # Campos de auditoria
+    id = Column(PGUUID(as_uuid=True), primary_key=True, index=True)
+    subscriber_id = Column(PGUUID(as_uuid=True), ForeignKey("subscribers.id"), nullable=False)
+    name = Column(String, nullable=False)
+    cpf = Column(String, nullable=True, unique=True, index=True)
+    phone = Column(String, nullable=True)
+    email = Column(String, nullable=True)
+    address = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+    zip_code = Column(String, nullable=True)
+    birth_date = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)

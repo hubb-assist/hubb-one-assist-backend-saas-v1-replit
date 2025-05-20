@@ -3,8 +3,12 @@ Sessão do SQLAlchemy para conexão com o banco de dados.
 """
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
+
+# Definir classe base para os modelos
+class Base(DeclarativeBase):
+    """Classe base para todos os modelos do SQLAlchemy."""
+    pass
 
 # Obter URL do banco de dados da variável de ambiente
 DATABASE_URL = os.environ.get("DATABASE_URL")
@@ -14,9 +18,6 @@ engine = create_engine(DATABASE_URL) if DATABASE_URL else None
 
 # Criar classe de sessão
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Criar classe base para os modelos
-Base = declarative_base()
 
 
 def get_db():

@@ -2,9 +2,14 @@
 Adaptador WSGI para ASGI para o FastAPI
 """
 import asyncio
+import importlib
 import typing
 
-from app.main import app as asgi_app
+# Importação preguiçosa para evitar dependências circulares
+def get_asgi_app():
+    """Importa o app ASGI sob demanda para evitar importações circulares"""
+    module = importlib.import_module('app.main')
+    return module.app
 
 
 class ASGItoWSGIAdapter:
@@ -67,7 +72,8 @@ class ASGItoWSGIAdapter:
         # Executar o aplicativo ASGI
         loop = asyncio.new_event_loop()
         try:
-            loop.run_until_complete(self.asgi_app(scope, receive, send))
+            asgi_app = self.asgi_app if callable(self.asgi_app) else self.asgi_app()
+            loop.run_until_complete(asgi_app(scope, receive, send))
         finally:
             loop.close()
         
@@ -116,4 +122,4 @@ class ASGItoWSGIAdapter:
 
 
 # Criar o aplicativo WSGI adaptado
-application = ASGItoWSGIAdapter(asgi_app)
+application = ASGItoWSGIAdapter(get_asgi_app)
