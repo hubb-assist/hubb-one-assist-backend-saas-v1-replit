@@ -1,7 +1,6 @@
 """
-Caso de uso para obter um insumo por ID.
+Caso de uso para obter um insumo pelo ID.
 """
-from typing import Dict, Any
 from uuid import UUID
 
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
@@ -9,7 +8,7 @@ from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 class GetInsumoUseCase:
     """
-    Caso de uso para obter um insumo por ID.
+    Caso de uso para obter um insumo pelo ID.
     """
     
     def __init__(self, repository: InsumoRepositoryInterface):
@@ -21,22 +20,22 @@ class GetInsumoUseCase:
         """
         self.repository = repository
     
-    def execute(self, insumo_id: UUID, subscriber_id: UUID) -> Dict[str, Any]:
+    def execute(self, insumo_id: UUID, subscriber_id: UUID) -> dict:
         """
-        Executa o caso de uso para obter um insumo por ID.
+        Executa o caso de uso para obter um insumo pelo ID.
         
         Args:
             insumo_id: ID do insumo a ser obtido
             subscriber_id: ID do assinante proprietário
             
         Returns:
-            Dict[str, Any]: Dados do insumo encontrado
+            dict: Dados do insumo encontrado
             
         Raises:
             EntityNotFoundException: Se o insumo não for encontrado
         """
         # Buscar no repositório
-        insumo = self.repository.get_by_id(insumo_id, subscriber_id)
+        entity = self.repository.get_by_id(insumo_id, subscriber_id)
         
-        # Retornar os dados
-        return insumo.to_dict()
+        # Retornar como dicionário
+        return entity.to_dict()

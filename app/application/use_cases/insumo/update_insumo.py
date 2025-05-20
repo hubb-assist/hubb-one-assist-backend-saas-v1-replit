@@ -1,9 +1,10 @@
 """
 Caso de uso para atualizar um insumo existente.
 """
-from typing import Dict, Any, Optional
+from typing import Optional
 from uuid import UUID
 
+from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
@@ -31,8 +32,9 @@ class UpdateInsumoUseCase:
         categoria: Optional[str] = None,
         quantidade: Optional[float] = None,
         observacoes: Optional[str] = None,
-        modulo_id: Optional[UUID] = None
-    ) -> Dict[str, Any]:
+        modulo_id: Optional[UUID] = None,
+        is_active: Optional[bool] = None
+    ) -> dict:
         """
         Executa o caso de uso para atualizar um insumo existente.
         
@@ -45,31 +47,43 @@ class UpdateInsumoUseCase:
             categoria: Nova categoria (opcional)
             quantidade: Nova quantidade (opcional)
             observacoes: Novas observações (opcional)
-            modulo_id: Novo ID de módulo (opcional)
+            modulo_id: Novo ID do módulo relacionado (opcional)
+            is_active: Novo status de ativação (opcional)
             
         Returns:
-            Dict[str, Any]: Dados do insumo atualizado
+            dict: Dados do insumo atualizado
             
         Raises:
             EntityNotFoundException: Se o insumo não for encontrado
             ValueError: Se os dados forem inválidos
         """
-        # Obter o insumo atual
-        insumo = self.repository.get_by_id(insumo_id, subscriber_id)
+        # Validar dados básicos
+        if quantidade is not None and quantidade < 0:
+            raise ValueError("Quantidade deve ser um valor não negativo")
         
-        # Atualizar as informações
-        insumo.update_info(
-            nome=nome,
-            tipo=tipo,
-            unidade=unidade,
-            categoria=categoria,
-            quantidade=quantidade,
-            observacoes=observacoes,
-            modulo_id=modulo_id
-        )
+        # Buscar entidade atual
+        entity = self.repository.get_by_id(insumo_id, subscriber_id)
         
-        # Salvar no repositório
-        updated_insumo = self.repository.update(insumo)
+        # Atualizar campos fornecidos
+        if nome is not None:
+            entity.nome = nome
+        if tipo is not None:
+            entity.tipo = tipo
+        if unidade is not None:
+            entity.unidade = unidade
+        if categoria is not None:
+            entity.categoria = categoria
+        if quantidade is not None:
+            entity.quantidade = quantidade
+        if observacoes is not None:
+            entity.observacoes = observacoes
+        if modulo_id is not None:
+            entity.modulo_id = modulo_id
+        if is_active is not None:
+            entity.is_active = is_active
         
-        # Retornar os dados
-        return updated_insumo.to_dict()
+        # Persistir no repositório
+        result = self.repository.update(entity)
+        
+        # Retornar como dicionário
+        return result.to_dict()

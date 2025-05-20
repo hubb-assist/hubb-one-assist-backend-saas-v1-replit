@@ -1,56 +1,90 @@
 """
-Esquemas Pydantic para Insumos.
+Schemas Pydantic para o módulo de Insumos.
 """
-from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 
 class InsumoBase(BaseModel):
-    """Esquema base para Insumo"""
-    nome: str = Field(..., description="Nome do insumo")
-    tipo: str = Field(..., description="Tipo do insumo (medicamento, material, equipamento)")
-    unidade: str = Field(..., description="Unidade de medida (ampola, caixa, unidade)")
-    categoria: str = Field(..., description="Categoria do insumo")
-    quantidade: float = Field(0, description="Quantidade disponível", ge=0)
-    observacoes: Optional[str] = Field(None, description="Observações adicionais")
-    modulo_id: Optional[UUID] = Field(None, description="ID do módulo ao qual o insumo pertence")
+    """
+    Atributos base para um insumo.
+    """
+    nome: str = Field(..., description="Nome do insumo", min_length=3, max_length=100)
+    tipo: str = Field(..., description="Tipo do insumo (ex: medicamento, equipamento)", min_length=3, max_length=50)
+    unidade: str = Field(..., description="Unidade de medida (ex: kg, litro, unidade)", min_length=1, max_length=30)
+    categoria: str = Field(..., description="Categoria do insumo", min_length=3, max_length=50)
+    quantidade: float = Field(..., description="Quantidade disponível", ge=0)
+    observacoes: Optional[str] = Field(None, description="Observações sobre o insumo", max_length=500)
+    modulo_id: Optional[UUID] = Field(None, description="ID do módulo relacionado")
+    is_active: bool = Field(True, description="Se o insumo está ativo")
 
 
 class InsumoCreate(InsumoBase):
-    """Esquema para criação de Insumo"""
+    """
+    Atributos para criar um novo insumo.
+    """
     pass
 
 
 class InsumoUpdate(BaseModel):
-    """Esquema para atualização de Insumo"""
-    nome: Optional[str] = Field(None, description="Nome do insumo")
-    tipo: Optional[str] = Field(None, description="Tipo do insumo (medicamento, material, equipamento)")
-    unidade: Optional[str] = Field(None, description="Unidade de medida (ampola, caixa, unidade)")
-    categoria: Optional[str] = Field(None, description="Categoria do insumo")
+    """
+    Atributos que podem ser atualizados em um insumo.
+    """
+    nome: Optional[str] = Field(None, description="Nome do insumo", min_length=3, max_length=100)
+    tipo: Optional[str] = Field(None, description="Tipo do insumo (ex: medicamento, equipamento)", min_length=3, max_length=50)
+    unidade: Optional[str] = Field(None, description="Unidade de medida (ex: kg, litro, unidade)", min_length=1, max_length=30)
+    categoria: Optional[str] = Field(None, description="Categoria do insumo", min_length=3, max_length=50)
     quantidade: Optional[float] = Field(None, description="Quantidade disponível", ge=0)
-    observacoes: Optional[str] = Field(None, description="Observações adicionais")
-    modulo_id: Optional[UUID] = Field(None, description="ID do módulo ao qual o insumo pertence")
+    observacoes: Optional[str] = Field(None, description="Observações sobre o insumo", max_length=500)
+    modulo_id: Optional[UUID] = Field(None, description="ID do módulo relacionado")
+    is_active: Optional[bool] = Field(None, description="Se o insumo está ativo")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "nome": "Seringa descartável",
+                "tipo": "Equipamento",
+                "unidade": "unidade",
+                "categoria": "Material descartável",
+                "quantidade": 100.0,
+                "observacoes": "Utilizar conforme protocolo",
+                "is_active": True
+            }
+        }
 
 
-class InsumoResponse(InsumoBase):
-    """Esquema para resposta de Insumo"""
+class InsumoInDB(InsumoBase):
+    """
+    Atributos de um insumo como armazenado no banco de dados.
+    """
     id: UUID
     subscriber_id: UUID
-    is_active: bool
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        from_attributes = True
+        orm_mode = True
+
+
+class InsumoResponse(InsumoInDB):
+    """
+    Resposta para as operações de insumo.
+    """
+    pass
+
+
+class InsumoItem(InsumoInDB):
+    """
+    Insumo em uma listagem.
+    """
+    pass
 
 
 class InsumoList(BaseModel):
-    """Esquema para lista de Insumos"""
+    """
+    Lista paginada de insumos.
+    """
     total: int
-    items: List[InsumoResponse]
-    
-    class Config:
-        from_attributes = True
+    items: List[InsumoItem]
