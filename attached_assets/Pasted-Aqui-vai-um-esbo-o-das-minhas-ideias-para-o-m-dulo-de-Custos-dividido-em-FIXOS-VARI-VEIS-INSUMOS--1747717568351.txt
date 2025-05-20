@@ -1,0 +1,153 @@
+Aqui vai um esboço das minhas ideias para o módulo de Custos, dividido em FIXOS, VARIÁVEIS, INSUMOS/MATERIAIS:
+
+Modelo de Domínio
+
+Entidade CostItem com campos comuns:
+
+id: UUID
+
+subscriber_id: UUID
+
+category: 'FIXO' | 'VARIAVEL' | 'INSUMO'
+
+name: string
+
+amount: number
+
+date: string (YYYY-MM-DD)
+
+notes?: string
+
+Objetos de valor
+
+Money (valor + moeda)
+
+DatePeriod (entre datas, para relatórios)
+
+Camada de Domain
+
+domain/cost/types.ts → interfaces acima
+
+domain/cost/validation.ts → Zod schema para criar/editar um custo
+
+domain/cost/repositories/ICostRepository.ts → interface de persistência
+
+Use Cases (Application Layer)
+
+domain/cost/useCases.ts
+
+createCost(item: CostItem)
+
+updateCost(id, data: Partial<CostItem>)
+
+deleteCost(id) (lógica de “desativação”)
+
+getCostById(id)
+
+listCosts(filter: { category?, dateFrom?, dateTo? })
+
+getCostSummary(period: DatePeriod) → total por categoria
+
+Serviços / Infraestrutura
+
+services/costService.ts (ou em lib/api-costs.ts)
+
+Funções Axios/Fetch para os endpoints CRUD
+
+Parâmetros de paginação, filtros e credenciais
+
+API Endpoints (Backend)
+
+GET /costs?category=&skip=&limit=&dateFrom=&dateTo=
+
+GET /costs/:id
+
+POST /costs
+
+PUT /costs/:id
+
+DELETE /costs/:id
+
+Front-end – Estrutura de Páginas
+
+Rota /costs → listagem + filtros (categoria, período)
+
+Rota /costs/new → formulário de criação
+
+Rota /costs/:id/edit → formulário de edição (reutiliza CostForm)
+
+Componentes de UI
+
+CostList: tabela com colunas (Nome, Categoria, Valor, Data, Ações)
+
+CostForm: formulários unificados para criar/editar (inputs, máscara de valor, date-picker)
+
+CostFilters: dropdown de categoria + seletor de datas
+
+CostSummaryCard: cartões com valor total fixos, variáveis e insumos no período
+
+Charts:
+
+Gráfico de barras ou linha (custo mensal vs categoria)
+
+Pizza (percentual gasto por categoria)
+
+Hooks Customizados
+
+useCosts(params) → listagem + loading + paginação
+
+useCost(id) → obtenção/edição/deleção de um item
+
+useCostSummary(period) → resumo agregado
+
+Integração com ShadCN UI
+
+Table, Card, Dialog para criação/edição (ModalDialog)
+
+AlertDialog para confirmar exclusão
+
+Button, Input, Select para filtros e formulários
+
+Relatórios e Exportação
+
+Botão “Exportar CSV/PDF” da lista de custos
+
+Relatório de comparação ano-a-ano ou mês-a-mês
+
+Permissões e Roles
+
+Apenas SUPER_ADMIN e DONO_ASSINANTE podem gerenciar custos
+
+Verificação de permissão via hook useAuth
+
+Organização de Pastas
+
+bash
+Copiar
+Editar
+client/
+├── src/
+│   ├── domain/cost/
+│   │   ├── types.ts
+│   │   ├── validation.ts
+│   │   └── useCases.ts
+│   ├── services/costService.ts
+│   ├── components/cost/
+│   │   ├── CostList.tsx
+│   │   ├── CostForm.tsx
+│   │   ├── CostFilters.tsx
+│   │   └── CostSummaryCard.tsx
+│   ├── hooks/useCosts.ts
+│   └── pages/costs/
+│       ├── index.tsx
+│       ├── new.tsx
+│       └── [id]/edit.tsx
+—
+Isso garante um fluxo DDD limpo, fácil manutenção e escalabilidade do módulo de custos. Quando der o ok, implementamos cada camada passo a passo!
+
+
+
+
+
+
+
