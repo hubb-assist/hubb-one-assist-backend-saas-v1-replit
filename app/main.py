@@ -11,6 +11,20 @@ from app.db.session import get_db
 from app.api.routes.insumos import router as insumos_router
 from app.core.security import get_password_hash
 
+# Importar todos os routers originais
+from app.api.routes_auth import router as auth_router
+from app.api.routes_users import router as users_router
+from app.api.routes_segments import router as segments_router
+from app.api.routes_modules import router as modules_router
+from app.api.routes_plans import router as plans_router
+from app.api.routes_subscribers import router as subscribers_router
+from app.api.routes_patients import router as patients_router
+from app.api.routes_patients_ddd import router as patients_ddd_router
+from app.api.routes_api_compatibility import router as api_compatibility_router
+from app.api.routes_public_segments import router as public_segments_router
+from app.api.routes_public_plans import router as public_plans_router
+from app.api.routes_public_subscribers import router as public_subscribers_router
+
 # Criar aplicação FastAPI
 app = FastAPI(
     title="HUBB ONE Assist API",
@@ -33,7 +47,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir rotas
+# Incluir rotas originais
+app.include_router(auth_router, prefix="/auth", tags=["autenticação"])
+app.include_router(users_router, prefix="/users", tags=["users"])
+app.include_router(segments_router, prefix="/segments", tags=["segments"])
+app.include_router(modules_router, prefix="/modules", tags=["modules"])
+app.include_router(plans_router, prefix="/plans", tags=["plans"])
+app.include_router(subscribers_router, prefix="/subscribers", tags=["subscribers"])
+app.include_router(patients_router, prefix="/patients", tags=["patients"])
+app.include_router(patients_ddd_router, prefix="/patients-ddd", tags=["patients-ddd"])
+app.include_router(api_compatibility_router, tags=["external-api-compatibility"])
+
+# Incluir rotas públicas
+app.include_router(
+    public_segments_router, prefix="/public/segments", tags=["public"]
+)
+app.include_router(
+    public_plans_router, prefix="/public/plans", tags=["public"]
+)
+app.include_router(
+    public_subscribers_router, prefix="/public/subscribers", tags=["public"]
+)
+
+# Incluir novas rotas DDD
 app.include_router(insumos_router, prefix="/insumos", tags=["insumos"])
 
 @app.get("/", response_class=HTMLResponse)
