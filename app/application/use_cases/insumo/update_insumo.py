@@ -2,7 +2,7 @@
 Caso de uso para atualizar um insumo existente.
 """
 
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional, List
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
@@ -41,25 +41,45 @@ class UpdateInsumoUseCase:
         Raises:
             ValueError: Se os dados fornecidos forem inválidos
         """
-        # Primeiro, buscar o insumo existente
-        insumo_existente = self.repository.get_by_id(insumo_id)
-        if not insumo_existente:
-            return None
-            
-        # Processar associações de módulos, se fornecidas
+        # Validações básicas para campos numéricos
+        if "valor_unitario" in data and data["valor_unitario"] is not None:
+            if data["valor_unitario"] < 0:
+                raise ValueError("Valor unitário não pode ser negativo")
+                
+        if "estoque_minimo" in data and data["estoque_minimo"] is not None:
+            if data["estoque_minimo"] < 0:
+                raise ValueError("Estoque mínimo não pode ser negativo")
+                
+        if "estoque_atual" in data and data["estoque_atual"] is not None:
+            if data["estoque_atual"] < 0:
+                raise ValueError("Estoque atual não pode ser negativo")
+        
+        # Processar associações de módulos, se presentes
         if "modules_used" in data and data["modules_used"]:
-            modulos = []
-            for module_data in data["modules_used"]:
-                module = ModuloAssociation(
-                    module_id=module_data["module_id"],
-                    quantidade_padrao=module_data.get("quantidade_padrao", 1),
-                    observacao=module_data.get("observacao"),
-                    module_nome=module_data.get("module_nome")
-                )
-                modulos.append(module)
-            data["modules_used"] = modulos
+            modules_list = data["modules_used"]
+            module_associations = []
+            
+            for module_data in modules_list:
+                module_id = module_data.get("module_id")
+                if not module_id:
+                    continue
+                    
+                try:
+                    if isinstance(module_id, str):
+                        module_id = UUID(module_id)
+                        
+                    module_associations.append(ModuloAssociation(
+                        module_id=module_id,
+                        quantidade_padrao=module_data.get("quantidade_padrao", 1),
+                        observacao=module_data.get("observacao"),
+                        module_nome=module_data.get("module_nome")
+                    ))
+                except (ValueError, TypeError):
+                    # Ignorar associação inválida
+                    continue
+                    
+            # Atualizar no dicionário
+            data["modules_used"] = module_associations
         
-        # Atualizar o insumo utilizando o repositório
-        updated_insumo = self.repository.update(insumo_id, data)
-        
-        return updated_insumo
+        # Enviar para o repositório
+        return self.repository.update(insumo_id, data)
