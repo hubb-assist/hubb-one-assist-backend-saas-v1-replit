@@ -1,7 +1,7 @@
 from typing import Dict, List, Any, Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Path
+from fastapi import APIRouter, Depends, HTTPException, Query, Path, Body
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db, get_current_user
@@ -36,9 +36,9 @@ def get_anamnesis_repository(db: Session = Depends(get_db)):
 @router.post("/", response_model=AnamnesisResponse, status_code=201)
 async def create_anamnesis(
     patient_id: UUID = Path(..., description="ID do paciente"),
-    data: AnamnesisCreate = None,
     current_user: User = Depends(get_current_user),
     repo: AnamnesisSQLAlchemyRepository = Depends(get_anamnesis_repository),
+    data: AnamnesisCreate = Body(...),
 ):
     """
     Cria uma nova ficha de anamnese para um paciente.
@@ -140,9 +140,9 @@ async def list_anamnesis(
 async def update_anamnesis(
     patient_id: UUID = Path(..., description="ID do paciente"),
     anamnesis_id: UUID = Path(..., description="ID da anamnese"),
-    data: AnamnesisUpdate = None,
     current_user: User = Depends(get_current_user),
     repo: AnamnesisSQLAlchemyRepository = Depends(get_anamnesis_repository),
+    data: AnamnesisUpdate = Body(...),
 ):
     """
     Atualiza uma ficha de anamnese existente.
