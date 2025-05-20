@@ -79,3 +79,34 @@ def create_access_token(
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     
     return encoded_jwt
+
+def create_refresh_token(
+    data: Dict[str, Any],
+    expires_delta: Optional[timedelta] = None
+) -> str:
+    """
+    Cria um token JWT de refresh.
+    
+    Args:
+        data: Dados a serem codificados no token
+        expires_delta: Tempo de expiração do token
+        
+    Returns:
+        str: Token JWT de refresh codificado
+    """
+    to_encode = data.copy()
+    
+    # Definir expiração (tokens de refresh tipicamente duram mais)
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        # Refresh token with longer lifetime (7 days)
+        expire = datetime.utcnow() + timedelta(days=7)
+    
+    # Adicionar expiração e tipo aos dados
+    to_encode.update({"exp": expire, "token_type": "refresh"})
+    
+    # Criar token JWT
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    
+    return encoded_jwt
