@@ -28,10 +28,9 @@ class InsumoAdapter:
             InsumoEntity: Entidade de domínio de insumo
         """
         # Extrai os IDs dos módulos relacionados
-        modules_used = [module.id for module in insumo_orm.modules] if insumo_orm.modules else []
+        modules_used = [module.id for module in insumo_orm.modules] if hasattr(insumo_orm, 'modules') and insumo_orm.modules else []
         
         return InsumoEntity(
-            id=insumo_orm.id,
             nome=insumo_orm.nome,
             descricao=insumo_orm.descricao,
             categoria=insumo_orm.categoria,
@@ -40,6 +39,7 @@ class InsumoAdapter:
             estoque_minimo=insumo_orm.estoque_minimo,
             estoque_atual=insumo_orm.estoque_atual,
             subscriber_id=insumo_orm.subscriber_id,
+            id=insumo_orm.id,
             fornecedor=insumo_orm.fornecedor,
             codigo_referencia=insumo_orm.codigo_referencia,
             data_validade=insumo_orm.data_validade,
@@ -82,6 +82,7 @@ class InsumoAdapter:
             is_active=insumo_entity.is_active,
             created_at=insumo_entity.created_at,
             updated_at=insumo_entity.updated_at
+            # Os relacionamentos modules serão tratados separadamente no repositório
         )
     
     @staticmethod
