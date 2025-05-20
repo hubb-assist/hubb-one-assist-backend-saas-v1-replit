@@ -19,8 +19,9 @@ class ModuloAssociationBase(BaseModel):
     observacao: Optional[str] = None
     module_nome: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class ModuloAssociationCreate(ModuloAssociationBase):
@@ -132,10 +133,11 @@ class InsumoResponse(InsumoBase):
         False, 
         description="Indica se o insumo está expirado"
     )
-    modules_used: List[ModuloAssociationResponse] = []
+    modules_used: List[ModuloAssociationResponse] = Field(default_factory=list)
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class InsumoEstoqueMovimento(BaseModel):
@@ -145,13 +147,14 @@ class InsumoEstoqueMovimento(BaseModel):
     quantidade: int = Field(..., gt=0, description="Quantidade a ser adicionada ou removida")
     tipo_movimento: str = Field(..., pattern=r'^(entrada|saida)$', description="Tipo de movimento: 'entrada' ou 'saida'")
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "quantidade": 10,
                 "tipo_movimento": "entrada"
             }
         }
+    }
 
 
 class InsumoFilter(BaseModel):
