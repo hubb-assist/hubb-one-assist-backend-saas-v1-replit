@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Path, status
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.auth.auth_handler import get_current_user
+from app.core.dependencies import get_current_user
 from app.db.models import User
 from app.domain.appointment.entities import AppointmentEntity
 from app.infrastructure.repositories.appointment_sqlalchemy import AppointmentRepository
