@@ -1,58 +1,76 @@
 """
-Caso de uso para listar insumos com paginação e filtros.
+Caso de uso para listar insumos com filtros e paginação.
 """
+from typing import Dict, Any, Optional, List
 from uuid import UUID
-from typing import List, Dict, Any, Optional, Tuple
 
-from app.domain.insumo.interfaces import InsumoRepository
-from app.domain.insumo.entities import InsumoEntity
+from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
 class ListInsumosUseCase:
     """
-    Caso de uso para listar insumos com paginação e filtros.
+    Caso de uso para listar insumos com filtros e paginação.
     """
     
-    def __init__(self, insumo_repository: InsumoRepository):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com uma implementação de repositório.
+        Inicializa o caso de uso.
         
         Args:
-            insumo_repository: Uma implementação de InsumoRepository
+            repository: Repositório de insumos
         """
-        self.repository = insumo_repository
+        self.repository = repository
     
     def execute(
         self,
         subscriber_id: UUID,
         skip: int = 0,
         limit: int = 100,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> Tuple[List[InsumoEntity], int]:
+        nome: Optional[str] = None,
+        tipo: Optional[str] = None,
+        categoria: Optional[str] = None,
+        modulo_id: Optional[UUID] = None,
+        is_active: Optional[bool] = True
+    ) -> Dict[str, Any]:
         """
-        Executa o caso de uso para listar insumos.
+        Executa o caso de uso para listar insumos com filtros e paginação.
         
         Args:
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            skip: Quantidade de registros para pular
-            limit: Limite de registros a retornar
-            filters: Filtros adicionais como categoria ou módulos
+            subscriber_id: ID do assinante proprietário
+            skip: Número de registros a pular (para paginação)
+            limit: Número máximo de registros a retornar
+            nome: Filtro pelo nome (opcional)
+            tipo: Filtro pelo tipo (opcional)
+            categoria: Filtro pela categoria (opcional)
+            modulo_id: Filtro pelo ID do módulo (opcional)
+            is_active: Filtro pelo status de ativação (opcional)
             
         Returns:
-            Tuple[List[InsumoEntity], int]: Lista de entidades de insumo e contagem total
+            Dict[str, Any]: Dados dos insumos encontrados com paginação
         """
-        # Buscar os insumos do repositório
-        insumos = self.repository.list_all(
+        # Preparar filtros
+        filters = {}
+        if nome:
+            filters["nome"] = nome
+        if tipo:
+            filters["tipo"] = tipo
+        if categoria:
+            filters["categoria"] = categoria
+        if modulo_id:
+            filters["modulo_id"] = modulo_id
+        if is_active is not None:
+            filters["is_active"] = is_active
+        
+        # Buscar no repositório
+        insumos = self.repository.list(
             subscriber_id=subscriber_id,
             skip=skip,
             limit=limit,
             filters=filters
         )
         
-        # Contar o total de insumos (para paginação)
-        total_count = self.repository.count(
-            subscriber_id=subscriber_id,
-            filters=filters
-        )
-        
-        return insumos, total_count
+        # Preparar resposta
+        return {
+            "total": len(insumos),
+            "items": [insumo.to_dict() for insumo in insumos]
+        }

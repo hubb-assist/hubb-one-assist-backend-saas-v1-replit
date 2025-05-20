@@ -1,12 +1,10 @@
 """
-Caso de uso para atualização de insumos.
+Caso de uso para atualizar um insumo existente.
 """
+from typing import Dict, Any, Optional
 from uuid import UUID
-from fastapi import HTTPException, status
 
-from app.domain.insumo.interfaces import InsumoRepository
-from app.domain.insumo.entities import InsumoEntity
-from app.schemas.insumo import InsumoUpdate
+from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
 class UpdateInsumoUseCase:
@@ -14,38 +12,64 @@ class UpdateInsumoUseCase:
     Caso de uso para atualizar um insumo existente.
     """
     
-    def __init__(self, insumo_repository: InsumoRepository):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com uma implementação de repositório.
+        Inicializa o caso de uso.
         
         Args:
-            insumo_repository: Uma implementação de InsumoRepository
+            repository: Repositório de insumos
         """
-        self.repository = insumo_repository
+        self.repository = repository
     
-    def execute(self, insumo_id: UUID, insumo_data: InsumoUpdate, subscriber_id: UUID) -> InsumoEntity:
+    def execute(
+        self,
+        insumo_id: UUID,
+        subscriber_id: UUID,
+        nome: Optional[str] = None,
+        tipo: Optional[str] = None,
+        unidade: Optional[str] = None,
+        categoria: Optional[str] = None,
+        quantidade: Optional[float] = None,
+        observacoes: Optional[str] = None,
+        modulo_id: Optional[UUID] = None
+    ) -> Dict[str, Any]:
         """
-        Executa o caso de uso para atualizar um insumo.
+        Executa o caso de uso para atualizar um insumo existente.
         
         Args:
             insumo_id: ID do insumo a ser atualizado
-            insumo_data: Dados a serem atualizados
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            subscriber_id: ID do assinante proprietário
+            nome: Novo nome (opcional)
+            tipo: Novo tipo (opcional)
+            unidade: Nova unidade de medida (opcional)
+            categoria: Nova categoria (opcional)
+            quantidade: Nova quantidade (opcional)
+            observacoes: Novas observações (opcional)
+            modulo_id: Novo ID de módulo (opcional)
             
         Returns:
-            InsumoEntity: Entidade de insumo atualizada
+            Dict[str, Any]: Dados do insumo atualizado
             
         Raises:
-            HTTPException: Se o insumo não for encontrado ou houver erro na atualização
+            EntityNotFoundException: Se o insumo não for encontrado
+            ValueError: Se os dados forem inválidos
         """
-        # Tentar atualizar o insumo
-        updated_insumo = self.repository.update(insumo_id, insumo_data, subscriber_id)
+        # Obter o insumo atual
+        insumo = self.repository.get_by_id(insumo_id, subscriber_id)
         
-        # Verificar se o insumo foi encontrado e atualizado
-        if not updated_insumo:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Insumo com ID {insumo_id} não encontrado"
-            )
-            
-        return updated_insumo
+        # Atualizar as informações
+        insumo.update_info(
+            nome=nome,
+            tipo=tipo,
+            unidade=unidade,
+            categoria=categoria,
+            quantidade=quantidade,
+            observacoes=observacoes,
+            modulo_id=modulo_id
+        )
+        
+        # Salvar no repositório
+        updated_insumo = self.repository.update(insumo)
+        
+        # Retornar os dados
+        return updated_insumo.to_dict()

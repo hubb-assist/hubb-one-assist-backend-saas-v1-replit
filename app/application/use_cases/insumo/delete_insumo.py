@@ -1,48 +1,35 @@
 """
-Caso de uso para exclusão lógica de insumos.
+Caso de uso para excluir um insumo (exclusão lógica).
 """
 from uuid import UUID
-from fastapi import HTTPException, status
 
-from app.domain.insumo.interfaces import InsumoRepository
+from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
 class DeleteInsumoUseCase:
     """
-    Caso de uso para desativar um insumo logicamente.
+    Caso de uso para excluir um insumo (exclusão lógica).
     """
     
-    def __init__(self, insumo_repository: InsumoRepository):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com uma implementação de repositório.
+        Inicializa o caso de uso.
         
         Args:
-            insumo_repository: Uma implementação de InsumoRepository
+            repository: Repositório de insumos
         """
-        self.repository = insumo_repository
+        self.repository = repository
     
-    def execute(self, insumo_id: UUID, subscriber_id: UUID) -> bool:
+    def execute(self, insumo_id: UUID, subscriber_id: UUID) -> None:
         """
-        Executa o caso de uso para desativar um insumo.
+        Executa o caso de uso para excluir um insumo (exclusão lógica).
         
         Args:
-            insumo_id: ID do insumo a ser desativado
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            
-        Returns:
-            bool: True se desativado com sucesso
+            insumo_id: ID do insumo a ser excluído
+            subscriber_id: ID do assinante proprietário
             
         Raises:
-            HTTPException: Se o insumo não for encontrado
+            EntityNotFoundException: Se o insumo não for encontrado
         """
-        # Tentar desativar o insumo
-        success = self.repository.delete(insumo_id, subscriber_id)
-        
-        # Verificar se o insumo foi encontrado e desativado
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Insumo com ID {insumo_id} não encontrado"
-            )
-            
-        return True
+        # Excluir logicamente no repositório
+        self.repository.delete(insumo_id, subscriber_id)

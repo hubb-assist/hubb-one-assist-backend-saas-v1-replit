@@ -1,238 +1,201 @@
 """
-Implementação SQLAlchemy do repositório de Insumos.
+Implementação do repositório de Insumos.
 """
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import or_, and_
 
-from app.domain.insumo.interfaces import InsumoRepository
+from app.domain.insumo.interfaces import InsumoRepositoryInterface
 from app.domain.insumo.entities import InsumoEntity
-from app.schemas.insumo import InsumoCreate, InsumoUpdate
 from app.infrastructure.adapters.insumo_adapter import InsumoAdapter
-from app.db.models.insumo import Insumo, insumo_modulo
+from app.db.models.insumo import Insumo
+from app.core.exceptions import EntityNotFoundException
 
 
-class InsumoSQLAlchemyRepository(InsumoRepository):
+class InsumoRepositoryImpl(InsumoRepositoryInterface):
     """
-    Implementação do repositório de Insumos utilizando SQLAlchemy.
+    Implementação do repositório de Insumos.
     """
     
     def __init__(self, db: Session):
         """
-        Inicializa o repositório com uma sessão de banco de dados.
+        Inicializa o repositório.
         
         Args:
-            db: Sessão de banco de dados SQLAlchemy
+            db: Sessão do banco de dados
         """
         self.db = db
+        self.adapter = InsumoAdapter()
     
-    def create(self, insumo_data: InsumoCreate, subscriber_id: UUID) -> InsumoEntity:
+    def create(self, entity: InsumoEntity) -> InsumoEntity:
         """
-        Cria um novo insumo.
+        Cria um novo insumo no repositório.
         
         Args:
-            insumo_data: Dados do insumo a ser criado
-            subscriber_id: ID do assinante para associação (multitenancy)
+            entity: Entidade de Insumo a ser criada
             
         Returns:
-            InsumoEntity: Entidade de insumo criada
+            InsumoEntity: Entidade criada com ID
         """
-        # Criar entidade de domínio
-        entity = InsumoEntity(
-            subscriber_id=subscriber_id,
-            nome=insumo_data.nome,
-            tipo=insumo_data.tipo,
-            unidade=insumo_data.unidade,
-            valor=insumo_data.valor,
-            observacoes=insumo_data.observacoes,
-            categoria=insumo_data.categoria,
-            modulos=insumo_data.modulos
-        )
+        # Converter entidade para modelo ORM
+        orm_model = self.adapter.to_orm_model(entity)
         
-        # Converter para modelo ORM e persistir
-        orm_model = InsumoAdapter.to_orm_model(entity, self.db)
+        # Persistir no banco de dados
         self.db.add(orm_model)
         self.db.commit()
         self.db.refresh(orm_model)
         
-        # Retornar entidade atualizada
-        return InsumoAdapter.to_entity(orm_model)
+        # Converter de volta para entidade
+        return self.adapter.to_entity(orm_model)
     
-    def get_by_id(self, insumo_id: UUID, subscriber_id: UUID) -> Optional[InsumoEntity]:
+    def get_by_id(self, insumo_id: UUID, subscriber_id: UUID) -> InsumoEntity:
         """
-        Busca um insumo pelo seu ID.
+        Obtém um insumo pelo ID.
         
         Args:
-            insumo_id: ID do insumo a ser buscado
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            insumo_id: ID do insumo a ser obtido
+            subscriber_id: ID do assinante proprietário
             
         Returns:
-            Optional[InsumoEntity]: Entidade de insumo se encontrada, None caso contrário
+            InsumoEntity: Entidade de Insumo encontrada
+            
+        Raises:
+            EntityNotFoundException: Se o insumo não for encontrado
         """
+        # Buscar no banco de dados
         orm_model = self.db.query(Insumo).filter(
             Insumo.id == insumo_id,
             Insumo.subscriber_id == subscriber_id,
             Insumo.is_active == True
         ).first()
         
-        return InsumoAdapter.to_entity(orm_model)
+        # Verificar se encontrou
+        if not orm_model:
+            raise EntityNotFoundException(f"Insumo com ID {insumo_id} não encontrado")
+        
+        # Converter para entidade
+        entity = self.adapter.to_entity(orm_model)
+        
+        return entity
     
-    def update(self, insumo_id: UUID, insumo_data: InsumoUpdate, subscriber_id: UUID) -> Optional[InsumoEntity]:
+    def update(self, entity: InsumoEntity) -> InsumoEntity:
         """
         Atualiza um insumo existente.
         
         Args:
-            insumo_id: ID do insumo a ser atualizado
-            insumo_data: Dados a serem atualizados
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            entity: Entidade de Insumo com os dados atualizados
             
         Returns:
-            Optional[InsumoEntity]: Entidade de insumo atualizada, None se não encontrada
+            InsumoEntity: Entidade atualizada
+            
+        Raises:
+            EntityNotFoundException: Se o insumo não for encontrado
         """
-        # Buscar o insumo atual
+        # Buscar no banco de dados
         orm_model = self.db.query(Insumo).filter(
-            Insumo.id == insumo_id,
-            Insumo.subscriber_id == subscriber_id,
+            Insumo.id == entity.id,
+            Insumo.subscriber_id == entity.subscriber_id,
             Insumo.is_active == True
         ).first()
         
+        # Verificar se encontrou
         if not orm_model:
-            return None
+            raise EntityNotFoundException(f"Insumo com ID {entity.id} não encontrado")
         
-        # Converter para entidade e atualizar com novos dados
-        entity = InsumoAdapter.to_entity(orm_model)
+        # Atualizar campos
+        orm_model = self.adapter.update_orm_model(orm_model, entity)
         
-        # Atualizar apenas os campos fornecidos
-        entity.update_info(
-            nome=insumo_data.nome,
-            tipo=insumo_data.tipo,
-            unidade=insumo_data.unidade,
-            valor=insumo_data.valor,
-            observacoes=insumo_data.observacoes,
-            categoria=insumo_data.categoria,
-            modulos=insumo_data.modulos
-        )
-        
-        # Atualizar o modelo ORM
-        orm_model = InsumoAdapter.to_orm_model(entity, self.db, orm_model)
+        # Persistir no banco de dados
         self.db.commit()
         self.db.refresh(orm_model)
         
-        return InsumoAdapter.to_entity(orm_model)
+        # Converter para entidade
+        return self.adapter.to_entity(orm_model)
     
-    def delete(self, insumo_id: UUID, subscriber_id: UUID) -> bool:
+    def delete(self, insumo_id: UUID, subscriber_id: UUID) -> None:
         """
-        Desativa um insumo logicamente.
+        Exclui logicamente um insumo (soft delete).
         
         Args:
-            insumo_id: ID do insumo a ser desativado
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            insumo_id: ID do insumo a ser excluído
+            subscriber_id: ID do assinante proprietário
             
-        Returns:
-            bool: True se desativado com sucesso, False caso contrário
+        Raises:
+            EntityNotFoundException: Se o insumo não for encontrado
         """
+        # Buscar no banco de dados
         orm_model = self.db.query(Insumo).filter(
             Insumo.id == insumo_id,
             Insumo.subscriber_id == subscriber_id,
             Insumo.is_active == True
         ).first()
         
+        # Verificar se encontrou
         if not orm_model:
-            return False
+            raise EntityNotFoundException(f"Insumo com ID {insumo_id} não encontrado")
         
-        # Converter para entidade e desativar
-        entity = InsumoAdapter.to_entity(orm_model)
-        entity.deactivate()
+        # Desativar (exclusão lógica)
+        orm_model.is_active = False
         
-        # Atualizar o modelo ORM
-        orm_model = InsumoAdapter.to_orm_model(entity, self.db, orm_model)
+        # Persistir no banco de dados
         self.db.commit()
-        
-        return True
     
-    def list_all(
-        self,
-        subscriber_id: UUID,
-        skip: int = 0,
-        limit: int = 100,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> List[InsumoEntity]:
+    def list(self, 
+            subscriber_id: UUID,
+            skip: int = 0,
+            limit: int = 100,
+            filters: Optional[Dict[str, Any]] = None,
+            ) -> List[InsumoEntity]:
         """
-        Lista todos os insumos com paginação e filtros opcionais.
+        Lista insumos com paginação e filtros opcionais.
         
         Args:
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            skip: Quantidade de registros para pular
-            limit: Limite de registros a retornar
-            filters: Filtros adicionais como categoria ou módulos
+            subscriber_id: ID do assinante proprietário
+            skip: Número de registros a pular (para paginação)
+            limit: Número máximo de registros a retornar
+            filters: Filtros opcionais a serem aplicados
             
         Returns:
-            List[InsumoEntity]: Lista de entidades de insumo
+            List[InsumoEntity]: Lista de entidades de Insumo
         """
-        filters = filters or {}
+        # Iniciar consulta
         query = self.db.query(Insumo).filter(
-            Insumo.subscriber_id == subscriber_id,
-            Insumo.is_active == True
+            Insumo.subscriber_id == subscriber_id
         )
         
-        # Aplicar filtros
-        if 'categoria' in filters and filters['categoria']:
-            query = query.filter(Insumo.categoria == filters['categoria'])
-        
-        if 'modulos' in filters and filters['modulos']:
-            modulos = filters['modulos']
-            if isinstance(modulos, list) and modulos:
-                # Filtrar por insumos que pertencem a qualquer um dos módulos especificados
-                query = query.join(insumo_modulo).filter(
-                    insumo_modulo.c.modulo.in_(modulos)
-                )
-        
-        if 'nome' in filters and filters['nome']:
-            query = query.filter(Insumo.nome.ilike(f"%{filters['nome']}%"))
-        
-        if 'tipo' in filters and filters['tipo']:
-            query = query.filter(Insumo.tipo == filters['tipo'])
+        # Aplicar filtros se fornecidos
+        if filters:
+            # Filtro por nome (parcial)
+            if "nome" in filters:
+                query = query.filter(Insumo.nome.ilike(f"%{filters['nome']}%"))
+            
+            # Filtro por tipo
+            if "tipo" in filters:
+                query = query.filter(Insumo.tipo == filters["tipo"])
+            
+            # Filtro por categoria
+            if "categoria" in filters:
+                query = query.filter(Insumo.categoria == filters["categoria"])
+            
+            # Filtro por módulo
+            if "modulo_id" in filters:
+                query = query.filter(Insumo.modulo_id == filters["modulo_id"])
+            
+            # Filtro por status de ativação
+            if "is_active" in filters:
+                query = query.filter(Insumo.is_active == filters["is_active"])
+        else:
+            # Por padrão, mostrar apenas os ativos
+            query = query.filter(Insumo.is_active == True)
         
         # Aplicar paginação
-        query = query.order_by(Insumo.nome).offset(skip).limit(limit)
+        query = query.offset(skip).limit(limit)
         
-        # Converter para entidades e retornar
+        # Executar a consulta
         orm_models = query.all()
-        return [InsumoAdapter.to_entity(m) for m in orm_models]
-    
-    def count(self, subscriber_id: UUID, filters: Optional[Dict[str, Any]] = None) -> int:
-        """
-        Conta o número total de insumos com base nos filtros.
         
-        Args:
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            filters: Filtros adicionais como categoria ou módulos
-            
-        Returns:
-            int: Número total de insumos
-        """
-        filters = filters or {}
-        query = self.db.query(Insumo).filter(
-            Insumo.subscriber_id == subscriber_id,
-            Insumo.is_active == True
-        )
+        # Converter para entidades
+        entities = [self.adapter.to_entity(orm_model) for orm_model in orm_models]
         
-        # Aplicar filtros
-        if 'categoria' in filters and filters['categoria']:
-            query = query.filter(Insumo.categoria == filters['categoria'])
-        
-        if 'modulos' in filters and filters['modulos']:
-            modulos = filters['modulos']
-            if isinstance(modulos, list) and modulos:
-                query = query.join(insumo_modulo).filter(
-                    insumo_modulo.c.modulo.in_(modulos)
-                )
-        
-        if 'nome' in filters and filters['nome']:
-            query = query.filter(Insumo.nome.ilike(f"%{filters['nome']}%"))
-        
-        if 'tipo' in filters and filters['tipo']:
-            query = query.filter(Insumo.tipo == filters['tipo'])
-        
-        return query.count()
+        return entities

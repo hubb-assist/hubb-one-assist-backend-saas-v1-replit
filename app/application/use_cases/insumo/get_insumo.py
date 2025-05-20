@@ -1,47 +1,42 @@
 """
-Caso de uso para obter insumos por ID.
+Caso de uso para obter um insumo por ID.
 """
+from typing import Dict, Any
 from uuid import UUID
-from fastapi import HTTPException, status
 
-from app.domain.insumo.interfaces import InsumoRepository
-from app.domain.insumo.entities import InsumoEntity
+from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
 class GetInsumoUseCase:
     """
-    Caso de uso para obter um insumo pelo ID.
+    Caso de uso para obter um insumo por ID.
     """
     
-    def __init__(self, insumo_repository: InsumoRepository):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com uma implementação de repositório.
+        Inicializa o caso de uso.
         
         Args:
-            insumo_repository: Uma implementação de InsumoRepository
+            repository: Repositório de insumos
         """
-        self.repository = insumo_repository
+        self.repository = repository
     
-    def execute(self, insumo_id: UUID, subscriber_id: UUID) -> InsumoEntity:
+    def execute(self, insumo_id: UUID, subscriber_id: UUID) -> Dict[str, Any]:
         """
-        Executa o caso de uso para obter um insumo pelo ID.
+        Executa o caso de uso para obter um insumo por ID.
         
         Args:
-            insumo_id: ID do insumo a ser buscado
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            insumo_id: ID do insumo a ser obtido
+            subscriber_id: ID do assinante proprietário
             
         Returns:
-            InsumoEntity: Entidade de insumo encontrada
+            Dict[str, Any]: Dados do insumo encontrado
             
         Raises:
-            HTTPException: Se o insumo não for encontrado
+            EntityNotFoundException: Se o insumo não for encontrado
         """
+        # Buscar no repositório
         insumo = self.repository.get_by_id(insumo_id, subscriber_id)
         
-        if not insumo:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Insumo com ID {insumo_id} não encontrado"
-            )
-            
-        return insumo
+        # Retornar os dados
+        return insumo.to_dict()

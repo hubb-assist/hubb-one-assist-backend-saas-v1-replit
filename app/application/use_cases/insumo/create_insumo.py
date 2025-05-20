@@ -1,47 +1,71 @@
 """
-Caso de uso para criação de insumos.
+Caso de uso para criar um novo insumo.
 """
+from typing import Dict, Any
 from uuid import UUID
-from fastapi import HTTPException, status
 
-from app.domain.insumo.interfaces import InsumoRepository
 from app.domain.insumo.entities import InsumoEntity
-from app.schemas.insumo import InsumoCreate
+from app.domain.insumo.interfaces import InsumoRepositoryInterface
 
 
 class CreateInsumoUseCase:
     """
     Caso de uso para criar um novo insumo.
-    Orquestra o processo de criação usando o repositório.
     """
     
-    def __init__(self, insumo_repository: InsumoRepository):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com uma implementação de repositório.
+        Inicializa o caso de uso.
         
         Args:
-            insumo_repository: Uma implementação de InsumoRepository
+            repository: Repositório de insumos
         """
-        self.repository = insumo_repository
+        self.repository = repository
     
-    def execute(self, insumo_data: InsumoCreate, subscriber_id: UUID) -> InsumoEntity:
+    def execute(
+        self, 
+        nome: str,
+        tipo: str,
+        unidade: str,
+        categoria: str,
+        subscriber_id: UUID,
+        quantidade: float = 0,
+        observacoes: str = None,
+        modulo_id: UUID = None
+    ) -> Dict[str, Any]:
         """
-        Executa o caso de uso para criar um insumo.
+        Executa o caso de uso para criar um novo insumo.
         
         Args:
-            insumo_data: Dados do insumo a ser criado
-            subscriber_id: ID do assinante para associação (multitenancy)
+            nome: Nome do insumo
+            tipo: Tipo do insumo
+            unidade: Unidade de medida
+            categoria: Categoria do insumo
+            subscriber_id: ID do assinante
+            quantidade: Quantidade do insumo
+            observacoes: Observações adicionais
+            modulo_id: ID do módulo associado
             
         Returns:
-            InsumoEntity: Entidade de insumo criada
+            Dict[str, Any]: Dados do insumo criado
             
         Raises:
-            HTTPException: Se houver um erro na criação
+            ValueError: Se os dados forem inválidos
         """
-        try:
-            return self.repository.create(insumo_data, subscriber_id)
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Erro ao criar insumo: {str(e)}"
-            )
+        # Criar a entidade
+        insumo = InsumoEntity(
+            nome=nome,
+            tipo=tipo,
+            unidade=unidade,
+            categoria=categoria,
+            subscriber_id=subscriber_id,
+            quantidade=quantidade,
+            observacoes=observacoes,
+            modulo_id=modulo_id
+        )
+        
+        # Salvar no repositório
+        created_insumo = self.repository.create(insumo)
+        
+        # Retornar os dados
+        return created_insumo.to_dict()
