@@ -1,0 +1,96 @@
+Prompt para o Agente (Replit/Cursor) – Implementar o Módulo Financeiro
+
+REGRAS DE SEGURANÇA (IMUTÁVEIS)
+
+Escopo Atômico: só crie/edite os arquivos abaixo. Não remova, renomeie ou crie nada fora desta lista.
+
+Naming & Colisões: novos modelos em arquivos únicos: models_payable.py, models_receivable.py. Não crie pastas que conflitem com arquivos existentes.
+
+Migrations Controladas: gere UMA migration Alembic por vez. Ajuste down_revision corretamente. Após gerar, execute alembic upgrade head e verifique o schema.
+
+Sem Flask: proibido usar Flask ou main_flask.py. Use APENAS ASGI (Uvicorn ou Gunicorn+UvicornWorker).
+
+Health-Check Obrigatório: garanta em app/main.py:
+
+python
+Copiar
+Editar
+@app.get("/", tags=["health"])
+async def health_check():
+    return {"status":"ok"}
+Valide sempre com curl -i http://localhost:5000/ retornando 200 OK.
+
+Teste Local Antes de Avançar: após cada etapa, abra o Swagger UI e confirme funcionamento dos novos endpoints.
+
+Versionamento: commit & push de cada etapa isolada antes de prosseguir. Se falhar, reverta ao último commit estável.
+
+Sem Installs Automáticos: não altere dependências sem revisão manual de requirements.txt.
+
+Logs e Erros: registre logs de sucesso e falha em cada camada; trate 400/401/403/404/500 com mensagens claras.
+
+Revisão Manual de Diff: todo PR será revisado contra estas regras antes de merge.
+
+Tarefa Imediata: Passo 1
+Gerar as Migrations Alembic e Modelos SQLAlchemy para as entidades Payable e Receivable:
+
+Migration Alembic
+
+Crie alembic/versions/<revision>_create_payables_and_receivables.py com:
+
+Tabela payables:
+
+id: UUID (PK)
+
+subscriber_id: UUID (FK subscribers.id)
+
+description: String
+
+amount: Numeric(12,2)
+
+due_date: Date
+
+paid: Boolean default False
+
+payment_date: DateTime, nullable
+
+notes: Text, nullable
+
+is_active, created_at, updated_at
+
+Tabela receivables:
+
+id: UUID (PK)
+
+subscriber_id: UUID (FK subscribers.id)
+
+patient_id: UUID (FK patients.id)
+
+description: String
+
+amount: Numeric(12,2)
+
+due_date: Date
+
+received: Boolean default False
+
+receive_date: DateTime, nullable
+
+notes: Text, nullable
+
+is_active, created_at, updated_at
+
+Modelos SQLAlchemy
+
+Crie app/db/models_payable.py com a classe Payable correspondendo à tabela acima.
+
+Crie app/db/models_receivable.py com a classe Receivable correspondendo à tabela acima.
+
+Após criar esses arquivos, execute:
+
+bash
+Copiar
+Editar
+alembic upgrade head
+e valide no banco que ambas as tabelas foram criadas corretamente.
+
+Próximo passo (APÓS confirmação): avançamos para os Schemas Pydantic.

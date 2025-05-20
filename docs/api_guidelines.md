@@ -1,168 +1,234 @@
-# 📡 HUBB Assist — Diretrizes de API e Desenvolvimento
+# Guia de Boas Práticas API - HUBB ONE Assist
 
-Este documento define os padrões, boas práticas e regras para o desenvolvimento e manutenção das APIs do sistema HUBB ONE Assist. Seu objetivo é garantir consistência, segurança e clareza nas interfaces de comunicação, prevenindo problemas comuns de desenvolvimento.
+## Arquitetura DDD (Domain-Driven Design) 
 
-## 🌐 Domínios Oficiais do Sistema
+Este documento detalha a arquitetura e as diretrizes seguidas na implementação dos módulos do sistema, exemplificando com o módulo de Agendamentos (Appointments).
 
-- **API/Backend:** https://api.hubbassist.com
-- **Frontend/App:** https://app.hubbassist.com
+### Princípios DDD Implementados
 
-## 🎯 Contexto e Escopo do Sistema
+#### 1. Estrutura em Camadas
 
-O HUBB ONE Assist é uma plataforma SaaS multitenancy para gestão profissional de clínicas e consultórios, com foco inicial nos segmentos de Odontologia e Veterinária. É um sistema de gestão administrativa completo, **sem componentes de hardware ou dispositivos físicos**.
+Nossa API segue uma estrutura em camadas que separa claramente as responsabilidades:
 
-### 📋 Entidades Principais do Sistema
+- **Camada de Domínio**: Entidades ricas com regras de negócio e interfaces de repositório
+- **Camada de Aplicação**: Casos de uso que orquestram operações
+- **Camada de Infraestrutura**: Implementações concretas de repositórios e serviços externos
+- **Camada de Apresentação**: API REST com validação e tratamento de erros
 
-- **Usuários (Users)**: Pessoas que acessam o sistema, com diferentes perfis e permissões
-- **Segmentos (Segments)**: Áreas de atuação profissional (ex: Odontologia, Veterinária)
-- **Módulos (Modules)**: Funcionalidades do sistema que podem ser associadas a um plano
-- **Planos (Plans)**: Pacotes de serviços oferecidos aos assinantes, com diferentes módulos
-- **Assinantes (Subscribers)**: Clínicas ou consultórios que contratam o sistema
+#### 2. Entidades Ricas vs. Anêmicas
 
-## 🚫 Regras de Escopo e Desenvolvimento
+Nossas entidades de domínio implementam comportamentos e regras de negócio, não apenas armazenam dados.
 
-### 1. Princípio de Conformidade com o Escopo
-- ✅ Todas as APIs devem estar alinhadas com o domínio de negócio do sistema (gestão de clínicas)
-- ❌ NÃO implementar APIs para controle de dispositivos IoT, hardware, Arduino, ESP32, sensores, etc.
-- ❌ NÃO desenvolver endpoints que não tenham relação direta com as entidades principais do sistema
+Exemplo da entidade `Appointment`:
 
-### 2. Regras de Aprovação e Controle
-- ✅ Toda nova API ou endpoint deve ser explicitamente solicitado e aprovado pelo responsável técnico
-- ✅ Solicitações de API devem incluir justificativa clara, casos de uso e valor para o negócio
-- ❌ NÃO criar APIs experimentais, de teste ou "extras" sem aprovação formal
-- ❌ NÃO implementar recursos técnicos complexos por iniciativa própria (message queues, websockets, etc.)
-
-### 3. Critérios de Segurança e Acesso
-- ✅ Endpoints protegidos devem validar JWT e aplicar filtros por subscriber_id (isolamento multitenancy)
-- ✅ Endpoints públicos devem ser claramente documentados e passar por revisão de segurança
-- ❌ NÃO expor endpoints que permitam acesso sem controle adequado a dados críticos
-- ❌ NÃO implementar bypass de autenticação, mesmo para testes ou "para facilitar desenvolvimento"
-
-## 🔧 Estrutura e Nomenclatura
-
-### Estrutura de Rotas
-- ✅ Endpoints protegidos por autenticação: `/{recurso}/` (ex: `/users/`, `/plans/`)
-- ✅ Endpoints públicos (sem autenticação): `/public/{recurso}/` (ex: `/public/plans/`)
-- ✅ Utilizar plurais para coleções e verbos HTTP apropriados (GET, POST, PUT, DELETE, PATCH)
-
-### Convenção de Nomenclatura
-- Arquivos de rotas: `routes_{recurso}.py` (ex: `routes_subscribers.py`)
-- Arquivos de rotas públicas: `routes_public_{recurso}.py` (ex: `routes_public_plans.py`)
-- Schemas: `{recurso}.py` (ex: `subscriber.py`)
-- Services: `{recurso}_service.py` (ex: `subscriber_service.py`)
-
-## 📨 Formato de Requisições e Respostas
-
-### 1. JSON como Padrão
-- Todas as APIs devem aceitar e retornar JSON como formato padrão
-- Utilizar snake_case para nomes de propriedades em JSON (ex: `first_name`, `is_active`)
-
-### 2. Paginação Padronizada
-```json
-{
-  "total": 100,
-  "page": 1,
-  "size": 10,
-  "items": [...]
-}
-```
-
-### 3. Respostas de Erro
-```json
-{
-  "detail": "Mensagem de erro específica"
-}
-```
-
-## 🛡️ Segurança e Autenticação
-
-### 1. Autenticação por JWT em Cookies HttpOnly
-- Todas as APIs protegidas exigem token JWT válido em cookie HttpOnly
-- Tokens devem incluir `user_id`, `role`, `subscriber_id` e `permissions`
-- Cookies configurados com `Secure=True` e `SameSite="none"` para CORS
-
-### 2. CORS Configurado Corretamente
-- Origens permitidas configuradas em ambiente via variáveis
-- Credentials habilitadas para uso com cookies
-- Frontend deve usar `credentials: "include"` ou `withCredentials: true`
-
-## 🏢 Arquitetura Multitenancy
-
-### 1. Isolamento por Subscriber_ID
-- Todas as entidades relevantes para o negócio devem ter campo `subscriber_id`
-- Filtro automático por `subscriber_id` em consultas para garantir isolamento de dados
-- Usuários com role `SUPER_ADMIN` e `DIRETOR` podem ver todos os registros
-
-### 2. Acesso por Hierarquia
-```
-SUPER_ADMIN: Acesso completo a todos os dados e recursos
-DIRETOR: Acesso à gestão de assinantes e dados administrativos
-COLABORADOR: Acesso às operações dentro do seu assinante
-DONO_ASSINANTE: Acesso à gestão do próprio assinante (clínica)
-```
-
-## 🏗️ Exemplos de Implementação
-
-### 1. Endpoint Protegido com Filtro de Assinante
 ```python
-@router.get("/subscribers/", response_model=PaginatedResponse[SubscriberResponse])
-async def list_subscribers(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    name: Optional[str] = Query(None)
-):
-    filter_params = {"name": name} if name else {}
-    return SubscriberService.get_subscribers(
-        db, current_user, skip=skip, limit=limit, filter_params=filter_params
+class Appointment:
+    def __init__(self, subscriber_id, patient_id, provider_id, ...):
+        # Atributos inicializados
+        # ...
+        # Validação das regras de negócio na criação
+        self._validate()
+    
+    def _validate(self) -> None:
+        # Regras de validação encapsuladas na entidade
+        if self.end_time <= self.start_time:
+            raise ValueError("A data/hora de término deve ser posterior à data/hora de início")
+        
+    def cancel(self) -> None:
+        # Lógica de negócio encapsulada em métodos
+        if self.status == "completed":
+            raise ValueError("Não é possível cancelar um agendamento já concluído")
+        
+        self.status = "cancelled"
+        self.updated_at = datetime.utcnow()
+```
+
+#### 3. Interfaces e Inversão de Dependência
+
+Definimos interfaces para repositórios, permitindo trocar implementações sem alterar o código de negócio.
+
+```python
+# Interface abstrata
+class IAppointmentRepository(ABC):
+    @abstractmethod
+    def create(self, appointment: Appointment) -> Appointment:
+        pass
+    
+    @abstractmethod
+    def get_by_id(self, appointment_id: UUID, subscriber_id: UUID) -> Appointment:
+        pass
+    
+    # Outros métodos...
+```
+
+#### 4. Casos de Uso
+
+Cada operação é implementada como um caso de uso específico, seguindo o princípio de responsabilidade única.
+
+```python
+class CreateAppointmentUseCase:
+    def __init__(self, repository: IAppointmentRepository):
+        self.repository = repository
+    
+    def execute(self, data: Dict[str, Any], subscriber_id: UUID) -> Dict[str, Any]:
+        # Lógica de aplicação para criar um agendamento
+```
+
+## Diretrizes de API REST
+
+### 1. Nomenclatura de Rotas
+
+- Use substantivos no plural para recursos: `/agendamentos`, `/pacientes`
+- Evite verbos nas URLs - use métodos HTTP para indicar ações
+- Use kebab-case para multi-palavras: `/custos-fixos`
+
+### 2. Métodos HTTP e Semântica
+
+| Método HTTP | Uso                                     | Exemplo                                      |
+|-------------|----------------------------------------|----------------------------------------------|
+| GET         | Recuperar recursos                     | `GET /agendamentos` - listar agendamentos    |
+| POST        | Criar recursos                         | `POST /agendamentos` - criar agendamento     |
+| PUT         | Atualizar recursos (completo)          | `PUT /agendamentos/{id}` - atualizar totalmente |
+| PATCH       | Atualizar recursos (parcial)           | `PATCH /agendamentos/{id}` - atualizar parcialmente |
+| DELETE      | Excluir recursos (logicamente)         | `DELETE /agendamentos/{id}` - excluir      |
+
+### 3. Respostas e Códigos HTTP
+
+| Código | Uso                                          |
+|--------|----------------------------------------------|
+| 200    | Sucesso em operações GET, PUT, PATCH         |
+| 201    | Sucesso em operações POST (recurso criado)   |
+| 204    | Sucesso em operações DELETE (sem conteúdo)   |
+| 400    | Erro de validação, dados inválidos           |
+| 401    | Autenticação necessária                      |
+| 403    | Permissão negada (autenticado, mas sem acesso) |
+| 404    | Recurso não encontrado                       |
+| 500    | Erro interno do servidor                     |
+
+### 4. Segurança Multi-tenant
+
+Todos os endpoints devem implementar segurança multi-tenant:
+
+```python
+# Verificação de segurança multi-tenant - usuário deve ter um subscriber_id
+if not hasattr(current_user, 'subscriber_id') or not current_user.subscriber_id:
+    raise HTTPException(
+        status_code=403,
+        detail="O usuário não está associado a um assinante"
     )
 ```
 
-### 2. Endpoint Público
+## Implementação de Funcionalidades
+
+### 1. Exclusão Lógica vs. Física
+
+- Use exclusão lógica (soft delete) com campo `is_active` em vez de remoção física dos registros
+- Implemente através do método `deactivate()` na entidade
+
+### 2. Filtros e Paginação
+
+- Sempre implemente paginação em endpoints que retornam listas
+- Suporte parâmetros de consulta para filtrar recursos
+
 ```python
-@router_public.post("/public/subscribers/", response_model=SubscriberCreateResponse)
-async def create_subscriber(
-    subscriber_data: SubscriberCreate,
-    db: Session = Depends(get_db)
+@router.get("/", response_model=List[AppointmentResponse])
+async def list_appointments(
+    date_from: Optional[datetime] = None,
+    date_to: Optional[datetime] = None,
+    patient_id: Optional[UUID] = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=100),
+    # ...
 ):
-    return SubscriberService.create_subscriber(db, subscriber_data)
 ```
 
-## 🚨 Lições Aprendidas e Armadilhas Comuns
+### 3. Validação de Dados
 
-### 1. Parâmetros em Ordem Correta
-- Sempre verifique a ordem dos parâmetros ao chamar funções
-- Problema encontrado: Inversão de parâmetros na função `apply_subscriber_filter`
-- Solução: Corrigir a ordem dos parâmetros: `query, current_user, Subscriber`
+- Use Pydantic para validação de dados de entrada e saída
+- Implemente validações de negócio nas entidades de domínio
+- Combine validações na API e no domínio para integridade total
 
-### 2. Erro 404 em Rotas
-- O frontend deve usar a rota correta para acessar os endpoints
-- Problema encontrado: Frontend tentando acessar `/external-api/subscribers` (não existente)
-- Solução: Usar a rota correta: `/subscribers/`
+```python
+class AppointmentBase(BaseModel):
+    # Campos com validação
+    service_name: str = Field(..., min_length=3, max_length=255)
+    start_time: datetime
+    end_time: datetime
+    
+    @validator("end_time")
+    def end_time_after_start_time(cls, v, values):
+        # Validação adicional
+        if "start_time" in values and v <= values["start_time"]:
+            raise ValueError("A data/hora de término deve ser posterior à data/hora de início")
+        return v
+```
 
-### 3. Inclusão de Credenciais em Requisições
-- O frontend deve incluir `credentials: "include"` em todas as requisições
-- Problema comum: CORS bloqueando cookies por falta de configuração adequada
+## Exemplos de Implementação DDD
 
-## 📝 Processos de Mudança
+### 1. Estrutura de Arquivos Exemplo - Módulo de Agendamentos
 
-### 1. Proposta de Novo Endpoint
-Para solicitar um novo endpoint ou API:
+```
+app/
+├── api/
+│   └── routes/
+│       └── appointment_router.py     # Rotas da API
+├── application/
+│   └── use_cases/
+│       └── appointment_use_cases.py  # Casos de uso
+├── domain/
+│   └── appointment/
+│       ├── entities.py               # Entidade de domínio
+│       └── interfaces.py             # Interfaces (repositório)
+├── infrastructure/
+│   └── repositories/
+│       └── appointment_sqlalchemy.py # Implementação do repositório
+├── db/
+│   └── models_appointment.py         # Modelo SQLAlchemy
+└── schemas/
+    └── appointment_schema.py         # Esquemas Pydantic
+```
 
-1. Descrever claramente o propósito e valor para o negócio
-2. Identificar as entidades e relacionamentos envolvidos
-3. Especificar os métodos HTTP e estrutura de dados
-4. Receber aprovação explícita antes de implementar
+### 2. Fluxo de Dados entre Camadas
 
-### 2. Checklist de Revisão
-- O endpoint está alinhado com o escopo do sistema?
-- A segurança e autenticação estão implementadas corretamente?
-- O isolamento multitenancy está respeitado?
-- A documentação e testes são adequados?
+1. **API recebe requisição**
+   - Valida dados com Pydantic
+   - Obtém usuário autenticado
+   - Verifica segurança multi-tenant
 
-## 📌 Última atualização
+2. **API chama caso de uso**
+   - Passa dados validados e dependências
 
-- Versão: `v1.0`
-- Data: `2025-05-12`
-- Responsável técnico: **Luis Paim**
+3. **Caso de uso executa lógica de aplicação**
+   - Cria/busca entidades de domínio
+   - Chama métodos de domínio para operações
+
+4. **Repositório persiste mudanças**
+   - Converte entidades para modelos de BD
+   - Executa operações no banco de dados
+
+5. **API retorna resposta formatada**
+   - Converte resultado para esquema de resposta
+   - Define código HTTP e cabeçalhos adequados
+
+### 3. Boas Práticas DDD Adicionais
+
+- **Ubiquitous Language**: Use uma linguagem consistente em todos os componentes
+- **Bounded Contexts**: Separe módulos com contextos de negócio distintos
+- **Value Objects**: Para conceitos imutáveis do domínio (ex: Email, CPF)
+- **Domain Events**: Para notificar mudanças significativas nas entidades
+- **Agregados**: Identifique grupos de entidades que devem ser tratadas como uma unidade
+
+## Conclusão
+
+Siga estas diretrizes ao implementar novos módulos ou modificar os existentes para garantir:
+
+- Código consistente e de alta qualidade
+- Separação clara de responsabilidades
+- Facilidade de manutenção e evolução
+- Testabilidade em todos os níveis
+- Segurança multi-tenant por design
+
+---
+
+**Autores:** Equipe de Desenvolvimento HUBB ONE Assist
+**Última atualização:** 20 de Maio de 2025
