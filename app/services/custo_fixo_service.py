@@ -23,7 +23,7 @@ class CustoFixoService:
         limit: int = 100,
         date_from: Optional[date] = None,
         date_to: Optional[date] = None
-    ) -> Dict[str, Any]:
+    ) -> CustoFixoList:
         """
         Retorna uma lista paginada de custos fixos do assinante.
         
@@ -41,7 +41,7 @@ class CustoFixoService:
         # Recuperar subscriber_id do usuário autenticado
         subscriber_id = getattr(current_user, "subscriber_id", None)
         if not subscriber_id:
-            return {"items": [], "total": 0, "skip": skip, "limit": limit}
+            return CustoFixoList(items=[], total=0, skip=skip, limit=limit)
         
         # Consulta base
         query = db.query(CostFixed).filter(
