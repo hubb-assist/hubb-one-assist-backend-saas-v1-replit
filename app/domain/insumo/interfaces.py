@@ -1,9 +1,9 @@
 """
-Interfaces para o domínio de Insumos, definindo contratos de repositórios.
+Interfaces para o domínio de Insumo.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
@@ -11,25 +11,22 @@ from app.domain.insumo.entities import InsumoEntity
 
 class InsumoRepositoryInterface(ABC):
     """
-    Interface que define os métodos necessários para um repositório de insumos.
+    Interface do repositório para o domínio de Insumo.
     
-    Esta interface segue o Princípio de Inversão de Dependência (DIP) do SOLID,
-    permitindo que a lógica de domínio dependa apenas de abstrações.
+    Define os métodos que qualquer implementação de repositório
+    de insumos deve fornecer.
     """
     
     @abstractmethod
-    def create(self, insumo: InsumoEntity) -> InsumoEntity:
+    def create(self, entity: InsumoEntity) -> InsumoEntity:
         """
         Cria um novo insumo no repositório.
         
         Args:
-            insumo: A entidade de insumo a ser criada
+            entity: Entidade de insumo a ser criada
             
         Returns:
-            InsumoEntity: A entidade criada, com ID gerado
-            
-        Raises:
-            ValueError: Se houver um erro ao criar o insumo
+            InsumoEntity: Entidade criada, com ID atribuído
         """
         pass
     
@@ -39,90 +36,70 @@ class InsumoRepositoryInterface(ABC):
         Busca um insumo pelo ID.
         
         Args:
-            insumo_id: O ID do insumo a buscar
+            insumo_id: ID do insumo a ser buscado
             
         Returns:
-            Optional[InsumoEntity]: A entidade encontrada ou None se não existir
-            
-        Raises:
-            ValueError: Se ocorrer um erro durante a busca
+            Optional[InsumoEntity]: Entidade encontrada ou None se não existir
         """
         pass
     
     @abstractmethod
-    def list_by_subscriber(
-        self, 
-        subscriber_id: UUID, 
-        skip: int = 0, 
-        limit: int = 100,
-        filters: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+    def list(self, subscriber_id: UUID, filters: Dict[str, Any] = None) -> List[InsumoEntity]:
         """
-        Lista insumos de um assinante com paginação e filtros.
+        Lista insumos com filtros opcionais.
         
         Args:
-            subscriber_id: ID do assinante proprietário
-            skip: Quantos registros pular (para paginação)
-            limit: Limite de registros por página
-            filters: Dicionário com filtros a aplicar
+            subscriber_id: ID do assinante para filtrar insumos
+            filters: Dicionário de filtros a serem aplicados
             
         Returns:
-            Dict[str, Any]: Dicionário com itens e metadados de paginação
-            
-        Raises:
-            ValueError: Se ocorrer um erro durante a listagem
+            List[InsumoEntity]: Lista de entidades de insumo
         """
         pass
     
     @abstractmethod
-    def update(self, insumo_id: UUID, data: Dict[str, Any]) -> Optional[InsumoEntity]:
+    def update(self, entity: InsumoEntity) -> InsumoEntity:
         """
         Atualiza um insumo existente.
         
         Args:
-            insumo_id: ID do insumo a atualizar
-            data: Dicionário com os campos a atualizar
+            entity: Entidade de insumo com dados atualizados
             
         Returns:
-            Optional[InsumoEntity]: A entidade atualizada ou None se não encontrada
+            InsumoEntity: Entidade atualizada
             
         Raises:
-            ValueError: Se ocorrer um erro durante a atualização
+            ValueError: Se o insumo não existir
         """
         pass
     
     @abstractmethod
     def delete(self, insumo_id: UUID) -> bool:
         """
-        Remove (logicamente) um insumo.
+        Remove logicamente um insumo (marcando como inativo).
         
         Args:
-            insumo_id: ID do insumo a remover
+            insumo_id: ID do insumo a ser removido
             
         Returns:
             bool: True se removido com sucesso, False se não encontrado
-            
-        Raises:
-            ValueError: Se ocorrer um erro durante a remoção
         """
         pass
     
     @abstractmethod
-    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str) -> Optional[InsumoEntity]:
+    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str) -> InsumoEntity:
         """
         Atualiza o estoque de um insumo.
         
         Args:
-            insumo_id: ID do insumo a atualizar
-            quantidade: Quantidade a ser movimentada (sempre positiva)
-            tipo_movimento: Tipo de movimento ('entrada' ou 'saida')
+            insumo_id: ID do insumo a ter estoque atualizado
+            quantidade: Quantidade a ser adicionada ou removida
+            tipo_movimento: 'entrada' para adicionar ou 'saida' para remover
             
         Returns:
-            Optional[InsumoEntity]: A entidade atualizada ou None se não encontrada
+            InsumoEntity: Entidade atualizada
             
         Raises:
-            ValueError: Se ocorrer um erro durante a atualização
-            ValueError: Se a quantidade for negativa ou tipo de movimento inválido
-            ValueError: Se a retirada resultar em estoque negativo
+            ValueError: Se o insumo não existir ou operação inválida
         """
         pass

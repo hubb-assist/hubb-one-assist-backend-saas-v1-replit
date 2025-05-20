@@ -1,79 +1,146 @@
 """
-Modelos de banco de dados para o módulo de Insumos.
+Modelos SQLAlchemy para o domínio de Insumos.
 """
 
 from datetime import datetime
-from typing import List, Optional
-from uuid import UUID
+from typing import List
+from uuid import uuid4
 
-from sqlalchemy import Column, String, Float, Integer, Boolean, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
+from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 
 
+class InsumoModuleAssociation(Base):
+    """
+    Modelo para a associação entre Insumos e Módulos.
+    
+    Esta é uma tabela de relacionamento N:M entre Insumos e Módulos,
+    que armazena detalhes específicos da associação.
+    """
+    __tablename__ = "insumos_modules_association"
+    
+    insumo_id = Column(UUID(as_uuid=True), ForeignKey("insumos.id", ondelete="CASCADE"), primary_key=True)
+    module_id = Column(UUID(as_uuid=True), primary_key=True)
+    quantidade_padrao = Column(Integer, default=1, nullable=False)
+    observacao = Column(String, nullable=True)
+    
+    insumo = relationship("Insumo", back_populates="modules_used")
+    
+    def __init__(
+        self,
+        insumo_id: UUID,
+        module_id: UUID,
+        quantidade_padrao: int = 1,
+        observacao: str = None
+    ):
+        """
+        Inicializa uma nova associação entre Insumo e Módulo.
+        
+        Args:
+            insumo_id: ID do insumo associado
+            module_id: ID do módulo associado
+            quantidade_padrao: Quantidade padrão do insumo utilizada no módulo
+            observacao: Observação sobre a utilização (opcional)
+        """
+        self.insumo_id = insumo_id
+        self.module_id = module_id
+        self.quantidade_padrao = quantidade_padrao
+        self.observacao = observacao
+
+
 class Insumo(Base):
     """
-    Modelo de banco de dados para a entidade Insumo.
+    Modelo de banco de dados para Insumos (suprimentos).
     
-    Representa a tabela de insumos no banco de dados, 
-    armazenando materiais, produtos e outros itens de estoque.
+    Armazena dados de insumos utilizados nos serviços,
+    com detalhes como estoque, valor, categorias e associações.
     """
     __tablename__ = "insumos"
     
-    id = Column(PostgresUUID(as_uuid=True), primary_key=True, index=True)
-    nome = Column(String, nullable=False, index=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    nome = Column(String, nullable=False)
     descricao = Column(String, nullable=False)
-    categoria = Column(String, nullable=False, index=True)
+    categoria = Column(String, nullable=False)
     valor_unitario = Column(Float, nullable=False)
     unidade_medida = Column(String, nullable=False)
     estoque_minimo = Column(Integer, nullable=False, default=0)
     estoque_atual = Column(Integer, nullable=False, default=0)
-    
-    # Campos opcionais
+    subscriber_id = Column(UUID(as_uuid=True), nullable=False, index=True)
     fornecedor = Column(String, nullable=True)
     codigo_referencia = Column(String, nullable=True)
     data_validade = Column(DateTime, nullable=True)
     data_compra = Column(DateTime, nullable=True)
     observacoes = Column(String, nullable=True)
-    
-    # Campos de controle
-    subscriber_id = Column(PostgresUUID(as_uuid=True), index=True, nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     
     # Relacionamentos
-    modules_used = relationship("InsumoModuleAssociation", back_populates="insumo", cascade="all, delete-orphan")
+    modules_used = relationship(
+        "InsumoModuleAssociation",
+        back_populates="insumo",
+        cascade="all, delete-orphan"
+    )
     
-    def __repr__(self):
-        return f"<Insumo(id={self.id}, nome='{self.nome}', categoria='{self.categoria}')>"
-
-
-class InsumoModuleAssociation(Base):
-    """
-    Modelo de banco de dados para a associação entre Insumos e Módulos.
-    
-    Esta tabela representa a relação muitos-para-muitos entre
-    insumos e módulos do sistema, com atributos adicionais.
-    """
-    __tablename__ = "insumo_module_associations"
-    
-    insumo_id = Column(PostgresUUID(as_uuid=True), ForeignKey("insumos.id", ondelete="CASCADE"), primary_key=True)
-    module_id = Column(PostgresUUID(as_uuid=True), primary_key=True)
-    
-    quantidade_padrao = Column(Integer, nullable=False, default=1)
-    observacao = Column(String, nullable=True)
-    
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
-    
-    # Relacionamentos
-    insumo = relationship("Insumo", back_populates="modules_used")
-    
-    # Potencial relacionamento com Module (se existir)
-    # module = relationship("Module")
-    
-    def __repr__(self):
-        return f"<InsumoModuleAssociation(insumo_id={self.insumo_id}, module_id={self.module_id}, quantidade={self.quantidade_padrao})>"
+    def __init__(
+        self,
+        nome: str,
+        descricao: str,
+        categoria: str,
+        valor_unitario: float,
+        unidade_medida: str,
+        estoque_minimo: int,
+        estoque_atual: int,
+        subscriber_id,
+        fornecedor: str = None,
+        codigo_referencia: str = None,
+        data_validade = None,
+        data_compra = None,
+        observacoes: str = None,
+        id = None,
+        is_active: bool = True,
+        created_at = None,
+        updated_at = None
+    ):
+        """
+        Inicializa um novo Insumo.
+        
+        Args:
+            nome: Nome do insumo
+            descricao: Descrição detalhada
+            categoria: Categoria do insumo (ex: "medicamento", "material")
+            valor_unitario: Valor unitário do insumo
+            unidade_medida: Unidade de medida (ex: "unidade", "ml", "caixa")
+            estoque_minimo: Estoque mínimo recomendado
+            estoque_atual: Quantidade atual em estoque
+            subscriber_id: ID do assinante (isolamento multitenant)
+            fornecedor: Nome do fornecedor (opcional)
+            codigo_referencia: Código de referência (opcional)
+            data_validade: Data de validade (opcional)
+            data_compra: Data da última compra (opcional)
+            observacoes: Observações adicionais (opcional)
+            id: UUID do insumo, gerado automaticamente se não fornecido
+            is_active: Indica se o insumo está ativo
+            created_at: Data de criação
+            updated_at: Data da última atualização
+        """
+        self.id = id if id else uuid4()
+        self.nome = nome
+        self.descricao = descricao
+        self.categoria = categoria
+        self.valor_unitario = valor_unitario
+        self.unidade_medida = unidade_medida
+        self.estoque_minimo = estoque_minimo
+        self.estoque_atual = estoque_atual
+        self.subscriber_id = subscriber_id
+        self.fornecedor = fornecedor
+        self.codigo_referencia = codigo_referencia
+        self.data_validade = data_validade
+        self.data_compra = data_compra
+        self.observacoes = observacoes
+        self.is_active = is_active
+        self.created_at = created_at if created_at else datetime.utcnow()
+        self.updated_at = updated_at if updated_at else datetime.utcnow()

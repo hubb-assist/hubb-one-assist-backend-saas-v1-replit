@@ -1,27 +1,26 @@
 """
-Implementação do repositório de insumos utilizando SQLAlchemy.
+Implementação do repositório de Insumos usando SQLAlchemy.
 """
 
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 
-from sqlalchemy import and_, or_, func, text
-from sqlalchemy.orm import Session, contains_eager
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, joinedload
 
 from app.db.models.insumo import Insumo, InsumoModuleAssociation
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
-from app.domain.insumo.value_objects.modulo_association import ModuloAssociation
 from app.infrastructure.adapters.insumo_adapter import InsumoAdapter
 
 
 class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
     """
-    Implementação do repositório de insumos utilizando SQLAlchemy para persistência.
+    Implementação do repositório de Insumos usando SQLAlchemy.
     
-    Esta classe concreta implementa as operações definidas na interface,
-    utilizando o SQLAlchemy como ORM para acesso ao banco de dados.
+    Esta classe concreta implementa os métodos definidos na interface
+    do repositório, fornecendo acesso aos dados usando SQLAlchemy.
     """
     
     def __init__(self, db_session: Session):
@@ -29,52 +28,55 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
         Inicializa o repositório com uma sessão de banco de dados.
         
         Args:
-            db_session: Sessão SQLAlchemy para o banco de dados
+            db_session: Sessão SQLAlchemy para operações no banco
         """
-        self.db = db_session
-        self.adapter = InsumoAdapter()
+        self.db_session = db_session
     
-    def create(self, insumo: InsumoEntity) -> InsumoEntity:
+    def create(self, entity: InsumoEntity) -> InsumoEntity:
         """
         Cria um novo insumo no banco de dados.
         
         Args:
-            insumo: Entidade de insumo a ser criada
+            entity: Entidade de insumo a ser criada
             
         Returns:
-            InsumoEntity: Entidade criada com ID gerado
+            InsumoEntity: Entidade criada, com ID atribuído
             
         Raises:
-            ValueError: Se ocorrer um erro durante a criação
+            ValueError: Se ocorrer um erro ao criar o insumo
         """
         try:
-            # Converter entidade para modelo
-            insumo_model = self.adapter.to_model(insumo)
+            # Converter entidade em modelo
+            model = InsumoAdapter.to_model(entity)
             
-            # Adicionar à sessão
-            self.db.add(insumo_model)
-            self.db.flush()  # Para obter o ID gerado
+            # Persistir no banco
+            self.db_session.add(model)
+            self.db_session.flush()  # Obter ID gerado
             
-            # Processar associações de módulos, se houver
-            if insumo.modules_used:
-                associations = self.adapter.create_module_associations(
-                    insumo.modules_used, insumo_model.id
-                )
-                for assoc in associations:
-                    self.db.add(assoc)
-                self.db.flush()
+            # Criar associações com módulos, se houver
+            if entity.modules_used:
+                for module_assoc in entity.modules_used:
+                    assoc_model = InsumoModuleAssociation(
+                        insumo_id=model.id,
+                        module_id=module_assoc.module_id,
+                        quantidade_padrao=module_assoc.quantidade_padrao,
+                        observacao=module_assoc.observacao
+                    )
+                    self.db_session.add(assoc_model)
+                
+                self.db_session.flush()
             
-            # Commit da transação
-            self.db.commit()
+            # Commit
+            self.db_session.commit()
             
-            # Recarregar o modelo para obter as associações
-            self.db.refresh(insumo_model)
+            # Converter de volta para entidade e retornar
+            return InsumoAdapter.to_entity(model)
             
-            # Converter modelo atualizado para entidade
-            return self.adapter.to_entity(insumo_model)
-            
+        except IntegrityError as e:
+            self.db_session.rollback()
+            raise ValueError(f"Erro de integridade ao criar insumo: {str(e)}")
         except Exception as e:
-            self.db.rollback()
+            self.db_session.rollback()
             raise ValueError(f"Erro ao criar insumo: {str(e)}")
     
     def get_by_id(self, insumo_id: UUID) -> Optional[InsumoEntity]:
@@ -82,308 +84,196 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
         Busca um insumo pelo ID.
         
         Args:
-            insumo_id: ID do insumo a buscar
+            insumo_id: ID do insumo a ser buscado
             
         Returns:
-            Optional[InsumoEntity]: Entidade encontrada ou None
+            Optional[InsumoEntity]: Entidade encontrada ou None se não existir
         """
         try:
-            # Buscar insumo com suas associações
-            insumo_model = self.db.query(Insumo).filter(
-                Insumo.id == insumo_id,
-                Insumo.is_active == True
-            ).first()
+            # Buscar insumo com associações
+            insumo = (
+                self.db_session.query(Insumo)
+                .options(joinedload(Insumo.modules_used))
+                .filter(Insumo.id == insumo_id, Insumo.is_active == True)
+                .first()
+            )
             
-            if not insumo_model:
+            if not insumo:
                 return None
-            
-            # Mapear associações de módulos
-            self._map_module_associations(insumo_model.id)
-            
+                
             # Converter para entidade e retornar
-            return self.adapter.to_entity(insumo_model)
+            return InsumoAdapter.to_entity(insumo)
             
         except Exception as e:
             raise ValueError(f"Erro ao buscar insumo: {str(e)}")
     
-    def _map_module_associations(self, insumo_id: UUID) -> None:
+    def list(self, subscriber_id: UUID, filters: Dict[str, Any] = None) -> List[InsumoEntity]:
         """
-        Carrega associações de módulos para um insumo.
+        Lista insumos com filtros opcionais.
         
         Args:
-            insumo_id: ID do insumo
-        """
-        try:
-            # Pré-carregar associações com módulos para melhorar performance
-            associations = self.db.query(InsumoModuleAssociation).filter(
-                InsumoModuleAssociation.insumo_id == insumo_id
-            ).all()
-            
-            # Obter IDs de módulos para carregar nomes
-            module_ids = [assoc.module_id for assoc in associations]
-            
-            # Carregar nomes de módulos se necessário (se tabela Module existir)
-            if module_ids and hasattr(InsumoModuleAssociation, 'module'):
-                # Esta parte depende da estrutura da tabela Module
-                pass
-            
-        except Exception as e:
-            # Logar erro, mas não interromper operação
-            print(f"Erro ao mapear associações de módulos: {str(e)}")
-    
-    def list_by_subscriber(
-        self, 
-        subscriber_id: UUID, 
-        skip: int = 0, 
-        limit: int = 100,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        Lista insumos de um assinante com paginação e filtros opcionais.
-        
-        Args:
-            subscriber_id: ID do assinante
-            skip: Quantos registros pular
-            limit: Limite de registros a retornar
-            filters: Filtros a aplicar (nome, categoria, etc.)
+            subscriber_id: ID do assinante para filtrar insumos
+            filters: Dicionário de filtros a serem aplicados
             
         Returns:
-            Dict[str, Any]: Dicionário com itens e informações de paginação
+            List[InsumoEntity]: Lista de entidades de insumo
         """
         try:
-            # Iniciar query base
-            query = self.db.query(Insumo).filter(
-                Insumo.is_active == True
+            # Iniciar query
+            query = (
+                self.db_session.query(Insumo)
+                .options(joinedload(Insumo.modules_used))
+                .filter(Insumo.subscriber_id == subscriber_id, Insumo.is_active == True)
             )
             
-            # Aplicar filtro por assinante
-            if subscriber_id:
-                query = query.filter(Insumo.subscriber_id == subscriber_id)
+            # Aplicar filtros adicionais
+            if filters:
+                query = InsumoAdapter.apply_filters(query, filters)
             
-            # Aplicar filtros adicionais, se fornecidos
-            query, total = self._apply_filters(query, filters or {})
+            # Executar consulta
+            insumos = query.all()
             
-            # Calcular total de registros para paginação
-            if total is None:
-                total = query.count()
-            
-            # Aplicar paginação
-            items = query.order_by(Insumo.nome).offset(skip).limit(limit).all()
-            
-            # Converter modelos para entidades
-            entities = [self.adapter.to_entity(item) for item in items]
-            
-            # Construir resposta
-            return {
-                "items": entities,
-                "total": total,
-                "page": skip // limit + 1 if limit > 0 else 1,
-                "pages": (total + limit - 1) // limit if limit > 0 else 1,
-                "size": len(entities)
-            }
+            # Converter para entidades
+            return [InsumoAdapter.to_entity(insumo) for insumo in insumos]
             
         except Exception as e:
             raise ValueError(f"Erro ao listar insumos: {str(e)}")
     
-    def _apply_filters(
-        self, 
-        query, 
-        filters: Dict[str, Any]
-    ) -> Tuple[Any, Optional[int]]:
-        """
-        Aplica filtros a uma query de insumos.
-        
-        Args:
-            query: Query SQLAlchemy base
-            filters: Dicionário de filtros a aplicar
-            
-        Returns:
-            Tuple[Any, Optional[int]]: Query filtrada e total de registros (se calculado)
-        """
-        total = None
-        
-        # Filtro por nome (busca por substring)
-        if "nome" in filters and filters["nome"]:
-            search_term = f"%{filters['nome']}%"
-            query = query.filter(Insumo.nome.ilike(search_term))
-        
-        # Filtro por categoria (exata)
-        if "categoria" in filters and filters["categoria"]:
-            query = query.filter(Insumo.categoria == filters["categoria"])
-        
-        # Filtro por fornecedor (busca por substring)
-        if "fornecedor" in filters and filters["fornecedor"]:
-            search_term = f"%{filters['fornecedor']}%"
-            query = query.filter(Insumo.fornecedor.ilike(search_term))
-        
-        # Filtro por estoque baixo
-        if "estoque_baixo" in filters and filters["estoque_baixo"] is not None:
-            if filters["estoque_baixo"]:
-                query = query.filter(Insumo.estoque_atual < Insumo.estoque_minimo)
-        
-        # Filtro por módulo
-        if "module_id" in filters and filters["module_id"]:
-            query = query.join(InsumoModuleAssociation).filter(
-                InsumoModuleAssociation.module_id == filters["module_id"]
-            )
-        
-        return query, total
-    
-    def update(self, insumo_id: UUID, data: Dict[str, Any]) -> Optional[InsumoEntity]:
+    def update(self, entity: InsumoEntity) -> InsumoEntity:
         """
         Atualiza um insumo existente.
         
         Args:
-            insumo_id: ID do insumo a atualizar
-            data: Dicionário com os campos a atualizar
+            entity: Entidade de insumo com dados atualizados
             
         Returns:
-            Optional[InsumoEntity]: Entidade atualizada ou None
+            InsumoEntity: Entidade atualizada
             
         Raises:
-            ValueError: Se ocorrer um erro durante a atualização
+            ValueError: Se o insumo não existir
         """
         try:
             # Buscar insumo existente
-            insumo_model = self.db.query(Insumo).filter(
-                Insumo.id == insumo_id,
-                Insumo.is_active == True
-            ).first()
+            insumo = (
+                self.db_session.query(Insumo)
+                .options(joinedload(Insumo.modules_used))
+                .filter(Insumo.id == entity.id, Insumo.is_active == True)
+                .first()
+            )
             
-            if not insumo_model:
-                return None
+            if not insumo:
+                raise ValueError(f"Insumo com ID {entity.id} não encontrado")
             
-            # Atualizar campos do modelo
-            self.adapter.update_from_dict(insumo_model, data)
+            # Validar pertencimento ao subscriber
+            if insumo.subscriber_id != entity.subscriber_id:
+                raise ValueError(f"Insumo não pertence ao subscriber informado")
             
-            # Atualizar associações de módulos, se fornecidas
-            if "modules_used" in data and data["modules_used"]:
-                # Remover associações existentes
-                self.db.query(InsumoModuleAssociation).filter(
-                    InsumoModuleAssociation.insumo_id == insumo_id
-                ).delete()
-                
-                # Criar novas associações
-                associations = self.adapter.create_module_associations(
-                    data["modules_used"], insumo_id
-                )
-                for assoc in associations:
-                    self.db.add(assoc)
+            # Atualizar modelo com dados da entidade
+            InsumoAdapter.update_model_from_entity(insumo, entity, update_modules=True)
             
-            # Commit das alterações
-            self.db.commit()
+            # Commit
+            self.db_session.commit()
             
-            # Recarregar o modelo para obter as associações atualizadas
-            self.db.refresh(insumo_model)
+            # Retornar entidade atualizada
+            return InsumoAdapter.to_entity(insumo)
             
-            # Converter modelo atualizado para entidade
-            return self.adapter.to_entity(insumo_model)
-            
+        except IntegrityError as e:
+            self.db_session.rollback()
+            raise ValueError(f"Erro de integridade ao atualizar insumo: {str(e)}")
+        except ValueError as e:
+            self.db_session.rollback()
+            raise e
         except Exception as e:
-            self.db.rollback()
+            self.db_session.rollback()
             raise ValueError(f"Erro ao atualizar insumo: {str(e)}")
     
     def delete(self, insumo_id: UUID) -> bool:
         """
-        Exclui logicamente um insumo (soft delete).
+        Remove logicamente um insumo (marcando como inativo).
         
         Args:
-            insumo_id: ID do insumo a excluir
+            insumo_id: ID do insumo a ser removido
             
         Returns:
-            bool: True se excluído com sucesso, False caso contrário
-            
-        Raises:
-            ValueError: Se ocorrer um erro durante a exclusão
+            bool: True se removido com sucesso, False se não encontrado
         """
         try:
-            # Buscar insumo existente
-            insumo_model = self.db.query(Insumo).filter(
-                Insumo.id == insumo_id,
-                Insumo.is_active == True
-            ).first()
+            # Buscar insumo
+            insumo = (
+                self.db_session.query(Insumo)
+                .filter(Insumo.id == insumo_id, Insumo.is_active == True)
+                .first()
+            )
             
-            if not insumo_model:
+            if not insumo:
                 return False
             
-            # Marcar como inativo (soft delete)
-            insumo_model.is_active = False
-            insumo_model.updated_at = datetime.utcnow()
+            # Desativar insumo (remoção lógica)
+            insumo.is_active = False
+            insumo.updated_at = datetime.utcnow()
             
-            # Commit das alterações
-            self.db.commit()
+            # Commit
+            self.db_session.commit()
             
             return True
             
         except Exception as e:
-            self.db.rollback()
-            raise ValueError(f"Erro ao excluir insumo: {str(e)}")
+            self.db_session.rollback()
+            raise ValueError(f"Erro ao remover insumo: {str(e)}")
     
-    def update_estoque(
-        self, 
-        insumo_id: UUID, 
-        quantidade: int,
-        tipo_movimento: str,
-        observacao: Optional[str] = None
-    ) -> Optional[InsumoEntity]:
+    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str) -> InsumoEntity:
         """
-        Atualiza o estoque de um insumo (entrada ou saída).
+        Atualiza o estoque de um insumo.
         
         Args:
-            insumo_id: ID do insumo
-            quantidade: Quantidade a adicionar/remover
-            tipo_movimento: 'entrada' ou 'saida'
-            observacao: Observação opcional sobre o movimento
+            insumo_id: ID do insumo a ter estoque atualizado
+            quantidade: Quantidade a ser adicionada ou removida
+            tipo_movimento: 'entrada' para adicionar ou 'saida' para remover
             
         Returns:
-            Optional[InsumoEntity]: Entidade atualizada ou None
+            InsumoEntity: Entidade atualizada
             
         Raises:
-            ValueError: Se os parâmetros forem inválidos ou estoque insuficiente
+            ValueError: Se o insumo não existir ou operação inválida
         """
         try:
-            # Validações iniciais
-            if quantidade <= 0:
-                raise ValueError("Quantidade deve ser maior que zero")
-            
-            if tipo_movimento not in ["entrada", "saida"]:
+            # Validar tipo de movimento
+            if tipo_movimento not in ['entrada', 'saida']:
                 raise ValueError("Tipo de movimento deve ser 'entrada' ou 'saida'")
             
-            # Buscar insumo existente
-            insumo_model = self.db.query(Insumo).filter(
-                Insumo.id == insumo_id,
-                Insumo.is_active == True
-            ).first()
+            # Buscar insumo
+            insumo = (
+                self.db_session.query(Insumo)
+                .options(joinedload(Insumo.modules_used))
+                .filter(Insumo.id == insumo_id, Insumo.is_active == True)
+                .first()
+            )
             
-            if not insumo_model:
-                return None
+            if not insumo:
+                raise ValueError(f"Insumo com ID {insumo_id} não encontrado")
             
-            # Converter modelo para entidade para usar lógica de domínio
-            insumo_entity = self.adapter.to_entity(insumo_model)
+            # Converter para entidade para aplicar lógica de negócio
+            entity = InsumoAdapter.to_entity(insumo)
             
-            # Aplicar movimento de estoque
-            if tipo_movimento == "entrada":
-                insumo_entity.adicionar_estoque(quantidade)
-            else:  # saida
-                insumo_entity.reduzir_estoque(quantidade)
+            # Atualizar estoque usando métodos da entidade
+            if tipo_movimento == 'entrada':
+                entity.adicionar_estoque(quantidade)
+            else:
+                entity.reduzir_estoque(quantidade)
             
-            # Atualizar modelo com valores da entidade
-            insumo_model.estoque_atual = insumo_entity.estoque_atual
-            insumo_model.updated_at = insumo_entity.updated_at
+            # Sincronizar modelo com entidade
+            insumo.estoque_atual = entity.estoque_atual
+            insumo.updated_at = datetime.utcnow()
             
-            # Aqui poderíamos registrar o movimento em uma tabela de histórico
-            # if observacao:
-            #    registrar_movimento_estoque(...)
+            # Commit
+            self.db_session.commit()
             
-            # Commit das alterações
-            self.db.commit()
-            
-            # Converter modelo atualizado para entidade
-            return self.adapter.to_entity(insumo_model)
+            # Retornar entidade atualizada
+            return InsumoAdapter.to_entity(insumo)
             
         except ValueError as e:
-            self.db.rollback()
-            raise ValueError(str(e))
+            self.db_session.rollback()
+            raise e
         except Exception as e:
-            self.db.rollback()
-            raise ValueError(f"Erro ao atualizar estoque: {str(e)}")
+            self.db_session.rollback()
+            raise ValueError(f"Erro ao atualizar estoque do insumo: {str(e)}")

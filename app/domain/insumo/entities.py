@@ -1,9 +1,9 @@
 """
-Entidades do domínio de Insumos.
+Entidades de domínio para o módulo de Insumos.
 """
 
 from datetime import datetime
-from typing import List, Optional, Any
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 from app.domain.insumo.value_objects.modulo_association import ModuloAssociation
@@ -11,10 +11,10 @@ from app.domain.insumo.value_objects.modulo_association import ModuloAssociation
 
 class InsumoEntity:
     """
-    Entidade que representa um insumo no domínio de negócio.
+    Entidade de domínio para representar um Insumo (Suprimento).
     
-    Esta classe contém todas as regras de negócio relacionadas
-    a insumos, materiais e produtos utilizados na operação.
+    Esta entidade contém toda a lógica de negócio relacionada a insumos,
+    garantindo a consistência dos dados e as regras do domínio.
     """
     
     def __init__(
@@ -27,12 +27,12 @@ class InsumoEntity:
         estoque_minimo: int,
         estoque_atual: int,
         subscriber_id: UUID,
-        id: Optional[UUID] = None,
         fornecedor: Optional[str] = None,
         codigo_referencia: Optional[str] = None,
         data_validade: Optional[datetime] = None,
         data_compra: Optional[datetime] = None,
         observacoes: Optional[str] = None,
+        id: Optional[UUID] = None,
         is_active: bool = True,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
@@ -44,35 +44,31 @@ class InsumoEntity:
         Args:
             nome: Nome do insumo
             descricao: Descrição detalhada do insumo
-            categoria: Categoria do insumo (ex: material, medicamento, etc)
+            categoria: Categoria do insumo (ex: "medicamento", "material")
             valor_unitario: Valor unitário do insumo
-            unidade_medida: Unidade de medida do insumo (ex: un, kg, ml, etc)
-            estoque_minimo: Quantidade mínima que deve ser mantida em estoque
+            unidade_medida: Unidade de medida (ex: "unidade", "ml", "caixa")
+            estoque_minimo: Estoque mínimo recomendado
             estoque_atual: Quantidade atual em estoque
-            subscriber_id: ID do assinante proprietário do insumo
-            id: Identificador único, gerado automaticamente se não fornecido
-            fornecedor: Nome do fornecedor ou fabricante
-            codigo_referencia: Código de referência do fornecedor
-            data_validade: Data de validade do insumo
-            data_compra: Data da última compra
-            observacoes: Observações adicionais
+            subscriber_id: ID do assinante (isolamento multitenant)
+            fornecedor: Nome do fornecedor (opcional)
+            codigo_referencia: Código de referência (opcional)
+            data_validade: Data de validade (opcional)
+            data_compra: Data da última compra (opcional)
+            observacoes: Observações adicionais (opcional)
+            id: UUID do insumo, gerado automaticamente se não fornecido
             is_active: Indica se o insumo está ativo
             created_at: Data de criação
             updated_at: Data da última atualização
-            modules_used: Lista de associações com módulos funcionais
+            modules_used: Lista de associações com módulos
         """
-        # Validações básicas
-        if valor_unitario < 0:
-            raise ValueError("Valor unitário não pode ser negativo")
-            
-        if estoque_minimo < 0:
-            raise ValueError("Estoque mínimo não pode ser negativo")
-            
-        if estoque_atual < 0:
-            raise ValueError("Estoque atual não pode ser negativo")
+        # Validação de campos
+        self._validar_campos_obrigatorios(
+            nome, descricao, categoria, valor_unitario, 
+            unidade_medida, estoque_minimo, estoque_atual, subscriber_id
+        )
         
-        # Propriedades obrigatórias
-        self.id = id or uuid4()
+        # Atribuição de campos
+        self.id = id if id else uuid4()
         self.nome = nome
         self.descricao = descricao
         self.categoria = categoria
@@ -81,154 +77,151 @@ class InsumoEntity:
         self.estoque_minimo = estoque_minimo
         self.estoque_atual = estoque_atual
         self.subscriber_id = subscriber_id
-        
-        # Propriedades opcionais
         self.fornecedor = fornecedor
         self.codigo_referencia = codigo_referencia
+        self.data_validade = data_validade
+        self.data_compra = data_compra
         self.observacoes = observacoes
         self.is_active = is_active
-        
-        # Datas
-        self.created_at = created_at or datetime.utcnow()
-        self.updated_at = updated_at or datetime.utcnow()
-        
-        # Data de validade
-        self.data_validade = None
-        if data_validade:
-            if data_validade < datetime.utcnow():
-                # Não lançar erro, apenas marcar que o produto está vencido
-                self.data_validade = data_validade
-            else:
-                self.data_validade = data_validade
-        
-        # Data de compra
-        self.data_compra = None
-        if data_compra:
-            if data_compra > datetime.utcnow():
-                raise ValueError("Data de compra não pode ser futura")
-            self.data_compra = data_compra
-                
-        # Associações com módulos
-        self.modules_used = modules_used or []
-    
-    def verificar_estoque_baixo(self) -> bool:
+        self.created_at = created_at if created_at else datetime.utcnow()
+        self.updated_at = updated_at if updated_at else datetime.utcnow()
+        self.modules_used = modules_used if modules_used else []
+
+    def _validar_campos_obrigatorios(
+        self, nome, descricao, categoria, valor_unitario, 
+        unidade_medida, estoque_minimo, estoque_atual, subscriber_id
+    ):
         """
-        Verifica se o estoque está abaixo do mínimo definido.
+        Valida os campos obrigatórios da entidade.
+        
+        Raises:
+            ValueError: Se algum campo obrigatório for inválido
+        """
+        # Validar campos em branco ou nulos
+        if not nome or not descricao or not categoria or not unidade_medida:
+            raise ValueError("Campos obrigatórios não podem ser vazios")
+            
+        # Validar campos numéricos
+        if valor_unitario < 0:
+            raise ValueError("Valor unitário não pode ser negativo")
+            
+        if estoque_minimo < 0:
+            raise ValueError("Estoque mínimo não pode ser negativo")
+            
+        if estoque_atual < 0:
+            raise ValueError("Estoque atual não pode ser negativo")
+            
+        # Validar subscriber_id
+        if not subscriber_id:
+            raise ValueError("Subscriber ID é obrigatório")
+            
+    def esta_abaixo_do_minimo(self) -> bool:
+        """
+        Verifica se o estoque atual está abaixo do mínimo.
         
         Returns:
-            bool: True se o estoque está abaixo do mínimo, False caso contrário
+            bool: True se estiver abaixo do mínimo, False caso contrário
         """
         return self.estoque_atual < self.estoque_minimo
-    
-    def verificar_validade(self) -> bool:
+        
+    def adicionar_estoque(self, quantidade: int) -> int:
         """
-        Verifica se o insumo está dentro do prazo de validade.
+        Adiciona quantidade ao estoque atual.
+        
+        Args:
+            quantidade: Quantidade a adicionar (deve ser positiva)
+            
+        Returns:
+            int: Novo valor do estoque
+            
+        Raises:
+            ValueError: Se a quantidade for negativa
+        """
+        if quantidade <= 0:
+            raise ValueError("Quantidade a adicionar deve ser positiva")
+            
+        self.estoque_atual += quantidade
+        self.updated_at = datetime.utcnow()
+        return self.estoque_atual
+        
+    def reduzir_estoque(self, quantidade: int) -> int:
+        """
+        Reduz quantidade do estoque atual.
+        
+        Args:
+            quantidade: Quantidade a reduzir (deve ser positiva)
+            
+        Returns:
+            int: Novo valor do estoque
+            
+        Raises:
+            ValueError: Se a quantidade for negativa ou maior que o estoque atual
+        """
+        if quantidade <= 0:
+            raise ValueError("Quantidade a reduzir deve ser positiva")
+            
+        if quantidade > self.estoque_atual:
+            raise ValueError("Quantidade a reduzir não pode ser maior que o estoque atual")
+            
+        self.estoque_atual -= quantidade
+        self.updated_at = datetime.utcnow()
+        return self.estoque_atual
+        
+    def esta_expirado(self) -> bool:
+        """
+        Verifica se o insumo está expirado, baseado na data de validade.
         
         Returns:
-            bool: True se o insumo está válido, False se está vencido ou não tem data de validade
+            bool: True se expirado, False caso contrário ou se não tiver data de validade
         """
         if not self.data_validade:
-            return False  # Se não tem data, consideramos como não validado
+            return False
             
-        return self.data_validade > datetime.utcnow()
-    
-    def calcular_valor_total(self) -> float:
-        """
-        Calcula o valor total do insumo em estoque.
+        return self.data_validade < datetime.utcnow()
         
-        Returns:
-            float: Valor total do estoque (quantidade atual * valor unitário)
+    def atualizar_dados(self, dados_atualizados: dict) -> None:
         """
-        return self.estoque_atual * self.valor_unitario
-    
-    def atualizar_estoque(self, quantidade: int, tipo_movimento: str) -> None:
-        """
-        Atualiza o estoque atual com base em um movimento de entrada ou saída.
+        Atualiza os dados da entidade com base em um dicionário.
         
         Args:
-            quantidade: Quantidade a ser movimentada (sempre positiva)
-            tipo_movimento: Tipo de movimento ('entrada' ou 'saida')
+            dados_atualizados: Dicionário com os campos a atualizar
             
         Raises:
-            ValueError: Se a quantidade for negativa ou tipo de movimento inválido
-            ValueError: Se a retirada resultar em estoque negativo
+            ValueError: Se os dados atualizados forem inválidos
         """
-        if quantidade < 0:
-            raise ValueError("A quantidade deve ser um valor positivo")
+        # Campos que não podem ser atualizados diretamente
+        campos_protegidos = ["id", "subscriber_id", "created_at"]
+        
+        # Validar campos protegidos
+        for campo in campos_protegidos:
+            if campo in dados_atualizados:
+                dados_atualizados.pop(campo)
+                
+        # Validar campos numéricos
+        if "valor_unitario" in dados_atualizados and dados_atualizados["valor_unitario"] < 0:
+            raise ValueError("Valor unitário não pode ser negativo")
             
-        if tipo_movimento not in ['entrada', 'saida']:
-            raise ValueError("Tipo de movimento deve ser 'entrada' ou 'saida'")
+        if "estoque_minimo" in dados_atualizados and dados_atualizados["estoque_minimo"] < 0:
+            raise ValueError("Estoque mínimo não pode ser negativo")
             
-        if tipo_movimento == 'entrada':
-            self.estoque_atual += quantidade
-        else:  # saída
-            if self.estoque_atual < quantidade:
-                raise ValueError(f"Estoque insuficiente. Disponível: {self.estoque_atual}, Solicitado: {quantidade}")
-            self.estoque_atual -= quantidade
-            
-        # Atualizar data de modificação
+        # Atualizar campos
+        for chave, valor in dados_atualizados.items():
+            if hasattr(self, chave):
+                setattr(self, chave, valor)
+                
+        # Atualizar timestamp de modificação
         self.updated_at = datetime.utcnow()
         
-    def atualizar_campos(self, dados: dict) -> None:
+    def desativar(self) -> None:
         """
-        Atualiza os campos da entidade com base em um dicionário de dados.
-        
-        Args:
-            dados: Dicionário com os campos a serem atualizados
-            
-        Raises:
-            ValueError: Se algum valor de campo for inválido
+        Desativa o insumo (exclusão lógica).
         """
-        # Atualizar campos de texto
-        if 'nome' in dados and dados['nome'] is not None:
-            self.nome = dados['nome']
-            
-        if 'descricao' in dados and dados['descricao'] is not None:
-            self.descricao = dados['descricao']
-            
-        if 'categoria' in dados and dados['categoria'] is not None:
-            self.categoria = dados['categoria']
-            
-        if 'unidade_medida' in dados and dados['unidade_medida'] is not None:
-            self.unidade_medida = dados['unidade_medida']
-            
-        if 'fornecedor' in dados:
-            self.fornecedor = dados['fornecedor']
-            
-        if 'codigo_referencia' in dados:
-            self.codigo_referencia = dados['codigo_referencia']
-            
-        if 'observacoes' in dados:
-            self.observacoes = dados['observacoes']
+        self.is_active = False
+        self.updated_at = datetime.utcnow()
         
-        # Atualizar campos numéricos com validação
-        if 'valor_unitario' in dados and dados['valor_unitario'] is not None:
-            if dados['valor_unitario'] < 0:
-                raise ValueError("Valor unitário não pode ser negativo")
-            self.valor_unitario = dados['valor_unitario']
-            
-        if 'estoque_minimo' in dados and dados['estoque_minimo'] is not None:
-            if dados['estoque_minimo'] < 0:
-                raise ValueError("Estoque mínimo não pode ser negativo")
-            self.estoque_minimo = dados['estoque_minimo']
-            
-        if 'estoque_atual' in dados and dados['estoque_atual'] is not None:
-            if dados['estoque_atual'] < 0:
-                raise ValueError("Estoque atual não pode ser negativo")
-            self.estoque_atual = dados['estoque_atual']
-            
-        # Atualizar datas com validação
-        if 'data_validade' in dados:
-            self.data_validade = dados['data_validade']
-            
-        if 'data_compra' in dados:
-            if dados['data_compra'] and dados['data_compra'] > datetime.utcnow():
-                raise ValueError("Data de compra não pode ser futura")
-            self.data_compra = dados['data_compra']
-            
-        # Atualizar associações com módulos
-        if 'modules_used' in dados and dados['modules_used'] is not None:
-            self.modules_used = dados['modules_used']
-            
-        # Atualizar data de modificação
+    def reativar(self) -> None:
+        """
+        Reativa o insumo.
+        """
+        self.is_active = True
         self.updated_at = datetime.utcnow()
