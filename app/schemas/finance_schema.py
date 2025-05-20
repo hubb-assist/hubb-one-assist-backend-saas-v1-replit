@@ -79,6 +79,22 @@ class ProfitCalculation(BaseModel):
     gross_profit: condecimal(decimal_places=2)
     net_profit: condecimal(decimal_places=2)
 
+# --- LIST RESPONSES ---
+class PayableListResponse(BaseModel):
+    items: List[PayableResponse]
+    total: int
+
+class ReceivableListResponse(BaseModel):
+    items: List[ReceivableResponse]
+    total: int
+
+# --- RESPONSE WRAPPERS ---
+class CashFlowResponse(CashFlowSummary):
+    pass
+
+class ProfitResponse(ProfitCalculation):
+    pass
+
 # --- FILTER PARAMETERS ---
 class FinanceFilterParams(BaseModel):
     date_from: Optional[date] = None
