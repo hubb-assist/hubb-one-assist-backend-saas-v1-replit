@@ -7,6 +7,7 @@ from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 
 from app.db.session import Base
+from sqlalchemy.orm import relationship
 
 
 class Segment(Base):
@@ -21,3 +22,6 @@ class Segment(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relacionamentos
+    subscribers = relationship("Subscriber", back_populates="segment")

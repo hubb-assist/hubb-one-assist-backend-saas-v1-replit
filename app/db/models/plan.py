@@ -38,6 +38,7 @@ class Plan(Base):
 
     # Relacionamentos
     modules = relationship("Module", secondary=plan_module, back_populates="plans")
+    subscribers = relationship("Subscriber", back_populates="plan")
 
 
 class PlanModule(Base):

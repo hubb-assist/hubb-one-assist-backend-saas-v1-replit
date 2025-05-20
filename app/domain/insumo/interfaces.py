@@ -1,116 +1,95 @@
 """
-Interfaces abstratas para repositórios do domínio Insumo.
-Seguindo o Princípio de Inversão de Dependência (DIP).
+Interfaces para o domínio de Insumos.
 """
 from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
-from app.schemas.insumo import InsumoCreate, InsumoUpdate
 
 
-class InsumoRepository(ABC):
+class InsumoRepositoryInterface(ABC):
     """
-    Repositório abstrato para Insumos.
-    Define os métodos que qualquer implementação concreta deve fornecer.
+    Interface para o repositório de Insumos.
     """
     
     @abstractmethod
-    def create(self, insumo_data: InsumoCreate, subscriber_id: UUID) -> InsumoEntity:
+    def create(self, entity: InsumoEntity) -> InsumoEntity:
         """
-        Cria um novo insumo.
+        Cria um novo insumo no repositório.
         
         Args:
-            insumo_data: Dados do insumo a ser criado
-            subscriber_id: ID do assinante para associação (multitenancy)
+            entity: Entidade de Insumo a ser criada.
             
         Returns:
-            InsumoEntity: Entidade de insumo criada
+            InsumoEntity: Entidade criada com ID.
+        """
+        pass
+    
+    @abstractmethod
+    def get_by_id(self, insumo_id: UUID, subscriber_id: UUID) -> InsumoEntity:
+        """
+        Obtém um insumo pelo ID.
+        
+        Args:
+            insumo_id: ID do insumo a ser obtido.
+            subscriber_id: ID do assinante proprietário do insumo.
+            
+        Returns:
+            InsumoEntity: Entidade de Insumo encontrada.
             
         Raises:
-            HTTPException: Se houver algum erro na criação
+            EntityNotFoundException: Se o insumo não for encontrado.
         """
         pass
     
     @abstractmethod
-    def get_by_id(self, insumo_id: UUID, subscriber_id: UUID) -> Optional[InsumoEntity]:
-        """
-        Busca um insumo pelo seu ID.
-        
-        Args:
-            insumo_id: ID do insumo a ser buscado
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            
-        Returns:
-            Optional[InsumoEntity]: Entidade de insumo se encontrada, None caso contrário
-        """
-        pass
-    
-    @abstractmethod
-    def update(self, insumo_id: UUID, insumo_data: InsumoUpdate, subscriber_id: UUID) -> Optional[InsumoEntity]:
+    def update(self, entity: InsumoEntity) -> InsumoEntity:
         """
         Atualiza um insumo existente.
         
         Args:
-            insumo_id: ID do insumo a ser atualizado
-            insumo_data: Dados a serem atualizados
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            entity: Entidade de Insumo com os dados atualizados.
             
         Returns:
-            Optional[InsumoEntity]: Entidade de insumo atualizada, None se não encontrada
+            InsumoEntity: Entidade atualizada.
             
         Raises:
-            HTTPException: Se houver algum erro na atualização
+            EntityNotFoundException: Se o insumo não for encontrado.
         """
         pass
     
     @abstractmethod
-    def delete(self, insumo_id: UUID, subscriber_id: UUID) -> bool:
+    def delete(self, insumo_id: UUID, subscriber_id: UUID) -> None:
         """
-        Desativa um insumo logicamente.
+        Exclui logicamente um insumo (soft delete).
         
         Args:
-            insumo_id: ID do insumo a ser desativado
-            subscriber_id: ID do assinante (isolamento multitenancy)
+            insumo_id: ID do insumo a ser excluído.
+            subscriber_id: ID do assinante proprietário do insumo.
             
-        Returns:
-            bool: True se desativado com sucesso, False caso contrário
+        Raises:
+            EntityNotFoundException: Se o insumo não for encontrado.
         """
         pass
     
     @abstractmethod
-    def list_all(
-        self,
-        subscriber_id: UUID,
-        skip: int = 0,
-        limit: int = 100,
-        filters: Optional[Dict[str, Any]] = None
-    ) -> List[InsumoEntity]:
+    def list(self, 
+             subscriber_id: UUID,
+             skip: int = 0,
+             limit: int = 100,
+             filters: Optional[Dict[str, Any]] = None,
+             ) -> List[InsumoEntity]:
         """
-        Lista todos os insumos com paginação e filtros opcionais.
+        Lista insumos com paginação e filtros opcionais.
         
         Args:
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            skip: Quantidade de registros para pular
-            limit: Limite de registros a retornar
-            filters: Filtros adicionais como categoria ou módulos
+            subscriber_id: ID do assinante proprietário dos insumos.
+            skip: Número de registros a pular (para paginação).
+            limit: Número máximo de registros a retornar.
+            filters: Filtros opcionais a serem aplicados.
             
         Returns:
-            List[InsumoEntity]: Lista de entidades de insumo
-        """
-        pass
-    
-    @abstractmethod
-    def count(self, subscriber_id: UUID, filters: Optional[Dict[str, Any]] = None) -> int:
-        """
-        Conta o número total de insumos com base nos filtros.
-        
-        Args:
-            subscriber_id: ID do assinante (isolamento multitenancy)
-            filters: Filtros adicionais como categoria ou módulos
-            
-        Returns:
-            int: Número total de insumos
+            List[InsumoEntity]: Lista de entidades de Insumo.
         """
         pass
