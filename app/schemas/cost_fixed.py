@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Optional, List
+from typing import Optional, List, Any
 from uuid import UUID
 from pydantic import BaseModel, Field, field_validator
 
@@ -55,3 +55,15 @@ class CostFixedListResponse(BaseModel):
     total: int
     skip: int
     limit: int
+    
+    @classmethod
+    def from_entities(cls, entities: List[Any], total: int, skip: int, limit: int):
+        """
+        Cria uma resposta de lista a partir de uma lista de entidades.
+        """
+        return cls(
+            items=[CostFixedResponse.model_validate(entity.__dict__) for entity in entities],
+            total=total,
+            skip=skip,
+            limit=limit
+        )
