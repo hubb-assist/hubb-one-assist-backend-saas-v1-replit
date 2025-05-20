@@ -1,0 +1,174 @@
+Implementar o repositório SQLAlchemy (em app/infrastructure/repositories/cost_clinical_sqlalchemy.py) e
+
+Criar os use cases (em app/application/use_cases/cost_clinical_use_cases.py).
+
+Me avise quando quiser ir para essa etapa!
+
+
+
+
+
+
+Você disse:
+pode mandar
+
+
+O ChatGPT disse:
+
+Pensou por 29 segundos
+6. Repositório SQLAlchemy
+📁 app/infrastructure/repositories/cost_clinical_sqlalchemy.py
+
+python
+Copiar
+Editar
+from typing import List, Optional
+from uuid import UUID
+from datetime import date
+from sqlalchemy.orm import Session
+from app.domain.cost_clinical.interfaces import ICostClinicalRepository
+from app.domain.cost_clinical.entities import CostClinicalEntity
+from app.db.models_cost_clinical import CostClinical
+from app.schemas.custo_clinico import CostClinicalCreate, CostClinicalUpdate
+
+class CostClinicalSQLAlchemyRepository(ICostClinicalRepository):
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, data: CostClinicalCreate, subscriber_id: UUID) -> CostClinicalEntity:
+        total_cost = float(data.duration_hours) * float(data.hourly_rate)
+        inst = CostClinical(
+            subscriber_id=subscriber_id,
+            procedure_name=data.procedure_name,
+            duration_hours=data.duration_hours,
+            hourly_rate=data.hourly_rate,
+            total_cost=total_cost,
+            date=data.date,
+            observacoes=data.observacoes
+        )
+        self.db.add(inst)
+        self.db.commit()
+        self.db.refresh(inst)
+        return self._to_entity(inst)
+
+    def get_by_id(self, id: UUID, subscriber_id: UUID) -> Optional[CostClinicalEntity]:
+        inst = (
+            self.db.query(CostClinical)
+            .filter_by(id=id, subscriber_id=subscriber_id, is_active=True)
+            .first()
+        )
+        return self._to_entity(inst) if inst else None
+
+    def update(self, id: UUID, data: CostClinicalUpdate, subscriber_id: UUID) -> CostClinicalEntity:
+        inst = self.db.query(CostClinical).filter_by(id=id, subscriber_id=subscriber_id).first()
+        if not inst:
+            return None
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(inst, field, value)
+        # recalcular total se horas ou tarifa mudaram
+        inst.total_cost = float(inst.duration_hours) * float(inst.hourly_rate)
+        self.db.commit()
+        self.db.refresh(inst)
+        return self._to_entity(inst)
+
+    def delete(self, id: UUID, subscriber_id: UUID) -> None:
+        inst = self.db.query(CostClinical).filter_by(id=id, subscriber_id=subscriber_id).first()
+        if inst:
+            inst.is_active = False
+            self.db.commit()
+
+    def list_all(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        date_from: date = None,
+        date_to: date = None
+    ) -> List[CostClinicalEntity]:
+        query = (
+            self.db.query(CostClinical)
+            .filter_by(subscriber_id=subscriber_id, is_active=True)
+        )
+        if date_from:
+            query = query.filter(CostClinical.date >= date_from)
+        if date_to:
+            query = query.filter(CostClinical.date <= date_to)
+        results = query.order_by(CostClinical.date.desc()).offset(skip).limit(limit).all()
+        return [self._to_entity(r) for r in results]
+
+    def _to_entity(self, model: CostClinical) -> CostClinicalEntity:
+        return CostClinicalEntity(
+            id=model.id,
+            subscriber_id=model.subscriber_id,
+            procedure_name=model.procedure_name,
+            duration_hours=float(model.duration_hours),
+            hourly_rate=float(model.hourly_rate),
+            total_cost=float(model.total_cost),
+            date=model.date,
+            observacoes=model.observacoes,
+            is_active=model.is_active,
+            created_at=model.created_at,
+            updated_at=model.updated_at,
+        )
+7. Use Cases
+📁 app/application/use_cases/cost_clinical_use_cases.py
+
+python
+Copiar
+Editar
+from uuid import UUID
+from datetime import date
+from typing import List, Optional
+from app.domain.cost_clinical.interfaces import ICostClinicalRepository
+from app.domain.cost_clinical.entities import CostClinicalEntity
+from app.schemas.custo_clinico import CostClinicalCreate, CostClinicalUpdate
+
+class CreateCostClinicalUseCase:
+    def __init__(self, repo: ICostClinicalRepository):
+        self.repo = repo
+
+    def execute(self, data: CostClinicalCreate, subscriber_id: UUID) -> CostClinicalEntity:
+        return self.repo.create(data, subscriber_id)
+
+class GetCostClinicalUseCase:
+    def __init__(self, repo: ICostClinicalRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID) -> CostClinicalEntity:
+        inst = self.repo.get_by_id(id, subscriber_id)
+        if not inst:
+            raise ValueError("Custo clínico não encontrado")
+        return inst
+
+class UpdateCostClinicalUseCase:
+    def __init__(self, repo: ICostClinicalRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, data: CostClinicalUpdate, subscriber_id: UUID) -> CostClinicalEntity:
+        inst = self.repo.update(id, data, subscriber_id)
+        if not inst:
+            raise ValueError("Custo clínico não encontrado para atualização")
+        return inst
+
+class DeleteCostClinicalUseCase:
+    def __init__(self, repo: ICostClinicalRepository):
+        self.repo = repo
+
+    def execute(self, id: UUID, subscriber_id: UUID) -> None:
+        self.repo.delete(id, subscriber_id)
+
+class ListCostClinicalUseCase:
+    def __init__(self, repo: ICostClinicalRepository):
+        self.repo = repo
+
+    def execute(
+        self,
+        subscriber_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        date_from: Optional[date] = None,
+        date_to: Optional[date] = None
+    ) -> List[CostClinicalEntity]:
+        return self.repo.list_all(subscriber_id, skip, limit, date_from, date_to)
+Com isso, o repositório e os use cases do submódulo Custos Clínicos estão concluídos.
+Próximo passo: montar o router FastAPI (/custos/clinicos) e depois adicionar testes.
