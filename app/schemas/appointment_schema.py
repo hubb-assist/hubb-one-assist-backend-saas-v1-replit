@@ -1,61 +1,72 @@
 """
-Schemas Pydantic para o módulo de Agendamentos
+Esquemas Pydantic para o módulo de Agendamentos
 """
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 from uuid import UUID
 from pydantic import BaseModel, Field, validator
 
 class AppointmentBase(BaseModel):
-    """Schema base para agendamentos"""
-    patient_id: UUID
-    provider_id: int
-    service_name: str
-    start_time: datetime
-    end_time: datetime
-    notes: Optional[str] = None
-    status: str = "scheduled"
-
+    """
+    Esquema base para agendamentos
+    """
+    patient_id: UUID = Field(..., description="ID do paciente")
+    provider_id: int = Field(..., description="ID do profissional")
+    service_name: str = Field(..., description="Nome do serviço")
+    start_time: datetime = Field(..., description="Data e hora de início")
+    end_time: datetime = Field(..., description="Data e hora de término")
+    notes: Optional[str] = Field(None, description="Observações adicionais")
+    
     @validator('end_time')
-    def end_time_after_start_time(cls, v, values):
-        """Valida que o horário de término é após o horário de início"""
+    def end_time_must_be_after_start_time(cls, v, values):
+        """
+        Valida se o horário de término é posterior ao de início
+        """
         if 'start_time' in values and v <= values['start_time']:
-            raise ValueError('O horário de término deve ser após o horário de início')
+            raise ValueError('O horário de término deve ser posterior ao horário de início')
         return v
-
+    
 class AppointmentCreate(AppointmentBase):
-    """Schema para criação de agendamentos"""
-    pass
-
+    """
+    Esquema para criação de agendamentos
+    """
+    status: Optional[str] = Field("scheduled", description="Status do agendamento")
+    
 class AppointmentUpdate(BaseModel):
-    """Schema para atualização de agendamentos"""
-    patient_id: Optional[UUID] = None
-    provider_id: Optional[int] = None
-    service_name: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    notes: Optional[str] = None
-    status: Optional[str] = None
-
+    """
+    Esquema para atualização de agendamentos
+    """
+    patient_id: Optional[UUID] = Field(None, description="ID do paciente")
+    provider_id: Optional[int] = Field(None, description="ID do profissional")
+    service_name: Optional[str] = Field(None, description="Nome do serviço")
+    start_time: Optional[datetime] = Field(None, description="Data e hora de início")
+    end_time: Optional[datetime] = Field(None, description="Data e hora de término")
+    status: Optional[str] = Field(None, description="Status do agendamento")
+    notes: Optional[str] = Field(None, description="Observações adicionais")
+    
     @validator('end_time')
-    def end_time_after_start_time(cls, v, values):
-        """Valida que o horário de término é após o horário de início"""
-        if v and 'start_time' in values and values['start_time'] and v <= values['start_time']:
-            raise ValueError('O horário de término deve ser após o horário de início')
+    def end_time_must_be_after_start_time(cls, v, values):
+        """
+        Valida se o horário de término é posterior ao de início, quando ambos estão presentes
+        """
+        if v is None:
+            return v
+            
+        start_time = values.get('start_time')
+        if start_time and v <= start_time:
+            raise ValueError('O horário de término deve ser posterior ao horário de início')
         return v
-
+    
 class AppointmentResponse(AppointmentBase):
-    """Schema para resposta de agendamentos"""
+    """
+    Esquema para resposta de agendamentos
+    """
     id: UUID
     subscriber_id: UUID
+    status: str
     is_active: bool
     created_at: datetime
-    updated_at: datetime
-
+    updated_at: Optional[datetime] = None
+    
     class Config:
-        """Configuração do schema"""
-        from_attributes = True
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat(),
-            UUID: lambda uuid: str(uuid)
-        }
+        orm_mode = True
