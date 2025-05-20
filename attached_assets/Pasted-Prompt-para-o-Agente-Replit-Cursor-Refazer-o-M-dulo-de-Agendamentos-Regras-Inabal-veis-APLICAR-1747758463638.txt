@@ -1,0 +1,117 @@
+Prompt para o Agente (Replit/Cursor): Refazer o Módulo de Agendamentos
+
+Regras Inabaláveis — APLICAR antes de qualquer alteração
+
+Escopo Atômico: só crie ou edite os arquivos listados abaixo. Não remova, renomeie ou crie pastas/arquivos extras.
+
+Naming & Colisões: use nomes únicos de arquivo (models_appointment.py, schemas/appointment_schema.py, etc.). Não crie pastas que conflitem com arquivos existentes.
+
+Migrations Controladas: gere UMA migration Alembic por vez, ajustando down_revision corretamente. Após criar a migration, execute alembic upgrade head e VERIFIQUE o schema no banco.
+
+Sem Flask: proíbido usar Flask ou arquivos main_flask.py. Só ASGI com Uvicorn/Gunicorn+UvicornWorker.
+
+Health-Check Obrigatório: garanta em app/main.py:
+
+python
+Copiar
+Editar
+@app.get("/", tags=["health"])
+async def health_check():
+    return {"status":"ok"}
+Teste Local Antes de Avançar: após cada etapa, faça curl -i http://localhost:5000/ e confirme 200 OK. Use Swagger UI para validar novos endpoints.
+
+Versionamento: commit e push de cada etapa antes de iniciar a próxima.
+
+Sem Installs Automáticos: não instale ou remova dependências sem revisão manual de requirements.txt.
+
+Revisão Manual de Diff: todo PR será verificado contra essas regras antes de merge.
+
+Tarefa: Refazer o Módulo de Agendamento de Pacientes
+Passo 1: Migration Alembic
+
+Crie alembic/versions/<nova_revision>_create_appointments_table.py com:
+
+Tabela appointments
+
+Colunas: id (UUID), subscriber_id (FK subscribers.id), patient_id (FK patients.id),
+provider_id (FK users.id), service_id (FK services.id),
+start_time (DateTime), end_time (DateTime), status (String) default="scheduled",
+notes (Text), is_active (Boolean), created_at, updated_at
+
+Índice em (provider_id, start_time, end_time) para buscas de conflitos.
+
+Passo 2: Modelo SQLAlchemy
+
+Crie app/db/models_appointment.py definindo a classe Appointment conforme o schema acima.
+
+Passo 3: Schemas Pydantic
+
+Crie app/schemas/appointment_schema.py com:
+
+AppointmentBase (sem IDs nem timestamps)
+
+AppointmentCreate (todos os campos obrigatórios exceto notes)
+
+AppointmentUpdate (todos opcionais)
+
+AppointmentResponse (inclui id, subscriber_id, status, timestamps, etc.)
+
+Passo 4: Camada de Domínio
+
+app/domain/appointment/entities.py: AppointmentEntity com todos os atributos.
+
+app/domain/appointment/interfaces.py: IAppointmentRepository definindo:
+
+create(data, subscriber_id)
+
+get_by_id(id, subscriber_id)
+
+update(id, data, subscriber_id)
+
+delete(id, subscriber_id) (soft delete ou status “cancelled”)
+
+list_all(subscriber_id, skip, limit, date_from?, date_to?, patient_id?, provider_id?, status?)
+
+Passo 5: Infraestrutura / Repositório
+
+app/infrastructure/repositories/appointment_sqlalchemy.py: implemente IAppointmentRepository usando SQLAlchemy, incluindo lógica de checagem de horários conflitantes (garantir que não haja dois agendamentos sobrepostos para o mesmo provider_id).
+
+Passo 6: Casos de Uso
+
+app/application/use_cases/appointment_use_cases.py com classes:
+
+CreateAppointmentUseCase (valida conflitos e agenda)
+
+GetAppointmentUseCase
+
+UpdateAppointmentUseCase (reagendamento e mudança de status)
+
+CancelAppointmentUseCase
+
+ListAppointmentsUseCase (filtros e paginação)
+
+Passo 7: Router FastAPI
+
+app/api/routes/appointment_router.py com prefixo /agendamentos:
+
+POST /agendamentos/ → criar
+
+GET /agendamentos/ → listar (com query params)
+
+GET /agendamentos/{id} → detalhes
+
+PUT /agendamentos/{id} → reagendar/mudar status
+
+DELETE /agendamentos/{id} → cancelar
+
+Ação Imediata:
+
+Inicie pelo Passo 1 (migration + alembic upgrade head).
+
+Comprove com curl e Swagger UI.
+
+Commit & Push.
+
+Só então passe ao Passo 2.
+
+Atenção: qualquer violação das regras inabaláveis deve resultar em recusa imediata da tarefa.
