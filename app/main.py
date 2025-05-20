@@ -47,6 +47,8 @@ from app.api.routes_relatorios_custos import router as relatorios_custos_router
 from app.api.routes.appointment_router import router as appointment_router
 # Rotas para o módulo Financeiro (Contas a Pagar, Contas a Receber, Fluxo de Caixa e Lucro)
 from app.api.routes.finance_router import router as finance_router
+# Rotas para o módulo de Anamnese
+from app.api.routes.anamnesis_router import router as anamnesis_router
 # Rotas de compatibilidade para URLs incorretas ou legadas que o frontend possa tentar usar
 from app.api.routes_api_compatibility import router as compatibility_router, external_api_router
 # Rota especial para tratar problemas de CORS com subscribers
