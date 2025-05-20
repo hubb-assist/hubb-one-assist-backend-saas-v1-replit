@@ -1,83 +1,88 @@
 """
-Caso de uso para criação de insumo.
+Caso de uso para criação de insumos.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Dict, Any, List, Optional
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
+from app.domain.insumo.value_objects.modulo_association import ModuloAssociation
 
 
 class CreateInsumoUseCase:
     """
-    Caso de uso para criação de um novo insumo.
+    Caso de uso para criar um novo insumo.
     
-    Implementa a lógica de negócio para criar um insumo,
-    sem depender de detalhes específicos de banco de dados ou framework.
+    Orquestra a validação, criação e persistência de um novo insumo
+    seguindo as regras de negócio definidas na entidade de domínio.
     """
     
-    def __init__(self, insumo_repository: InsumoRepositoryInterface):
+    def __init__(self, repository: InsumoRepositoryInterface):
         """
-        Inicializa o caso de uso com o repositório de insumos.
+        Inicializa o caso de uso com uma implementação de repositório.
         
         Args:
-            insumo_repository: Repositório de insumos que segue a interface definida
+            repository: Implementação do repositório de insumos
         """
-        self.insumo_repository = insumo_repository
+        self.repository = repository
     
-    def execute(self,
-                nome: str,
-                descricao: str,
-                categoria: str,
-                valor_unitario: float,
-                unidade_medida: str,
-                estoque_minimo: int,
-                estoque_atual: int,
-                subscriber_id: UUID,
-                fornecedor: Optional[str] = None,
-                codigo_referencia: Optional[str] = None,
-                data_validade: Optional[str] = None,
-                data_compra: Optional[str] = None,
-                observacoes: Optional[str] = None,
-                modules_used: Optional[List[Dict[str, Any]]] = None) -> InsumoEntity:
+    def execute(
+        self,
+        nome: str,
+        descricao: str,
+        categoria: str,
+        valor_unitario: float,
+        unidade_medida: str,
+        estoque_minimo: int,
+        estoque_atual: int,
+        subscriber_id: UUID,
+        fornecedor: Optional[str] = None,
+        codigo_referencia: Optional[str] = None,
+        data_validade: Optional[str] = None,
+        data_compra: Optional[str] = None,
+        observacoes: Optional[str] = None,
+        modules_used: Optional[List[Dict[str, Any]]] = None
+    ) -> InsumoEntity:
         """
-        Executa o caso de uso de criação de insumo.
+        Executa o caso de uso para criar um novo insumo.
         
         Args:
             nome: Nome do insumo
             descricao: Descrição detalhada
             categoria: Categoria do insumo
-            valor_unitario: Valor unitário
-            unidade_medida: Unidade de medida
-            estoque_minimo: Estoque mínimo recomendado
-            estoque_atual: Estoque atual
-            subscriber_id: ID do assinante proprietário
+            valor_unitario: Valor unitário (deve ser positivo)
+            unidade_medida: Unidade de medida (ex: kg, unid)
+            estoque_minimo: Quantidade mínima desejada em estoque
+            estoque_atual: Quantidade atual em estoque
+            subscriber_id: ID do assinante a que pertence o insumo
             fornecedor: Nome do fornecedor (opcional)
-            codigo_referencia: Código de referência (opcional)
+            codigo_referencia: Código interno ou do fornecedor (opcional)
             data_validade: Data de validade (opcional)
-            data_compra: Data de compra (opcional)
-            observacoes: Observações adicionais (opcional)
-            modules_used: Lista de módulos que usam este insumo (opcional)
+            data_compra: Data da última compra (opcional)
+            observacoes: Anotações gerais (opcional)
+            modules_used: Lista de associações com módulos (opcional)
             
         Returns:
             InsumoEntity: Entidade de insumo criada
-        
+            
         Raises:
-            ValueError: Se os dados forem inválidos
+            ValueError: Se algum dado for inválido
         """
-        # Validações básicas
-        if valor_unitario <= 0:
-            raise ValueError("Valor unitário deve ser maior que zero")
+        # Converter associações de módulos para objetos de valor, se fornecidos
+        modulos = []
+        if modules_used:
+            for module_data in modules_used:
+                module = ModuloAssociation(
+                    module_id=module_data["module_id"],
+                    quantidade_padrao=module_data.get("quantidade_padrao", 1),
+                    observacao=module_data.get("observacao"),
+                    module_nome=module_data.get("module_nome")
+                )
+                modulos.append(module)
         
-        if estoque_minimo < 0:
-            raise ValueError("Estoque mínimo não pode ser negativo")
-        
-        if estoque_atual < 0:
-            raise ValueError("Estoque atual não pode ser negativo")
-        
-        # Criar insumo no repositório
-        insumo = self.insumo_repository.create(
+        # Criar a entidade de domínio, que validará os dados de acordo com regras de negócio
+        insumo = InsumoEntity(
             nome=nome,
             descricao=descricao,
             categoria=categoria,
@@ -91,7 +96,10 @@ class CreateInsumoUseCase:
             data_validade=data_validade,
             data_compra=data_compra,
             observacoes=observacoes,
-            modules_used=modules_used
+            modules_used=modulos
         )
         
-        return insumo
+        # Persistir no repositório
+        created_insumo = self.repository.create(insumo)
+        
+        return created_insumo
