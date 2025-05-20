@@ -24,8 +24,8 @@ def upgrade():
         sa.Column('id', UUID(as_uuid=True), primary_key=True, default=uuid.uuid4),
         sa.Column('subscriber_id', UUID(as_uuid=True), nullable=False),
         sa.Column('patient_id', UUID(as_uuid=True), nullable=False),
-        sa.Column('provider_id', UUID(as_uuid=True), nullable=False),
-        sa.Column('service_id', UUID(as_uuid=True), nullable=False),
+        sa.Column('provider_id', sa.Integer(), nullable=False),
+        sa.Column('service_name', sa.String(255), nullable=False),
         sa.Column('start_time', sa.DateTime(), nullable=False),
         sa.Column('end_time', sa.DateTime(), nullable=False),
         sa.Column('status', sa.String(50), nullable=False, default='scheduled'),
@@ -36,7 +36,6 @@ def upgrade():
         sa.ForeignKeyConstraint(['subscriber_id'], ['subscribers.id'], name='fk_appointment_subscriber'),
         sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], name='fk_appointment_patient'),
         sa.ForeignKeyConstraint(['provider_id'], ['users.id'], name='fk_appointment_provider'),
-        sa.ForeignKeyConstraint(['service_id'], ['services.id'], name='fk_appointment_service'),
     )
     
     # Criar índice para busca de conflitos de horário
