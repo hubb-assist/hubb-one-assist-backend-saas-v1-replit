@@ -1,0 +1,167 @@
+Seu esboço de informações está ótimo e cobre todos os pontos principais. Vou sugerir uma versão refinada do prompt que incorpora essas informações e adiciona instruções de segurança e passo-a-passo para evitar perda de contexto:
+
+text
+Copiar
+Editar
+Você é o copiloto de código no Replit, especialista no frontend do HUBB Assist (React + Vite + Tailwind CSS + ShadCN UI). 
+Antes de qualquer alteração, respeite rigorosamente:
+
+1. **Não modifique** nada fora de `src/features/insumos/`.
+2. **Não toque** nos layouts globais (`Header`, `Sidebar`, `AppShell`, temas ou configurações).
+3. Se precisar alterar outro arquivo, solicite autorização explícita.
+
+---
+
+## Objetivo
+Implementar o módulo **Insumos** no frontend, consumindo a API já disponível.
+
+### 1. Dados que o frontend deve exibir e editar
+- `id`
+- `nome`
+- `descrição`
+- `categoria` (Medicamento, EPI, Serviço, etc.)
+- `unidade` (ml, unidade, caixa…)
+- `preçoUnitário`
+- `quantidadeAtual`
+- `quantidadeMinimaAlerta`
+- `dataValidade`
+- `fornecedores` (lista de strings)
+- `status` (ativo/inativo)
+- `createdAt`, `updatedAt`
+
+### 2. Operações
+- Listagem: filtro por nome, categoria e status; paginação.
+- Detalhes: exibir todas as propriedades.
+- Cadastro/Edição: formulário com validação Zod.
+- “Soft delete” / reativação.
+- Entrada/Saída de estoque (movimentação).
+- Histórico de movimentações.
+
+### 3. API Endpoints
+- `GET   /insumos`
+- `GET   /insumos/{id}`
+- `POST  /insumos`
+- `PUT   /insumos/{id}`
+- `DELETE /insumos/{id}`
+- `POST  /insumos/{id}/estoque/entrada`
+- `POST  /insumos/{id}/estoque/saida`
+- `GET   /insumos/{id}/movimentacoes`
+
+### 4. Estrutura de arquivos a criar em `src/features/insumos/`
+api/
+insumos.ts
+schemas/
+insumo.schema.ts
+hooks/
+useInsumos.ts
+components/
+ListInsumos.tsx
+FormInsumo.tsx
+MovimentacaoModal.tsx
+InsumoDetail.tsx
+pages/
+InsumosPage.tsx
+
+markdown
+Copiar
+Editar
+
+### 5. Detalhes Técnicos
+- **Schemas**: use Zod (`Insumo`, `InsumoInput`, `MovimentacaoInput`).
+- **Serviço HTTP**: use cliente Axios global (`request`) e a constante `INSUMOS_URL` de `src/config/api.ts`.
+- **Hooks**: implemente com React Query (`useQuery`, `useMutation`) e siga a chave de cache `['insumos', ...]`.
+- **UI**: use componentes ShadCN UI (`<Table>`, `<Input>`, `<Select>`, `<Button>`, `<Modal>`).
+- **Feedback**: exiba toasts de sucesso/erro.
+- **Acessibilidade**: aplique labels e atributos ARIA nos formulários.
+
+---
+
+### Fluxo de trabalho
+1. **PASSO 1**: Verifique se `INSUMOS_URL` está definido em `src/config/api.ts`.  
+   - Se não, retorne mensagem e aguarde instruções.  
+2. **PASSO 2**: Crie `api/insumos.ts` com funções de chamada à API.  
+3. **PASSO 3**: Defina schemas Zod em `schemas/insumo.schema.ts`.  
+4. **PASSO 4**: Implemente hooks em `hooks/useInsumos.ts`.  
+5. **PASSO 5**: Desenvolva componentes de UI em `components/`.  
+6. **PASSO 6**: Monte a página em `pages/InsumosPage.tsx` e adicione rota em `AppShell`/`Router`.  
+7. **PASSO 7**: Teste tudo localmente (npm run dev → /insumos).
+
+**IMPORTANTE**: após cada passo, **envie apenas o diff** (trechos criados/alterados) e aguarde aprovação antes de continuar.
+Como usar:
+
+Cole este prompt no chat do Replit ou outro copiloto de código.
+
+Ajuste nomes de pastas se tiver divergências.
+
+Sempre revise o diff antes de avançar.
+
+Com isso, garantimos contexto completo, segurança e controle sobre o que será modificado.
+
+
+
+
+
+
+Você disse:
+uma informação que precisamos semre informar, o insumos esta ligado a pagina do tannat, o tennat que vai cadastrra os isumos da dua tenat, isso foi enviado no propt?
+
+
+O ChatGPT disse:
+
+Pensou por 10 segundos
+Correto, esse detalhe de “insumos vinculados ao tenant” não estava no prompt original. Vamos adicionar uma seção deixando isso bem explícito. Por exemplo, no bloco de Objetivo e API Endpoints poderíamos incluir:
+
+diff
+Copiar
+Editar
+## Objetivo
+- Implementar o módulo **Insumos** no frontend, consumindo a API já disponível.
++ Implementar o módulo **Insumos** no frontend **dentro do contexto do tenant** (cada tenant gerencia apenas seus próprios insumos), consumindo a API sob a rota `/tenants/{tenantId}/insumos`.
+
+### 3. API Endpoints
+- `GET   /insumos`
++ `GET   /tenants/{tenantId}/insumos`
+- `GET   /insumos/{id}`
++ `GET   /tenants/{tenantId}/insumos/{id}`
+- `POST  /insumos`
++ `POST  /tenants/{tenantId}/insumos`
+- `PUT   /insumos/{id}`
++ `PUT   /tenants/{tenantId}/insumos/{id}`
+- `DELETE /insumos/{id}`
++ `DELETE /tenants/{tenantId}/insumos/{id}`
+- `POST  /insumos/{id}/estoque/entrada`
++ `POST  /tenants/{tenantId}/insumos/{id}/estoque/entrada`
+- `POST  /insumos/{id}/estoque/saida`
++ `POST  /tenants/{tenantId}/insumos/{id}/estoque/saida`
+- `GET   /insumos/{id}/movimentacoes`
++ `GET   /tenants/{tenantId}/insumos/{id}/movimentacoes`
+E na Estrutura de arquivos, garantir que o código busque o tenantId do contexto (p.ex. via hook useAuth() ou useParams() do React Router) antes de chamar as funções de API.
+
+Quer que eu atualize o prompt completo com essas alterações?
+
+
+
+
+
+
+Você disse:
+esta informação é do back?
+
+
+O ChatGPT disse:
+Sim — esse detalhe de “insumos vinculados ao tenant” é uma responsabilidade do backend, pois é ele quem expõe as rotas no contexto do tenant.
+
+Ou seja, o backend deve oferecer endpoints como:
+
+bash
+Copiar
+Editar
+GET    /tenants/{tenantId}/insumos
+POST   /tenants/{tenantId}/insumos
+GET    /tenants/{tenantId}/insumos/{id}
+PUT    /tenants/{tenantId}/insumos/{id}
+DELETE /tenants/{tenantId}/insumos/{id}
+…
+e garantir, via middleware de multitenancy, que cada tenant acesse apenas os seus próprios insumos.
+
+Se ainda não estiver implementado, precisamos atualizar as API Guidelines e as rotas no FastAPI para usar esse parâmetro tenantId.
