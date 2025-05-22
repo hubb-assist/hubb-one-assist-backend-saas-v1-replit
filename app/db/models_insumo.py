@@ -3,14 +3,87 @@ Modelos SQLAlchemy para o domínio de Insumos.
 """
 
 from datetime import datetime
-from typing import List
-from uuid import uuid4
+from typing import List, Optional
+from uuid import UUID, uuid4
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, String, Integer, Float, DateTime, Boolean, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
+
+
+class InsumoMovimentacao(Base):
+    """
+    Modelo para o histórico de movimentações de estoque de insumos.
+    
+    Registra todas as entradas e saídas de estoque, com informações
+    de rastreabilidade como usuário responsável, motivo, quantidade e timestamps.
+    """
+    __tablename__ = "insumo_movimentacoes"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    insumo_id = Column(UUID(as_uuid=True), ForeignKey("insumos.id", ondelete="CASCADE"), nullable=False)
+    quantidade = Column(Integer, nullable=False)
+    tipo_movimento = Column(String(10), nullable=False)  # 'entrada' ou 'saida'
+    motivo = Column(String(255), nullable=True)
+    estoque_anterior = Column(Integer, nullable=False)
+    estoque_resultante = Column(Integer, nullable=False)
+    observacao = Column(String, nullable=True)
+    usuario_id = Column(UUID(as_uuid=True), nullable=True)
+    subscriber_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    
+    # Índices para otimização
+    __table_args__ = (
+        Index('ix_insumo_movimentacoes_insumo_id', 'insumo_id'),
+        Index('ix_insumo_movimentacoes_created_at', 'created_at'),
+    )
+    
+    # Relacionamentos
+    insumo = relationship("Insumo", back_populates="movimentacoes")
+    
+    def __init__(
+        self,
+        insumo_id: UUID,
+        quantidade: int,
+        tipo_movimento: str,
+        estoque_anterior: int,
+        estoque_resultante: int,
+        subscriber_id: UUID,
+        motivo: Optional[str] = None,
+        observacao: Optional[str] = None,
+        usuario_id: Optional[UUID] = None,
+        id = None,
+        created_at = None
+    ):
+        """
+        Inicializa um novo registro de movimentação de estoque.
+        
+        Args:
+            insumo_id: ID do insumo movimentado
+            quantidade: Quantidade movimentada (sempre positiva)
+            tipo_movimento: 'entrada' ou 'saida'
+            estoque_anterior: Estoque antes da movimentação
+            estoque_resultante: Estoque após a movimentação
+            subscriber_id: ID do assinante (isolamento multitenant)
+            motivo: Motivo da movimentação (opcional)
+            observacao: Detalhes adicionais (opcional)
+            usuario_id: ID do usuário responsável (opcional)
+            id: UUID da movimentação, gerado automaticamente se não fornecido
+            created_at: Data de criação do registro
+        """
+        self.id = id if id else uuid4()
+        self.insumo_id = insumo_id
+        self.quantidade = quantidade
+        self.tipo_movimento = tipo_movimento
+        self.motivo = motivo
+        self.estoque_anterior = estoque_anterior
+        self.estoque_resultante = estoque_resultante
+        self.observacao = observacao
+        self.usuario_id = usuario_id
+        self.subscriber_id = subscriber_id
+        self.created_at = created_at if created_at else datetime.utcnow()
 
 
 class InsumoModuleAssociation(Base):
@@ -34,7 +107,7 @@ class InsumoModuleAssociation(Base):
         insumo_id: UUID,
         module_id: UUID,
         quantidade_padrao: int = 1,
-        observacao: str = None
+        observacao: Optional[str] = None
     ):
         """
         Inicializa uma nova associação entre Insumo e Módulo.
@@ -81,6 +154,13 @@ class Insumo(Base):
     # Relacionamentos
     modules_used = relationship(
         "InsumoModuleAssociation",
+        back_populates="insumo",
+        cascade="all, delete-orphan"
+    )
+    
+    # Relacionamento com o histórico de movimentações
+    movimentacoes = relationship(
+        "InsumoMovimentacao",
         back_populates="insumo",
         cascade="all, delete-orphan"
     )

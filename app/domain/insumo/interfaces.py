@@ -3,7 +3,8 @@ Interfaces para o domínio de Insumo.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional, Dict, Any
+from datetime import datetime
+from typing import List, Optional, Dict, Any, Tuple
 from uuid import UUID
 
 from app.domain.insumo.entities import InsumoEntity
