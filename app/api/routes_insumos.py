@@ -330,3 +330,138 @@ def update_estoque(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao atualizar estoque: {str(e)}")
+
+
+@router.get("/{insumo_id}/movimentacoes", response_model=Dict[str, Any])
+def get_movimentacoes_por_insumo(
+    insumo_id: UUID,
+    skip: int = Query(0, ge=0, description="Quantos registros pular"),
+    limit: int = Query(100, ge=1, le=1000, description="Limite de registros a retornar"),
+    tipo_movimento: Optional[str] = Query(None, pattern=r'^(entrada|saida)$', description="Filtrar por tipo de movimento"),
+    data_inicio: Optional[datetime] = Query(None, description="Data inicial para filtro"),
+    data_fim: Optional[datetime] = Query(None, description="Data final para filtro"),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """
+    Obtém o histórico de movimentações de estoque de um insumo específico.
+    
+    Requer autenticação com um usuário que pertença ao mesmo assinante do insumo.
+    Suporta filtros por tipo de movimento e período de datas, além de paginação.
+    """
+    # Verificar se o usuário tem acesso
+    subscriber_id = getattr(current_user, "subscriber_id", None)
+    if not subscriber_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
+        )
+    
+    # Criar repositório e caso de uso
+    repository = SQLAlchemyInsumoRepository(db)
+    get_use_case = GetInsumoUseCase(repository)
+    
+    # Verificar se o insumo existe e pertence ao assinante do usuário
+    insumo = get_use_case.execute(insumo_id)
+    if not insumo:
+        raise HTTPException(status_code=404, detail="Insumo não encontrado")
+        
+    if insumo.subscriber_id != subscriber_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso não autorizado a este insumo"
+        )
+    
+    # Criar caso de uso para obter histórico de movimentações
+    movimentacoes_use_case = GetMovimentacoesUseCase(repository)
+    
+    try:
+        # Executar o caso de uso
+        movimentacoes, total = movimentacoes_use_case.execute(
+            subscriber_id=subscriber_id,
+            insumo_id=insumo_id,
+            tipo_movimento=tipo_movimento,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+            skip=skip,
+            limit=limit
+        )
+        
+        # Formatar resposta com paginação
+        result = {
+            "items": movimentacoes,
+            "total": total,
+            "skip": skip,
+            "limit": limit,
+            "insumo": {
+                "id": insumo.id,
+                "nome": insumo.nome,
+                "estoque_atual": insumo.estoque_atual,
+                "estoque_minimo": insumo.estoque_minimo,
+                "unidade_medida": insumo.unidade_medida
+            }
+        }
+        
+        return result
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao obter histórico de movimentações: {str(e)}")
+
+
+@router.get("/movimentacoes", response_model=Dict[str, Any])
+def get_todas_movimentacoes(
+    skip: int = Query(0, ge=0, description="Quantos registros pular"),
+    limit: int = Query(100, ge=1, le=1000, description="Limite de registros a retornar"),
+    insumo_id: Optional[UUID] = Query(None, description="Filtrar por ID do insumo"),
+    tipo_movimento: Optional[str] = Query(None, pattern=r'^(entrada|saida)$', description="Filtrar por tipo de movimento"),
+    data_inicio: Optional[datetime] = Query(None, description="Data inicial para filtro"),
+    data_fim: Optional[datetime] = Query(None, description="Data final para filtro"),
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """
+    Obtém o histórico de movimentações de estoque de todos os insumos do assinante.
+    
+    Requer autenticação e isolamento por multitenancy (subscriber_id).
+    Suporta filtros por insumo, tipo de movimento e período de datas, além de paginação.
+    """
+    # Verificar se o usuário tem acesso
+    subscriber_id = getattr(current_user, "subscriber_id", None)
+    if not subscriber_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
+        )
+    
+    # Criar repositório e caso de uso
+    repository = SQLAlchemyInsumoRepository(db)
+    movimentacoes_use_case = GetMovimentacoesUseCase(repository)
+    
+    try:
+        # Executar o caso de uso
+        movimentacoes, total = movimentacoes_use_case.execute(
+            subscriber_id=subscriber_id,
+            insumo_id=insumo_id,
+            tipo_movimento=tipo_movimento,
+            data_inicio=data_inicio,
+            data_fim=data_fim,
+            skip=skip,
+            limit=limit
+        )
+        
+        # Formatar resposta com paginação
+        result = {
+            "items": movimentacoes,
+            "total": total,
+            "skip": skip,
+            "limit": limit
+        }
+        
+        return result
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao obter histórico de movimentações: {str(e)}")
