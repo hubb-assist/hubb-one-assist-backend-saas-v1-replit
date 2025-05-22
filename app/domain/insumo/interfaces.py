@@ -88,7 +88,9 @@ class InsumoRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str) -> InsumoEntity:
+    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str, 
+                    motivo: Optional[str] = None, observacao: Optional[str] = None, 
+                    usuario_id: Optional[UUID] = None) -> InsumoEntity:
         """
         Atualiza o estoque de um insumo.
         
@@ -96,11 +98,42 @@ class InsumoRepositoryInterface(ABC):
             insumo_id: ID do insumo a ter estoque atualizado
             quantidade: Quantidade a ser adicionada ou removida
             tipo_movimento: 'entrada' para adicionar ou 'saida' para remover
+            motivo: Motivo da movimentação de estoque (opcional)
+            observacao: Observação adicional sobre a movimentação (opcional)
+            usuario_id: ID do usuário que realizou a movimentação (opcional)
             
         Returns:
             InsumoEntity: Entidade atualizada
             
         Raises:
             ValueError: Se o insumo não existir ou operação inválida
+        """
+        pass
+    
+    @abstractmethod
+    def get_movimentacoes(
+        self, 
+        subscriber_id: UUID, 
+        insumo_id: Optional[UUID] = None,
+        tipo_movimento: Optional[str] = None,
+        data_inicio: Optional[datetime] = None,
+        data_fim: Optional[datetime] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        """
+        Lista o histórico de movimentações de estoque de insumos com filtros.
+        
+        Args:
+            subscriber_id: ID do assinante (isolamento multitenant)
+            insumo_id: Filtrar por ID do insumo específico (opcional)
+            tipo_movimento: Filtrar por tipo de movimento ('entrada' ou 'saida') (opcional)
+            data_inicio: Filtrar por data inicial (opcional)
+            data_fim: Filtrar por data final (opcional)
+            skip: Quantos registros pular (paginação)
+            limit: Limite de registros a retornar (paginação)
+            
+        Returns:
+            Tuple[List[Dict[str, Any]], int]: Lista de movimentações e contagem total
         """
         pass

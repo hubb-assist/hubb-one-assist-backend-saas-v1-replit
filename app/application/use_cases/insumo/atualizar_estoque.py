@@ -30,7 +30,10 @@ class AtualizarEstoqueUseCase:
         self, 
         insumo_id: UUID, 
         quantidade: int, 
-        tipo_movimento: str
+        tipo_movimento: str,
+        motivo: Optional[str] = None,
+        observacao: Optional[str] = None,
+        usuario_id: Optional[UUID] = None
     ) -> Optional[InsumoEntity]:
         """
         Executa o caso de uso para atualizar o estoque de um insumo.
@@ -39,6 +42,9 @@ class AtualizarEstoqueUseCase:
             insumo_id: ID do insumo a atualizar
             quantidade: Quantidade a ser movimentada (sempre positiva)
             tipo_movimento: Tipo de movimento ('entrada' ou 'saida')
+            motivo: Motivo da movimentação (opcional)
+            observacao: Observações adicionais (opcional)
+            usuario_id: ID do usuário que realizou a movimentação (opcional)
             
         Returns:
             Optional[InsumoEntity]: Entidade atualizada ou None se não encontrada
@@ -59,7 +65,10 @@ class AtualizarEstoqueUseCase:
             return self.repository.update_stock(
                 insumo_id=insumo_id,
                 quantidade=quantidade,
-                tipo_movimento=tipo_movimento
+                tipo_movimento=tipo_movimento,
+                motivo=motivo,
+                observacao=observacao,
+                usuario_id=usuario_id
             )
         except ValueError as e:
             # Propagar erro de estoque insuficiente ou outras validações

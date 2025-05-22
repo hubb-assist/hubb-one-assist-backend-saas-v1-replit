@@ -156,12 +156,16 @@ class InsumoEstoqueMovimento(BaseModel):
     """
     quantidade: int = Field(..., gt=0, description="Quantidade a ser adicionada ou removida")
     tipo_movimento: str = Field(..., pattern=r'^(entrada|saida)$', description="Tipo de movimento: 'entrada' ou 'saida'")
+    motivo: Optional[str] = Field(None, max_length=255, description="Motivo da movimentação (ex: compra, venda, ajuste)")
+    observacao: Optional[str] = Field(None, description="Observações adicionais sobre a movimentação")
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "quantidade": 10,
-                "tipo_movimento": "entrada"
+                "tipo_movimento": "entrada",
+                "motivo": "Compra mensal",
+                "observacao": "Lote 12345, validade 01/2026"
             }
         }
     }

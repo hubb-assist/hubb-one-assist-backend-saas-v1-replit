@@ -2,6 +2,7 @@
 Rotas da API para o módulo de insumos.
 """
 
+from datetime import datetime
 from typing import Dict, Any, List, Optional
 from uuid import UUID
 
@@ -16,6 +17,7 @@ from app.application.use_cases.insumo.list_insumos import ListInsumosUseCase, Li
 from app.application.use_cases.insumo.update_insumo import UpdateInsumoUseCase
 from app.application.use_cases.insumo.delete_insumo import DeleteInsumoUseCase
 from app.application.use_cases.insumo.atualizar_estoque import AtualizarEstoqueUseCase
+from app.application.use_cases.insumo.get_movimentacoes import GetMovimentacoesUseCase
 from app.infrastructure.repositories.insumo_repository import SQLAlchemyInsumoRepository
 from app.schemas.insumo import (
     InsumoCreate,
@@ -24,6 +26,7 @@ from app.schemas.insumo import (
     InsumoEstoqueMovimento,
     InsumoFilter
 )
+from app.schemas.insumo_movimentacao import InsumoEstoqueHistoricoRequest
 
 
 router = APIRouter(prefix="/insumos", tags=["insumos"])
@@ -313,7 +316,10 @@ def update_estoque(
         updated_insumo = estoque_use_case.execute(
             insumo_id=insumo_id,
             quantidade=estoque_data.quantidade,
-            tipo_movimento=estoque_data.tipo_movimento
+            tipo_movimento=estoque_data.tipo_movimento,
+            motivo=getattr(estoque_data, "motivo", None),
+            observacao=getattr(estoque_data, "observacao", None),
+            usuario_id=getattr(current_user, "id", None)
         )
         
         if not updated_insumo:

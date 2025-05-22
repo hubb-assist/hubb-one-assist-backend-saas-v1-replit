@@ -3,13 +3,14 @@ Implementação do repositório de Insumos usando SQLAlchemy.
 """
 
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from uuid import UUID
 
+from sqlalchemy import and_, or_, func, desc, asc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from app.db.models_insumo import Insumo, InsumoModuleAssociation
+from app.db.models_insumo import Insumo, InsumoModuleAssociation, InsumoMovimentacao
 from app.domain.insumo.entities import InsumoEntity
 from app.domain.insumo.interfaces import InsumoRepositoryInterface
 from app.infrastructure.adapters.insumo_adapter import InsumoAdapter
@@ -221,7 +222,9 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
             self.db_session.rollback()
             raise ValueError(f"Erro ao remover insumo: {str(e)}")
     
-    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str) -> InsumoEntity:
+    def update_stock(self, insumo_id: UUID, quantidade: int, tipo_movimento: str, 
+                    motivo: Optional[str] = None, observacao: Optional[str] = None, 
+                    usuario_id: Optional[UUID] = None) -> InsumoEntity:
         """
         Atualiza o estoque de um insumo.
         
@@ -229,6 +232,9 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
             insumo_id: ID do insumo a ter estoque atualizado
             quantidade: Quantidade a ser adicionada ou removida
             tipo_movimento: 'entrada' para adicionar ou 'saida' para remover
+            motivo: Motivo da movimentação de estoque (opcional)
+            observacao: Observação adicional sobre a movimentação (opcional)
+            usuario_id: ID do usuário que realizou a movimentação (opcional)
             
         Returns:
             InsumoEntity: Entidade atualizada
@@ -252,6 +258,9 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
             if not insumo:
                 raise ValueError(f"Insumo com ID {insumo_id} não encontrado")
             
+            # Armazenar o estoque anterior para o histórico
+            estoque_anterior = insumo.estoque_atual
+            
             # Converter para entidade para aplicar lógica de negócio
             entity = InsumoAdapter.to_entity(insumo)
             
@@ -265,6 +274,22 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
             insumo.estoque_atual = entity.estoque_atual
             insumo.updated_at = datetime.utcnow()
             
+            # Criar o registro de movimentação no histórico
+            movimentacao = InsumoMovimentacao(
+                insumo_id=insumo_id,
+                quantidade=quantidade,
+                tipo_movimento=tipo_movimento,
+                motivo=motivo,
+                estoque_anterior=estoque_anterior,
+                estoque_resultante=insumo.estoque_atual,
+                observacao=observacao,
+                usuario_id=usuario_id,
+                subscriber_id=insumo.subscriber_id
+            )
+            
+            # Adicionar movimentação ao banco
+            self.db_session.add(movimentacao)
+            
             # Commit
             self.db_session.commit()
             
@@ -277,3 +302,102 @@ class SQLAlchemyInsumoRepository(InsumoRepositoryInterface):
         except Exception as e:
             self.db_session.rollback()
             raise ValueError(f"Erro ao atualizar estoque do insumo: {str(e)}")
+            
+    def get_movimentacoes(
+        self, 
+        subscriber_id: UUID, 
+        insumo_id: Optional[UUID] = None,
+        tipo_movimento: Optional[str] = None,
+        data_inicio: Optional[datetime] = None,
+        data_fim: Optional[datetime] = None,
+        skip: int = 0,
+        limit: int = 100
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        """
+        Lista o histórico de movimentações de estoque de insumos com filtros.
+        
+        Args:
+            subscriber_id: ID do assinante (isolamento multitenant)
+            insumo_id: Filtrar por ID do insumo específico (opcional)
+            tipo_movimento: Filtrar por tipo de movimento ('entrada' ou 'saida') (opcional)
+            data_inicio: Filtrar por data inicial (opcional)
+            data_fim: Filtrar por data final (opcional)
+            skip: Quantos registros pular (paginação)
+            limit: Limite de registros a retornar (paginação)
+            
+        Returns:
+            Tuple[List[Dict[str, Any]], int]: Lista de movimentações e contagem total
+        """
+        try:
+            # Consulta base para obter movimentações com o nome do insumo
+            query = (
+                self.db_session.query(
+                    InsumoMovimentacao,
+                    Insumo.nome.label('insumo_nome'),
+                    Insumo.categoria.label('insumo_categoria'),
+                    Insumo.unidade_medida.label('insumo_unidade_medida')
+                )
+                .join(Insumo, InsumoMovimentacao.insumo_id == Insumo.id)
+                .filter(InsumoMovimentacao.subscriber_id == subscriber_id)
+            )
+            
+            # Aplicar filtros adicionais se fornecidos
+            if insumo_id:
+                query = query.filter(InsumoMovimentacao.insumo_id == insumo_id)
+                
+            if tipo_movimento:
+                query = query.filter(InsumoMovimentacao.tipo_movimento == tipo_movimento)
+                
+            if data_inicio:
+                query = query.filter(InsumoMovimentacao.created_at >= data_inicio)
+                
+            if data_fim:
+                query = query.filter(InsumoMovimentacao.created_at <= data_fim)
+                
+            # Consulta para a contagem total
+            count_query = query.with_entities(func.count(InsumoMovimentacao.id))
+            total_count = count_query.scalar() or 0
+            
+            # Aplicar ordenação e paginação
+            query = (
+                query
+                .order_by(desc(InsumoMovimentacao.created_at))
+                .offset(skip)
+                .limit(limit)
+            )
+            
+            # Executar consulta
+            results = query.all()
+            
+            # Transformar resultados em dicionários para serializar facilmente
+            movimentacoes = []
+            for row in results:
+                movimentacao = row[0]  # InsumoMovimentacao
+                insumo_nome = row[1]   # Insumo.nome
+                insumo_categoria = row[2]  # Insumo.categoria
+                insumo_unidade_medida = row[3]  # Insumo.unidade_medida
+                
+                # Criar dicionário com todos os dados
+                mov_dict = {
+                    'id': movimentacao.id,
+                    'insumo_id': movimentacao.insumo_id,
+                    'quantidade': movimentacao.quantidade,
+                    'tipo_movimento': movimentacao.tipo_movimento,
+                    'motivo': movimentacao.motivo,
+                    'estoque_anterior': movimentacao.estoque_anterior,
+                    'estoque_resultante': movimentacao.estoque_resultante,
+                    'observacao': movimentacao.observacao,
+                    'usuario_id': movimentacao.usuario_id,
+                    'subscriber_id': movimentacao.subscriber_id,
+                    'created_at': movimentacao.created_at,
+                    'insumo_nome': insumo_nome,
+                    'insumo_categoria': insumo_categoria,
+                    'insumo_unidade_medida': insumo_unidade_medida
+                }
+                
+                movimentacoes.append(mov_dict)
+                
+            return movimentacoes, total_count
+            
+        except Exception as e:
+            raise ValueError(f"Erro ao obter histórico de movimentações: {str(e)}")
