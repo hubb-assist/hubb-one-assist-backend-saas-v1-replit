@@ -5,9 +5,16 @@ Importa a aplicação FastAPI do backend.
 
 import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
 
+# Adicionar o diretório backend ao Python path
+backend_path = os.path.join(os.path.dirname(__file__), 'backend')
+sys.path.insert(0, backend_path)
+
+# Importar a aplicação FastAPI
 from app.main import app
+
+# Exportar para o Gunicorn
+application = app
 
 if __name__ == "__main__":
     import uvicorn
