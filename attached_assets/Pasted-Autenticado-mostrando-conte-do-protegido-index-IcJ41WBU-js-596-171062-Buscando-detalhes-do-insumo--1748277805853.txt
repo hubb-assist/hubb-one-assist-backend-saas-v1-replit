@@ -1,0 +1,462 @@
+Autenticado, mostrando conteúdo protegido index-IcJ41WBU.js:596:171062
+Buscando detalhes do insumo novo index-IcJ41WBU.js:596:171729
+Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/insumos/novo index-IcJ41WBU.js:438:5561
+XHRGET
+https://hubb-one-assist-back-hubb-one.replit.app/insumos/novo
+[HTTP/3 200  347ms]
+
+Criando novo insumo: 
+Object { nome: "Luva de Procedimento", descricao: "Luva de procedimento", categoria: "MEDICAMENTO", unidade: "UNIDADE", precoUnitario: 22, quantidadeAtual: 555, quantidadeMinimaAlerta: 100, dataValidade: "2025-05-29", fornecedores: [], status: "ATIVO" }
+index-IcJ41WBU.js:596:171826
+Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/insumos index-IcJ41WBU.js:438:5561
+XHRPOST
+https://hubb-one-assist-back-hubb-one.replit.app/insumos
+[HTTP/3 307  320ms]
+
+XHRPOST
+https://hubb-one-assist-back-hubb-one.replit.app/insumos/
+[HTTP/3 422  344ms]
+
+Erro na requisição: 
+Object { message: "Request failed with status code 422", name: "AxiosError", code: "ERR_BAD_REQUEST", config: {…}, request: XMLHttpRequest, response: {…}, status: 422, stack: "", … }
+​
+code: "ERR_BAD_REQUEST"
+​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​​
+adapter: Array(3) [ "xhr", "http", "fetch" ]
+​​
+allowAbsoluteUrls: true
+​​
+baseURL: "https://hubb-one-assist-back-hubb-one.replit.app"
+​​
+data: '{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}'
+​​
+env: Object { FormData: FormData(), Blob: Blob() }
+​​
+headers: Object { Accept: "application/json", "Content-Type": "application/json" }
+​​​
+Accept: "application/json"
+​​​
+"Content-Type": "application/json"
+​​​
+<prototype>: Object { … }
+​​​​
+clear: 
+​​​​
+concat: 
+​​​​
+constructor: 
+​​​​
+delete: 
+​​​​
+get: 
+​​​​
+getAccept: 
+​​​​
+getAcceptEncoding: 
+​​​​
+getAuthorization: 
+​​​​
+getContentLength: 
+​​​​
+getContentType: 
+​​​​
+getSetCookie: 
+​​​​
+getUserAgent: 
+​​​​
+has: 
+​​​​
+hasAccept: 
+​​​​
+hasAcceptEncoding: 
+​​​​
+hasAuthorization: 
+​​​​
+hasContentLength: 
+​​​​
+hasContentType: 
+​​​​
+hasUserAgent: 
+​​​​
+normalize: 
+​​​​
+set: 
+​​​​
+setAccept: 
+​​​​
+setAcceptEncoding: 
+​​​​
+setAuthorization: 
+​​​​
+setContentLength: 
+​​​​
+setContentType: 
+​​​​
+setUserAgent: 
+​​​​
+toJSON: 
+​​​​
+toString: 
+​​​​
+Symbol(Symbol.iterator): function Symbol.iterator()
+​​​​
+Symbol(Symbol.toStringTag): undefined
+​​​​
+<get clear()>: function get()​​​​
+<set clear()>: function set(r)​​​​
+<get concat()>: function get()​​​​
+<set concat()>: function set(r)​​​​
+<get constructor()>: function get()​​​​
+<set constructor()>: function set(r)​​​​
+<get delete()>: function get()​​​​
+<set delete()>: function set(r)​​​​
+<get get()>: function get()​​​​
+<set get()>: function set(r)​​​​
+<get getAccept()>: function get()​​​​
+<set getAccept()>: function set(r)​​​​
+<get getAcceptEncoding()>: function get()​​​​
+<set getAcceptEncoding()>: function set(r)​​​​
+<get getAuthorization()>: function get()​​​​
+<set getAuthorization()>: function set(r)​​​​
+<get getContentLength()>: function get()​​​​
+<set getContentLength()>: function set(r)​​​​
+<get getContentType()>: function get()​​​​
+<set getContentType()>: function set(r)​​​​
+<get getSetCookie()>: function get()​​​​
+<set getSetCookie()>: function set(r)​​​​
+<get getUserAgent()>: function get()​​​​
+<set getUserAgent()>: function set(r)​​​​
+<get has()>: function get()​​​​
+<set has()>: function set(r)​​​​
+<get hasAccept()>: function get()​​​​
+<set hasAccept()>: function set(r)​​​​
+<get hasAcceptEncoding()>: function get()​​​​
+<set hasAcceptEncoding()>: function set(r)​​​​
+<get hasAuthorization()>: function get()​​​​
+<set hasAuthorization()>: function set(r)​​​​
+<get hasContentLength()>: function get()​​​​
+<set hasContentLength()>: function set(r)​​​​
+<get hasContentType()>: function get()​​​​
+<set hasContentType()>: function set(r)​​​​
+<get hasUserAgent()>: function get()​​​​
+<set hasUserAgent()>: function set(r)​​​​
+<get normalize()>: function get()​​​​
+<set normalize()>: function set(r)​​​​
+<get set()>: function get()​​​​
+<set set()>: function set(r)​​​​
+<get setAccept()>: function get()​​​​
+<set setAccept()>: function set(r)​​​​
+<get setAcceptEncoding()>: function get()​​​​
+<set setAcceptEncoding()>: function set(r)​​​​
+<get setAuthorization()>: function get()​​​​
+<set setAuthorization()>: function set(r)​​​​
+<get setContentLength()>: function get()​​​​
+<set setContentLength()>: function set(r)​​​​
+<get setContentType()>: function get()​​​​
+<set setContentType()>: function set(r)​​​​
+<get setUserAgent()>: function get()​​​​
+<set setUserAgent()>: function set(r)​​​​
+<get toJSON()>: function get()​​​​
+<set toJSON()>: function set(r)​​​​
+<get toString()>: function get()​​​​
+<set toString()>: function set(r)​​​​
+<prototype>: Object { … }
+​​
+maxBodyLength: -1
+​​
+maxContentLength: -1
+​​
+method: "post"
+​​
+timeout: 15000
+​​
+transformRequest: Array [ transformRequest(t, n)
+ ]
+​​
+transformResponse: Array [ transformResponse(t)
+ ]
+​​
+transitional: Object { silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false }
+​​
+url: "/insumos"
+​​
+validateStatus: function validateStatus(t)
+​​
+withCredentials: true
+​​
+xsrfCookieName: "XSRF-TOKEN"
+​​
+xsrfHeaderName: "X-XSRF-TOKEN"
+​​
+<prototype>: Object { … }
+​
+message: "Request failed with status code 422"
+​
+name: "AxiosError"
+​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​​
+mozAnon: false
+​​
+mozSystem: false
+​​
+onabort: function onabort()​​
+onerror: function onerror()
+​​
+onload: null
+​​
+onloadend: function y()
+​​
+onloadstart: null
+​​
+onprogress: null
+​​
+ontimeout: function ontimeout()
+​​
+readyState: 4
+​​
+response: '{"detail":[{"type":"missing","loc":["body","valor_unitario"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","unidade_medida"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_minimo"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_atual"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","subscriber_id"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}}]}'
+​​
+responseText: '{"detail":[{"type":"missing","loc":["body","valor_unitario"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","unidade_medida"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_minimo"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_atual"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","subscriber_id"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}}]}'
+​​
+responseType: ""
+​​
+responseURL: "https://hubb-one-assist-back-hubb-one.replit.app/insumos/"
+​​
+responseXML: null
+​​
+status: 422
+​​
+statusText: ""
+​​
+timeout: 15000
+​​
+upload: XMLHttpRequestUpload { onloadstart: null, onprogress: null, onabort: null, … }
+​​
+withCredentials: true
+​​
+<prototype>: XMLHttpRequestPrototype { open: open()
+, setRequestHeader: setRequestHeader(), send: send(), … }
+​
+response: Object { data: {…}, status: 422, statusText: "", … }
+​
+stack: "MD@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:1082\ny@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5719\nEventHandlerNonNull*jK</<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5788\njK<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5118\ntA@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:512\npromise callback*_request@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1326\nrequest@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:1979\nn/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1938\nvD/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:433:95260\nyTe@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:171873\nmutationFn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:173210\nfn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:19682\ng@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10108\nstart@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10567\nexecute@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:20487\nasync*mutate@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:39430\nu@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:180749\njSe/Me/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:517:120185\nasync*G6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:9864\nY6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10018\nX6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10075\nNP@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31462\nhR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31881\nO0/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:36794\nl_@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:36957\nDM@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:8999\nO0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:33168\nIj@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17378\nfU@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17160\nEventListener.handleEvent*pR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32677\nA0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32077\nth/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32243\nth@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32188\nRr.createRoot@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:56003\n@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:197765\n"
+​
+status: 422
+​
+<prototype>: Object { constructor: Ue(e, t, n, r, o), toJSON: toJSON()
+, stack: "", … }
+index-IcJ41WBU.js:438:5933
+    <anonymous> https://app.hubbassist.com/assets/index-IcJ41WBU.js:438
+    (Async: promise callback)
+    _request https://app.hubbassist.com/assets/index-IcJ41WBU.js:438
+    request https://app.hubbassist.com/assets/index-IcJ41WBU.js:437
+    n https://app.hubbassist.com/assets/index-IcJ41WBU.js:438
+    vD https://app.hubbassist.com/assets/index-IcJ41WBU.js:433
+    yTe https://app.hubbassist.com/assets/index-IcJ41WBU.js:596
+    mutationFn https://app.hubbassist.com/assets/index-IcJ41WBU.js:596
+    fn https://app.hubbassist.com/assets/index-IcJ41WBU.js:48
+    g https://app.hubbassist.com/assets/index-IcJ41WBU.js:48
+    start https://app.hubbassist.com/assets/index-IcJ41WBU.js:48
+    execute https://app.hubbassist.com/assets/index-IcJ41WBU.js:48
+    mutate https://app.hubbassist.com/assets/index-IcJ41WBU.js:48
+    u https://app.hubbassist.com/assets/index-IcJ41WBU.js:596
+    Me https://app.hubbassist.com/assets/index-IcJ41WBU.js:517
+    G6 https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    Y6 https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    X6 https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    NP https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    hR https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    O0 https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    l_ https://app.hubbassist.com/assets/index-IcJ41WBU.js:40
+    DM https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    O0 https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    Ij https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    fU https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    (Async: EventListener.handleEvent)
+    pR https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    A0 https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    th https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    th https://app.hubbassist.com/assets/index-IcJ41WBU.js:37
+    createRoot https://app.hubbassist.com/assets/index-IcJ41WBU.js:40
+    <anonymous> https://app.hubbassist.com/assets/index-IcJ41WBU.js:596
+Erro ao criar insumo: 
+Object { message: "Request failed with status code 422", name: "AxiosError", code: "ERR_BAD_REQUEST", config: {…}, request: XMLHttpRequest, response: {…}, status: 422, stack: "", … }
+​
+code: "ERR_BAD_REQUEST"
+​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​​
+adapter: Array(3) [ "xhr", "http", "fetch" ]
+​​
+allowAbsoluteUrls: true
+​​
+baseURL: "https://hubb-one-assist-back-hubb-one.replit.app"
+​​
+data: '{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}'
+​​
+env: Object { FormData: FormData(), Blob: Blob() }
+​​
+headers: Object { Accept: "application/json", "Content-Type": "application/json" }
+​​
+maxBodyLength: -1
+​​
+maxContentLength: -1
+​​
+method: "post"
+​​
+timeout: 15000
+​​
+transformRequest: Array [ transformRequest(t, n)
+ ]
+​​
+transformResponse: Array [ transformResponse(t)
+ ]
+​​
+transitional: Object { silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false }
+​​
+url: "/insumos"
+​​
+validateStatus: function validateStatus(t)
+​​
+withCredentials: true
+​​
+xsrfCookieName: "XSRF-TOKEN"
+​​
+xsrfHeaderName: "X-XSRF-TOKEN"
+​​
+<prototype>: Object { … }
+​
+message: "Request failed with status code 422"
+​
+name: "AxiosError"
+​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​
+response: Object { data: {…}, status: 422, statusText: "", … }
+​
+stack: "MD@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:1082\ny@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5719\nEventHandlerNonNull*jK</<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5788\njK<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5118\ntA@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:512\npromise callback*_request@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1326\nrequest@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:1979\nn/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1938\nvD/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:433:95260\nyTe@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:171873\nmutationFn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:173210\nfn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:19682\ng@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10108\nstart@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10567\nexecute@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:20487\nasync*mutate@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:39430\nu@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:180749\njSe/Me/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:517:120185\nasync*G6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:9864\nY6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10018\nX6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10075\nNP@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31462\nhR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31881\nO0/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:36794\nl_@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:36957\nDM@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:8999\nO0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:33168\nIj@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17378\nfU@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17160\nEventListener.handleEvent*pR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32677\nA0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32077\nth/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32243\nth@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32188\nRr.createRoot@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:56003\n@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:197765\n"
+​
+status: 422
+​
+<prototype>: Object { constructor: Ue(e, t, n, r, o), toJSON: toJSON()
+, stack: "", … }
+index-IcJ41WBU.js:596:173334
+Erro ao salvar insumo: 
+Object { message: "Request failed with status code 422", name: "AxiosError", code: "ERR_BAD_REQUEST", config: {…}, request: XMLHttpRequest, response: {…}, status: 422, stack: "", … }
+​
+code: "ERR_BAD_REQUEST"
+​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​​
+adapter: Array(3) [ "xhr", "http", "fetch" ]
+​​
+allowAbsoluteUrls: true
+​​
+baseURL: "https://hubb-one-assist-back-hubb-one.replit.app"
+​​
+data: '{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}'
+​​
+env: Object { FormData: FormData(), Blob: Blob() }
+​​
+headers: Object { Accept: "application/json", "Content-Type": "application/json" }
+​​
+maxBodyLength: -1
+​​
+maxContentLength: -1
+​​
+method: "post"
+​​
+timeout: 15000
+​​
+transformRequest: Array [ transformRequest(t, n)
+ ]
+​​
+transformResponse: Array [ transformResponse(t)
+ ]
+​​
+transitional: Object { silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false }
+​​
+url: "/insumos"
+​​
+validateStatus: function validateStatus(t)
+​​
+withCredentials: true
+​​
+xsrfCookieName: "XSRF-TOKEN"
+​​
+xsrfHeaderName: "X-XSRF-TOKEN"
+​​
+<prototype>: Object { … }
+​
+message: "Request failed with status code 422"
+​
+name: "AxiosError"
+​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​​
+mozAnon: false
+​​
+mozSystem: false
+​​
+onabort: function onabort()​​
+onerror: function onerror()
+​​
+onload: null
+​​
+onloadend: function y()
+​​
+onloadstart: null
+​​
+onprogress: null
+​​
+ontimeout: function ontimeout()
+​​
+readyState: 4
+​​
+response: '{"detail":[{"type":"missing","loc":["body","valor_unitario"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","unidade_medida"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_minimo"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_atual"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","subscriber_id"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}}]}'
+​​
+responseText: '{"detail":[{"type":"missing","loc":["body","valor_unitario"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","unidade_medida"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_minimo"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","estoque_atual"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}},{"type":"missing","loc":["body","subscriber_id"],"msg":"Field required","input":{"nome":"Luva de Procedimento","descricao":"Luva de procedimento","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":22,"quantidadeAtual":555,"quantidadeMinimaAlerta":100,"dataValidade":"2025-05-29","fornecedores":[],"status":"ATIVO"}}]}'
+​​
+responseType: ""
+​​
+responseURL: "https://hubb-one-assist-back-hubb-one.replit.app/insumos/"
+​​
+responseXML: null
+​​
+status: 422
+​​
+statusText: ""
+​​
+timeout: 15000
+​​
+upload: XMLHttpRequestUpload { onloadstart: null, onprogress: null, onabort: null, … }
+​​
+withCredentials: true
+​​
+<prototype>: XMLHttpRequestPrototype { open: open()
+, setRequestHeader: setRequestHeader(), send: send(), … }
+​
+response: Object { data: {…}, status: 422, statusText: "", … }
+​​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​​
+data: Object { detail: (5) […] }
+​​
+headers: Object { "content-length": "1650", "content-type": "application/json" }
+​​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​​
+status: 422
+​​
+statusText: ""
+​​
+<prototype>: Object { … }
+​
+stack: "MD@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:1082\ny@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5719\nEventHandlerNonNull*jK</<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5788\njK<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5118\ntA@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:512\npromise callback*_request@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1326\nrequest@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:1979\nn/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1938\nvD/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:433:95260\nyTe@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:171873\nmutationFn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:173210\nfn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:19682\ng@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10108\nstart@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10567\nexecute@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:20487\nasync*mutate@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:39430\nu@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:180749\njSe/Me/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:517:120185\nasync*G6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:9864\nY6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10018\nX6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10075\nNP@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31462\nhR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31881\nO0/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:36794\nl_@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:36957\nDM@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:8999\nO0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:33168\nIj@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17378\nfU@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17160\nEventListener.handleEvent*pR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32677\nA0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32077\nth/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32243\nth@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:32188\nRr.createRoot@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:56003\n@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:197765\n"
+​
+status: 422
+​
+<prototype>: Object { constructor: Ue(e, t, n, r, o), toJSON: toJSON(), stack: "", … }
