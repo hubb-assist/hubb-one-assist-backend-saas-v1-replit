@@ -1,0 +1,256 @@
+Fazendo requisição para API: https://hubb-one-assist-back-hubb-one.replit.app/insumos index-IcJ41WBU.js:438:5561
+XHRPOST
+https://hubb-one-assist-back-hubb-one.replit.app/insumos
+[HTTP/3 307  455ms]
+
+XHROPTIONS
+https://hubb-one-assist-back-hubb-one.replit.app/insumos
+[HTTP/3 200  327ms]
+
+XHRPOST
+https://hubb-one-assist-back-hubb-one.replit.app/insumos/
+[HTTP/3 422  572ms]
+
+XHROPTIONS
+https://hubb-one-assist-back-hubb-one.replit.app/insumos/
+[HTTP/3 200  163ms]
+
+Erro na requisição: 
+Object { message: "Request failed with status code 422", name: "AxiosError", code: "ERR_BAD_REQUEST", config: {…}, request: XMLHttpRequest, response: {…}, status: 422, stack: "", … }
+​
+code: "ERR_BAD_REQUEST"
+​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​​
+adapter: Array(3) [ "xhr", "http", "fetch" ]
+​​
+allowAbsoluteUrls: true
+​​
+baseURL: "https://hubb-one-assist-back-hubb-one.replit.app"
+​​
+data: '{"nome":"Luva de Procedimento","descricao":"teste teste teste","categoria":"MEDICAMENTO","unidade":"UNIDADE","precoUnitario":550,"quantidadeAtual":55,"quantidadeMinimaAlerta":20,"dataValidade":"2025-06-26","fornecedores":[],"status":"ATIVO"}'
+​​
+env: Object { FormData: FormData(), Blob: Blob() }
+​​​
+Blob: function Blob()
+​​​​
+length: 0
+​​​​
+name: "Blob"
+​​​​
+prototype: BlobPrototype { slice: slice(), stream: stream(), text: text(), … }
+​​​​
+<prototype>: function ()
+​​​
+FormData: function FormData()
+​​​​
+length: 0
+​​​​
+name: "FormData"
+​​​​
+prototype: FormDataPrototype { append: append(), delete: delete(), get: get(), … }
+​​​​
+<prototype>: function ()
+​​​
+<prototype>: Object { … }
+​​​​
+__defineGetter__: function __defineGetter__()
+​​​​
+__defineSetter__: function __defineSetter__()
+​​​​
+__lookupGetter__: function __lookupGetter__()
+​​​​
+__lookupSetter__: function __lookupSetter__()
+​​​​
+__proto__: 
+​​​​
+constructor: function Object()
+​​​​
+hasOwnProperty: function hasOwnProperty()
+​​​​
+isPrototypeOf: function isPrototypeOf()
+​​​​
+propertyIsEnumerable: function propertyIsEnumerable()
+​​​​
+toLocaleString: function toLocaleString()
+​​​​
+toString: function toString()
+​​​​
+valueOf: function valueOf()
+​​​​
+<get __proto__()>: function __proto__()
+​​​​
+<set __proto__()>: function __proto__()
+​​
+headers: Object { Accept: "application/json", "Content-Type": "application/json" }
+​​​
+Accept: "application/json"
+​​​
+"Content-Type": "application/json"
+​​​
+<prototype>: Object { … }
+​​
+maxBodyLength: -1
+​​
+maxContentLength: -1
+​​
+method: "post"
+​​
+timeout: 15000
+​​
+transformRequest: Array [ transformRequest(t, n)
+ ]
+​​​
+0: function transformRequest(t, n)
+​​​
+length: 1
+​​​
+<prototype>: Array []
+​​
+transformResponse: Array [ transformResponse(t)
+ ]
+​​​
+0: function transformResponse(t)
+​​​
+length: 1
+​​​
+<prototype>: Array []
+​​
+transitional: Object { silentJSONParsing: true, forcedJSONParsing: true, clarifyTimeoutError: false }
+​​​
+clarifyTimeoutError: false
+​​​
+forcedJSONParsing: true
+​​​
+silentJSONParsing: true
+​​​
+<prototype>: Object { … }
+​​
+url: "/insumos"
+​​
+validateStatus: function validateStatus(t)
+​​
+withCredentials: true
+​​
+xsrfCookieName: "XSRF-TOKEN"
+​​
+xsrfHeaderName: "X-XSRF-TOKEN"
+​​
+<prototype>: Object { … }
+​​​
+__defineGetter__: function __defineGetter__()
+​​​
+__defineSetter__: function __defineSetter__()
+​​​
+__lookupGetter__: function __lookupGetter__()
+​​​
+__lookupSetter__: function __lookupSetter__()
+​​​
+__proto__: 
+​​​
+constructor: function Object()
+​​​
+hasOwnProperty: function hasOwnProperty()
+​​​
+isPrototypeOf: function isPrototypeOf()
+​​​
+propertyIsEnumerable: function propertyIsEnumerable()
+​​​
+toLocaleString: function toLocaleString()
+​​​
+toString: function toString()
+​​​
+valueOf: function valueOf()
+​​​
+<get __proto__()>: function __proto__()
+​​​
+<set __proto__()>: function __proto__()
+​
+message: "Request failed with status code 422"
+​
+name: "AxiosError"
+​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​
+response: Object { data: {…}, status: 422, statusText: "", … }
+​​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​​
+data: Object { detail: (1) […] }
+​​​
+detail: Array [ {…} ]
+​​​
+<prototype>: Object { … }
+​​​​
+__defineGetter__: function __defineGetter__()
+​​​​
+__defineSetter__: function __defineSetter__()
+​​​​
+__lookupGetter__: function __lookupGetter__()
+​​​​
+__lookupSetter__: function __lookupSetter__()
+​​​​
+__proto__: 
+​​​​
+constructor: function Object()
+​​​​
+hasOwnProperty: function hasOwnProperty()
+​​​​
+isPrototypeOf: function isPrototypeOf()
+​​​​
+propertyIsEnumerable: function propertyIsEnumerable()
+​​​​
+toLocaleString: function toLocaleString()
+​​​​
+toString: function toString()
+​​​​
+valueOf: function valueOf()
+​​​​
+<get __proto__()>: function __proto__()
+​​​​
+<set __proto__()>: function __proto__()
+​​
+headers: Object { "content-length": "335", "content-type": "application/json" }
+​​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​​
+status: 422
+​​
+statusText: ""
+​​
+<prototype>: Object { … }
+​
+stack: "MD@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:1082\ny@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5719\nEventHandlerNonNull*jK</<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5788\njK<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5118\ntA@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:512\npromise callback*_request@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1326\nrequest@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:1979\nn/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1938\nvD/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:433:95260\nyTe@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:171873\nmutationFn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:173210\nfn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:19682\ng@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10108\nstart@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10567\nexecute@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:20487\nasync*mutate@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:39430\nu@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:180749\njSe/Me/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:517:120185\nasync*G6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:9864\nY6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10018\nX6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10075\nNP@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31462\nhR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31881\nO0/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:36794\nl_@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:36957\nDM@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:8999\nO0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:33168\nIj@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17378\nfU@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17160\n"
+​
+status: 422
+​
+<prototype>: Object { constructor: Ue(e, t, n, r, o), toJSON: toJSON()
+, stack: "", … }
+index-IcJ41WBU.js:438:5933
+Erro ao criar insumo: 
+Object { message: "Request failed with status code 422", name: "AxiosError", code: "ERR_BAD_REQUEST", config: {…}, request: XMLHttpRequest, response: {…}, status: 422, stack: "", … }
+index-IcJ41WBU.js:596:173334
+Erro ao salvar insumo: 
+Object { message: "Request failed with status code 422", name: "AxiosError", code: "ERR_BAD_REQUEST", config: {…}, request: XMLHttpRequest, response: {…}, status: 422, stack: "", … }
+​
+code: "ERR_BAD_REQUEST"
+​
+config: Object { timeout: 15000, xsrfCookieName: "XSRF-TOKEN", xsrfHeaderName: "X-XSRF-TOKEN", … }
+​
+message: "Request failed with status code 422"
+​
+name: "AxiosError"
+​
+request: XMLHttpRequest { readyState: 4, timeout: 15000, withCredentials: true, … }
+​
+response: Object { data: {…}, status: 422, statusText: "", … }
+​
+stack: "MD@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:1082\ny@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5719\nEventHandlerNonNull*jK</<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5788\njK<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:435:5118\ntA@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:512\npromise callback*_request@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1326\nrequest@https://app.hubbassist.com/assets/index-IcJ41WBU.js:437:1979\nn/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:438:1938\nvD/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:433:95260\nyTe@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:171873\nmutationFn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:173210\nfn@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:19682\ng@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10108\nstart@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:10567\nexecute@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:20487\nasync*mutate@https://app.hubbassist.com/assets/index-IcJ41WBU.js:48:39430\nu@https://app.hubbassist.com/assets/index-IcJ41WBU.js:596:180749\njSe/Me/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:517:120185\nasync*G6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:9864\nY6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10018\nX6@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:10075\nNP@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31462\nhR@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:31881\nO0/<@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:36794\nl_@https://app.hubbassist.com/assets/index-IcJ41WBU.js:40:36957\nDM@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:8999\nO0@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:33168\nIj@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17378\nfU@https://app.hubbassist.com/assets/index-IcJ41WBU.js:37:17160\n"
+​
+status: 422
+​
+<prototype>: Object { constructor: Ue(e, t, n, r, o), toJSON: toJSON()
+, stack: "", … }
+index-IcJ41WBU.js:596:180845
+
+​
