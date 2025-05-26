@@ -1,0 +1,156 @@
+Organize o repositório assim:
+
+graphql
+Copiar
+Editar
+hubb-one-assist-backend-saas-v1-replit/
+├── backend/        # Código FastAPI existente
+├── frontend/       # Novo app React + Vite
+├── shared/         # Schemas TypeScript gerados (OpenAPI → TS) e utilitários comuns
+├── docker-compose.yml  # Orquestração de backend + frontend
+└── README.md
+backend/: mantenha seu FastAPI, migrations e scripts de deploy.
+
+frontend/: crie aqui o esqueleto do React (com npm init vite@latest frontend -- --template react-ts).
+
+shared/: após expor o spec OpenAPI, você vai gerar tipos e cliente HTTP para usar no React.
+
+2. Expor o Spec OpenAPI
+No backend/app/main.py (ou equivalente), assegure-se de que o Swagger esteja ativo:
+
+python
+Copiar
+Editar
+from fastapi import FastAPI
+
+app = FastAPI(
+    title="HUBB Assist API",
+    version="1.0.0",
+    docs_url="/docs",
+    openapi_url="/openapi.json",
+)
+# … suas rotas
+O endpoint /openapi.json será usado para gerar o cliente TypeScript.
+
+3. Geração de Tipos e Cliente HTTP
+No diretório shared/, adicione um script para gerar tipagens:
+
+bash
+Copiar
+Editar
+# no root do monorepo
+yarn add -D openapi-typescript-codegen
+Em package.json (ou num script shell):
+
+json
+Copiar
+Editar
+"scripts": {
+  "generate:types": "openapi --input http://localhost:8000/openapi.json --output shared/ --client axios"
+}
+Isso criará modelos TS e funções de chamada via Axios.
+
+Assim, o frontend nunca “chuta” shape de JSON.
+
+4. Configurar CORS no FastAPI
+Dentro do backend/app/main.py, ative o CORS para seu frontend:
+
+python
+Copiar
+Editar
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=["http://localhost:5173"],  # porta padrão do Vite
+  allow_methods=["*"],
+  allow_headers=["*"],
+  allow_credentials=True,
+)
+Ajuste a URL quando for para produção (e.g. https://app.hubbassist.com).
+
+5. Criar o Frontend com Vite + React
+Dentro de frontend/, instale dependências:
+
+bash
+Copiar
+Editar
+cd frontend
+npm install
+npm install axios react-router-dom zod @hookform/resolvers react-hook-form
+axios para requisições (ou use o cliente gerado em shared/).
+
+react-router-dom para rotas.
+
+zod + react-hook-form para validação de formulários.
+
+Configure o Vite (vite.config.ts) para resolver o monorepo:
+
+ts
+Copiar
+Editar
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8000',
+    },
+  },
+  resolve: {
+    alias: {
+      '@shared': '/shared',
+    },
+  },
+})
+O proxy faz com que /api/... vá para seu backend local na porta 8000.
+
+6. Orquestração de Desenvolvimento
+No root, use docker-compose ou concurrently:
+
+Opção A: docker-compose.yml
+yaml
+Copiar
+Editar
+version: '3.8'
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+Opção B: Script dev
+json
+Copiar
+Editar
+// package.json do root
+"scripts": {
+  "dev": "concurrently \"cd backend && uvicorn app.main:app --reload\" \"cd frontend && npm run dev\""
+}
+7. CI/CD Unificado
+No GitHub Actions (ou outro):
+
+Lint & Test (backend)
+
+Generate Types (npm run generate:types)
+
+Lint & Test (frontend)
+
+Build & Deploy (pode ser em repositórios separados, mas disparados pelo mesmo workflow).
+
+8. Primeiro Protótipo
+Rodar o backend: cd backend && uvicorn app.main:app --reload.
+
+Gerar tipos: npm run generate:types.
+
+Rodar frontend: cd frontend && npm run dev.
+
+Abra http://localhost:5173, crie uma página que consuma GET /items (por exemplo) usando o cliente Axios gerado.
+
+Seguindo esses passos, você terá um monolito modular onde frontend e backend compartilham contratos e podem evoluir juntos — sem aquela frustração de mismatch de payload, CORS e versionamento disperso.
