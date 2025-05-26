@@ -1,0 +1,183 @@
+Cookie warnings 8
+[API CONFIG] Arquivo de configuração carregado com sucesso index-DFBL4hlN.js:1:1858
+[API CONFIG] BASE_URL: https://hubb-one-assist-back-hubb-one.replit.app index-DFBL4hlN.js:1:1932
+Configurando API - usando URL implantada: https://hubb-one-assist-back-hubb-one.replit.app index-DFBL4hlN.js:438:5050
+Tentando login com e-mail: luiscpaim@gmail.com index-DFBL4hlN.js:517:138945
+Tentando login na URL direta: https://hubb-one-assist-back-hubb-one.replit.app/auth/login index-DFBL4hlN.js:438:6177
+XHRPOST
+https://hubb-one-assist-back-hubb-one.replit.app/auth/login
+CORS No Allow Credentials
+
+	
+POST
+	https://hubb-one-assist-back-hubb-one.replit.app/auth/login
+Status
+200
+VersionHTTP/2
+Transferred1.85 kB (256 B size)
+Referrer Policystrict-origin-when-cross-origin
+Request PriorityHighest
+DNS ResolutionSystem
+
+	
+access-control-allow-credentials
+	true
+access-control-allow-origin
+	*
+access-control-expose-headers
+	*
+alt-svc
+	h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+cache-control
+	private
+content-length
+	256
+content-type
+	application/json
+date
+	Mon, 26 May 2025 16:07:23 GMT
+expires
+	Mon, 26 May 2025 16:07:23 GMT
+server
+	Google Frontend
+set-cookie
+	access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJsdWlzY3BhaW1AZ21haWwuY29tIiwicm9sZSI6IkRPTk9fQVNTSU5BTlRFIiwic3Vic2NyaWJlcl9pZCI6IjkzYjZmYWEyLTBkNzYtNGYzOS04NmVkLTY4YTMwYmQ5ODhiMCIsInNlZ21lbnRfaWQiOiJlYjkxNTk5Yy01MTAyLTQwNTEtODllMi1kNTdiNDAxMTJhZDEiLCJwZXJtaXNzaW9ucyI6WyJDQU5fQ1JFQVRFX1BBVElFTlQiLCJDQU5fVklFV19QQVRJRU5UIiwiQ0FOX0VESVRfUEFUSUVOVCIsIkNBTl9ERUxFVEVfUEFUSUVOVCJdLCJleHAiOjE3NDgyNzc0NDN9.sMTbBmWvzXCTF2p84rON0eIoumFxk9IPvv37qvunMSI; HttpOnly; Max-Age=1800; Path=/; SameSite=none; Secure
+set-cookie
+	refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJsdWlzY3BhaW1AZ21haWwuY29tIiwicm9sZSI6IkRPTk9fQVNTSU5BTlRFIiwic3Vic2NyaWJlcl9pZCI6IjkzYjZmYWEyLTBkNzYtNGYzOS04NmVkLTY4YTMwYmQ5ODhiMCIsInNlZ21lbnRfaWQiOiJlYjkxNTk5Yy01MTAyLTQwNTEtODllMi1kNTdiNDAxMTJhZDEiLCJwZXJtaXNzaW9ucyI6WyJDQU5fQ1JFQVRFX1BBVElFTlQiLCJDQU5fVklFV19QQVRJRU5UIiwiQ0FOX0VESVRfUEFUSUVOVCIsIkNBTl9ERUxFVEVfUEFUSUVOVCJdLCJleHAiOjE3NDg4ODA0NDN9.VtrCnvRW4r-cDAPiYcdwhONqcQNR1XkC_3n4yrM_2iE; HttpOnly; Max-Age=604800; Path=/; SameSite=none; Secure
+strict-transport-security
+	max-age=63072000; includeSubDomains
+via
+	1.1 google
+x-cloud-trace-context
+	f368b3290ad401f0e865477b78e92b8c
+X-Firefox-Spdy
+	h2
+	
+Accept
+	application/json
+Accept-Encoding
+	gzip, deflate, br, zstd
+Accept-Language
+	en-US,en;q=0.5
+Connection
+	keep-alive
+Content-Length
+	55
+Content-Type
+	application/json
+Host
+	hubb-one-assist-back-hubb-one.replit.app
+Origin
+	https://app.hubbassist.com
+Priority
+	u=0
+Referer
+	https://app.hubbassist.com/
+Sec-Fetch-Dest
+	empty
+Sec-Fetch-Mode
+	cors
+Sec-Fetch-Site
+	cross-site
+TE
+	trailers
+User-Agent
+	Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+XHROPTIONS
+https://hubb-one-assist-back-hubb-one.replit.app/auth/login
+[HTTP/2 200  343ms]
+
+	
+OPTIONS
+	https://hubb-one-assist-back-hubb-one.replit.app/auth/login
+Status
+200
+VersionHTTP/2
+Transferred618 B (2 B size)
+Referrer Policystrict-origin-when-cross-origin
+DNS ResolutionSystem
+
+	
+access-control-allow-credentials
+	true
+access-control-allow-headers
+	content-type
+access-control-allow-methods
+	DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
+access-control-allow-origin
+	https://app.hubbassist.com
+access-control-max-age
+	600
+alt-svc
+	h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+content-length
+	2
+content-type
+	text/plain; charset=utf-8
+date
+	Mon, 26 May 2025 16:07:22 GMT
+server
+	Google Frontend
+strict-transport-security
+	max-age=63072000; includeSubDomains
+vary
+	Origin
+via
+	1.1 google
+x-cloud-trace-context
+	6987518cf8f561a67ecfb2ae94b897a3;o=1
+X-Firefox-Spdy
+	h2
+	
+Accept
+	*/*
+Accept-Encoding
+	gzip, deflate, br, zstd
+Accept-Language
+	en-US,en;q=0.5
+Access-Control-Request-Headers
+	content-type
+Access-Control-Request-Method
+	POST
+Connection
+	keep-alive
+Host
+	hubb-one-assist-back-hubb-one.replit.app
+Origin
+	https://app.hubbassist.com
+Priority
+	u=4
+Referer
+	https://app.hubbassist.com/
+Sec-Fetch-Dest
+	empty
+Sec-Fetch-Mode
+	cors
+Sec-Fetch-Site
+	cross-site
+User-Agent
+	Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:138.0) Gecko/20100101 Firefox/138.0
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at ‘https://hubb-one-assist-back-hubb-one.replit.app/auth/login’. (Reason: Credential is not supported if the CORS header ‘Access-Control-Allow-Origin’ is ‘*’).
+
+Erro ao fazer login: 
+Object { message: "Network Error", name: "AxiosError", code: "ERR_NETWORK", config: {…}, request: XMLHttpRequest, stack: "", … }
+index-DFBL4hlN.js:438:6449
+    login https://app.hubbassist.com/assets/index-DFBL4hlN.js:438
+    login https://app.hubbassist.com/assets/index-DFBL4hlN.js:438
+    p https://app.hubbassist.com/assets/index-DFBL4hlN.js:517
+    Me https://app.hubbassist.com/assets/index-DFBL4hlN.js:517
+    q6 https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    K6 https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    Y6 https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    PP https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    fR https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    O0 https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    s_ https://app.hubbassist.com/assets/index-DFBL4hlN.js:40
+    IM https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    O0 https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    $j https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+    dU https://app.hubbassist.com/assets/index-DFBL4hlN.js:37
+Error in parsing value for ‘-webkit-text-size-adjust’.  Declaration dropped. index-m0dtg-X1.css:1:2443
+Unknown property ‘-moz-osx-font-smoothing’.  Declaration dropped. index-m0dtg-X1.css:1:5052
+Unknown property ‘-moz-column-gap’.  Declaration dropped. index-m0dtg-X1.css:1:14387
+Unknown property ‘-moz-column-gap’.  Declaration dropped

@@ -100,10 +100,18 @@ async def force_https(request: Request, call_next):
         # Continuar mesmo se houver um erro no middleware
         return await call_next(request)
 
-# Adicionar middleware CORS com todas as origens (para desenvolvimento/testes)
+# Adicionar middleware CORS com origens específicas (corrigido para produção)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permite todas as origens durante o desenvolvimento
+    allow_origins=[
+        "https://app.hubbassist.com",
+        "https://api.hubbassist.com", 
+        "https://hubb-one-assist-front-hubb-one.replit.app",
+        "https://hubb-one-assist-back-hubb-one.replit.app",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8080"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

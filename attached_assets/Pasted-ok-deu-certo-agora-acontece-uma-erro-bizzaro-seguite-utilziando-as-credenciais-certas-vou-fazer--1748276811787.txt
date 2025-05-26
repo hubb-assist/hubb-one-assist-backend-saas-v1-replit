@@ -1,0 +1,35 @@
+ok deu certo, agora acontece uma erro bizzaro, seguite, utilziando as credenciais certas, vou fazer login, a qualquer momento, em qualqyer situação mesmo com cache ou sem cache no navegador a prieira vez o login sempre falha, sempre, sempre, sempre nunca da certo, na segunda tentativa da certo, ai faço logout e vou fazer login, de novo a primeira tantativa da errado e a segunda da certo, vou em outro navegador a primeira tetativa da errado e a segunda da certo, coltei os logs da primeira tentativa para voce analizar anexo====NÃO FAÇA NADA SEM MEU COMANDO, NÃO FAÇA NADA SEM MEU COMANDO
+
+Just now
+
+hubb-one
+Analisando os logs, identifiquei o problema! É um erro de CORS clássico que está causando a falha na primeira tentativa.
+
+🔍 Diagnóstico do Problema:
+Linha crítica do erro:
+
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at 'https://hubb-one-assist-back-hubb-one.replit.app/auth/login'. (Reason: Credential is not supported if the CORS header 'Access-Control-Allow-Origin' is '*').
+O que está acontecendo:
+
+O backend está retornando access-control-allow-origin: * (qualquer origem)
+MAS também está retornando access-control-allow-credentials: true
+Essa combinação é PROIBIDA pela política de CORS do navegador
+Na segunda tentativa funciona porque o navegador já fez o preflight e aceita
+🎯 Solução:
+O backend precisa ser corrigido para retornar o domínio específico em vez do wildcard * quando usar credentials.
+
+Ao invés de:
+
+access-control-allow-origin: *
+access-control-allow-credentials: true
+Deve ser:
+
+access-control-allow-origin: https://app.hubbassist.com
+access-control-allow-credentials: true
+Posso implementar uma solução temporária no frontend removendo credentials, mas a correção definitiva precisa ser no backend.
+
+Você quer que eu:
+
+Implemente uma solução temporária no frontend?
+Ou prefere corrigir diretamente no backend (mais recomendado)?
+O problema é 100% CORS - não tem relação com nossos caches ou logout!
