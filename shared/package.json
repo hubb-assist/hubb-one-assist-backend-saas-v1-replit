@@ -1,0 +1,19 @@
+{
+  "name": "@hubb-assist/shared",
+  "version": "1.0.0",
+  "description": "Tipos e utilitários compartilhados entre frontend e backend",
+  "main": "index.ts",
+  "scripts": {
+    "generate:types": "openapi --input http://localhost:5000/openapi.json --output ./generated --client axios",
+    "generate:types:prod": "openapi --input https://hubb-one-assist-front-e-back-monol-hubb-one.replit.app/openapi.json --output ./generated --client axios",
+    "build": "tsc",
+    "clean": "rm -rf generated dist"
+  },
+  "devDependencies": {
+    "openapi-typescript-codegen": "^0.25.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
