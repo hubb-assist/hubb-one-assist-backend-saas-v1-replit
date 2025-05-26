@@ -1,0 +1,78 @@
+Analisando o seu .replit, vejo que tanto o bloco de deployment quanto o workflow “Start application” ainda estão invocando o Gunicorn apontando para main:app na raiz — mas, como seu FastAPI agora vive em backend/app/main.py, é por aí que precisamos direcionar o servidor, e de preferência usando o Uvicorn (ASGI), não o Gunicorn WSGI “puro”.
+
+Aqui vai uma proposta de ajuste completo:
+
+ini
+Copiar
+Editar
+modules = ["python-3.11", "python3", "postgresql-16", "nodejs-20"]
+
+[nix]
+channel = "stable-24_05"
+packages = ["cargo", "jq", "libiconv", "libxcrypt", "openssl", "postgresql", "rustc"]
+
+[deployment]
+deploymentTarget = "autoscale"
+# Substituir gunicorn por uvicorn, apontando para o módulo correto
+run = ["uvicorn", "--host", "0.0.0.0", "--port", "5000", "backend.app.main:app"]
+
+[workflows]
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+  [[workflows.workflow.tasks]]
+  task = "workflow.run"
+  args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+  [[workflows.workflow.tasks]]
+  # Mesma mudança aqui: chamar uvicorn em vez de gunicorn
+  task = "shell.exec"
+  args = "uvicorn --host 0.0.0.0 --port 5000 --reload backend.app.main:app"
+  waitForPort = 5000
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3000
+
+[[ports]]
+localPort = 8000
+externalPort = 8000
+O que mudou e por quê
+run = ["uvicorn … backend.app.main:app"]
+— Aponta exatamente para o módulo onde o app = FastAPI() está definido (backend/app/main.py).
+
+Uso de Uvicorn em vez de Gunicorn sem worker ASGI
+— FastAPI é ASGI; o Gunicorn padrão não sabe lidar com o protocolo async sem um worker especial. Uvicorn resolve isso nativamente e funciona dire tamente no Replit.
+
+--reload no workflow de dev
+— Garante hot-reload local para facilitar testes sem precisar reiniciar manualmente.
+
+Remoção das chamadas a main:app na raiz
+— Evita o ModuleNotFoundError, pois não existe mais main.py no nível superior.
+
+Próximos passos
+Salve este novo .replit (substituindo o existente).
+
+Confirme no console do Replit que, ao clicar em “Run”, o log exibe algo como:
+
+pgsql
+Copiar
+Editar
+INFO:     Started server process […]
+INFO:     Uvicorn running on http://0.0.0.0:5000 (Press CTRL+C to quit)
+Acesse https://SEU-REPLIT-NAME.repl.co/docs e …/openapi.json para garantir que tudo subiu corretamente.
+
+Com o servidor estável, passemos ao Item 2 (exposição do OpenAPI) e Item 3 (geração de tipos TS).
+
+Se ficar alguma dúvida sobre o comportamento ou se surgir novo erro de import, me envie o log completo e seu backend/app/main.py para ajustarmos import paths ou __init__.py faltantes.
