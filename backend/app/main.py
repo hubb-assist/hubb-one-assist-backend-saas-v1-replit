@@ -57,11 +57,14 @@ from app.api.routes_public_subscribers_cors import router as public_subscribers_
 # Criar tabelas no banco de dados
 Base.metadata.create_all(bind=engine)
 
-# Inicialização do FastAPI
+# Inicialização do FastAPI com configuração completa do OpenAPI
 app = FastAPI(
     title="HUBB ONE Assist API",
-    description="Backend para o sistema HUBB ONE Assist",
-    version="0.1.0",
+    description="Sistema SaaS completo para gestão financeira profissional de clínicas e consultórios médicos",
+    version="1.0.0",
+    docs_url="/docs",
+    openapi_url="/openapi.json",
+    redoc_url="/redoc"
 )
 
 # Middleware para redirecionar HTTP para HTTPS
@@ -108,8 +111,9 @@ app.add_middleware(
         "https://api.hubbassist.com", 
         "https://hubb-one-assist-front-hubb-one.replit.app",
         "https://hubb-one-assist-back-hubb-one.replit.app",
+        "https://hubb-one-assist-front-e-back-monol-hubb-one.replit.app",
         "http://localhost:3000",
-        "http://localhost:5173",
+        "http://localhost:5173",  # Porta padrão do Vite
         "http://localhost:8080"
     ],
     allow_credentials=True,
