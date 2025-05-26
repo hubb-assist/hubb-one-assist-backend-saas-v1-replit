@@ -53,7 +53,7 @@ def create_insumo(
     
     # Utilizar o subscriber_id do usuário atual, se não foi fornecido explicitamente
     # Cria uma cópia do objeto para não modificar diretamente
-    data_dict = insumo_data.dict()
+    data_dict = insumo_data.model_dump()
     if not data_dict.get("subscriber_id"):
         data_dict["subscriber_id"] = subscriber_id
     
@@ -68,7 +68,7 @@ def create_insumo(
         # Garantir que modules_used seja uma lista vazia se for nulo
         modules = getattr(insumo_data, "modules_used", None)
         if modules and isinstance(modules, list):
-            data["modules_used"] = [module.dict() for module in modules]
+            data["modules_used"] = [module.model_dump() for module in modules]
         else:
             data["modules_used"] = []
         
