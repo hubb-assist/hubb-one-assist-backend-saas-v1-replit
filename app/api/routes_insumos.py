@@ -81,6 +81,49 @@ def create_insumo(
         raise HTTPException(status_code=500, detail=f"Erro ao criar insumo: {str(e)}")
 
 
+@router.get("/novo", response_model=Dict[str, Any])
+def get_novo_insumo_form(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    """
+    Retorna dados necessários para o formulário de criação de novo insumo.
+    
+    Requer autenticação com um usuário que pertença a um assinante.
+    """
+    # Verificar se o usuário tem acesso
+    subscriber_id = getattr(current_user, "subscriber_id", None)
+    if not subscriber_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Usuário não está associado a um assinante"
+        )
+    
+    # Retornar estrutura padrão para novo insumo
+    return {
+        "action": "create",
+        "subscriber_id": subscriber_id,
+        "categorias_sugeridas": [
+            "Medicamentos",
+            "Equipamentos",
+            "Materiais de Consumo",
+            "Produtos de Limpeza",
+            "Instrumentos",
+            "Outros"
+        ],
+        "unidades_medida": [
+            "UN",
+            "KG",
+            "G",
+            "L",
+            "ML",
+            "M",
+            "CM",
+            "MM"
+        ]
+    }
+
+
 @router.get("/{insumo_id}", response_model=InsumoResponse)
 def get_insumo(
     insumo_id: UUID,
